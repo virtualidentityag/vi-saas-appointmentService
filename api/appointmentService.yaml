@@ -1,0 +1,824 @@
+openapi: 3.0.1
+info:
+  title: Appointment Service
+  description: "!UNFINISHED! Spec for Appointment Service"
+  version: 0.2.0
+servers:
+  - url: /
+tags:
+  - name: user
+    description: Cal.com appointment givers
+  - name: availability
+    description: Cal.com user availability
+  - name: team
+    description: Cal.com appointment giver teams
+  - name: booking
+    description: Cal.com appointment booking
+  - name: eventType
+    description: Cal.com appointment eventType
+paths:
+  /user:
+    put:
+      tags:
+        - user
+      summary: Update an existing user with user object
+      operationId: updateUser
+      requestBody:
+        description: User object that needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: User not found
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+      security:
+        - appointment_auth:
+            - write:users
+            - read:users
+      x-codegen-request-body-name: body
+    post:
+      tags:
+        - user
+      summary: Add a new user to calcom with user object
+      operationId: createUser
+      requestBody:
+        description: User object that needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        405:
+          description: Invalid input
+          content: { }
+      security:
+        - appointment_auth:
+            - write:users
+            - read:users
+      x-codegen-request-body-name: body
+  /user/{userId}:
+    get:
+      tags:
+        - user
+      summary: Find user by ID
+      description: Returns a single user
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: User not found
+          content: { }
+      security:
+        - appointment_auth:
+            - read:users
+    post:
+      tags:
+        - user
+      summary: Updates a user with form data
+      operationId: updateUserWithForm
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                name:
+                  type: string
+                  description: Updated name of the user
+                status:
+                  type: string
+                  description: Updated status of the user
+      responses:
+        405:
+          description: Invalid input
+          content: { }
+      security:
+        - appointment_auth:
+            - write:users
+            - read:users
+    delete:
+      tags:
+        - user
+      summary: Deletes a user
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          description: User id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: User not found
+          content: { }
+      security:
+        - appointment_auth:
+            - write:users
+            - read:users
+  /user/{userId}/eventType:
+    get:
+      tags:
+        - user
+      summary: Get all eventTypes of user
+      operationId: getAllEventTypesOfUser
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ArrayOfEventTypes'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfEventTypes'
+      security:
+        - appointment_auth:
+            - write:eventTypes
+            - read:eventTypes
+    post:
+      tags:
+        - user
+      summary: Add a new eventType to a calcom user
+      operationId: addEventTypeToUser
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: EventType object that needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventType'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/EventType'
+        required: true
+      responses:
+        405:
+          description: Invalid input
+          content: { }
+      security:
+        - appointment_auth:
+            - write:eventTypes
+            - read:eventTypes
+      x-codegen-request-body-name: body
+  /user/{userId}/booking:
+    get:
+      tags:
+        - user
+      summary: Get all bookings of a user
+      operationId: getAllBookingsOfUser
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ArrayOfBookings'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfBookings'
+      security:
+        - appointment_auth:
+            - write:bookings
+            - read:bookings
+  /user/{userId}/availability:
+    get:
+      tags:
+        - user
+      summary: Get all availabilities of a user
+      operationId: getAllAvailabilitiesOfUser
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ArrayOfAvailabilities'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfAvailabilities'
+      security:
+        - appointment_auth:
+            - write:availabilities
+            - read:availabilities
+  /eventType/{eventTypeId}:
+    get:
+      tags:
+        - eventType
+      summary: Get EventType by ID
+      description: Returns a single eventType
+      operationId: getEventTypeById
+      parameters:
+        - name: eventTypeId
+          in: path
+          description: Id of the eventType to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/EventType'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventType'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: User not found
+          content: { }
+      security:
+        - appointment_auth:
+            - read:eventTypes
+    post:
+      tags:
+        - eventType
+      summary: Updates an eventType
+      operationId: updateEventType
+      parameters:
+        - name: eventTypeId
+          in: path
+          description: Id of the eventType to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        405:
+          description: Invalid input
+          content: { }
+      security:
+        - appointment_auth:
+            - write:eventTypes
+            - read:eventTypes
+    delete:
+      tags:
+        - eventType
+      summary: Deletes an eventType
+      operationId: deleteEventType
+      parameters:
+        - name: eventTypeId
+          in: path
+          description: Id of the eventType to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: EventType not found
+          content: { }
+      security:
+        - appointment_auth:
+            - write:eventTypes
+            - read:eventTypes
+  /availability/{availabilityId}:
+    get:
+      tags:
+        - availability
+      summary: Get availability by ID
+      description: Returns a single availability
+      operationId: getAvailabilityById
+      parameters:
+        - name: availabilityId
+          in: path
+          description: Id of the availability to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Availability'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Availability'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: availability not found
+          content: { }
+      security:
+        - appointment_auth:
+            - read:availabilities
+    post:
+      tags:
+        - availability
+      summary: Updates an availability
+      operationId: updateAvailability
+      parameters:
+        - name: availabilityId
+          in: path
+          description: Id of the availability to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        405:
+          description: Invalid input
+          content: { }
+      security:
+        - appointment_auth:
+            - write:availabilities
+            - read:availabilities
+    delete:
+      tags:
+        - availability
+      summary: Deletes an availability
+      operationId: deleteAvailability
+      parameters:
+        - name: availabilityId
+          in: path
+          description: Id of the availability to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: Availability not found
+          content: { }
+      security:
+        - appointment_auth:
+            - write:availabilities
+            - read:eventTypes
+  /booking/{bookingId}:
+    get:
+      tags:
+        - booking
+      summary: Get booking by ID
+      description: Returns a single booking
+      operationId: getBookingById
+      parameters:
+        - name: bookingId
+          in: path
+          description: Id of the eventType to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Booking'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: Booking not found
+          content: { }
+      security:
+        - appointment_auth:
+            - read:bookings
+  /team:
+    get:
+      tags:
+        - team
+      summary: Get all teams
+      operationId: getAllTeams
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ArrayOfTeams'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfTeams'
+    put:
+      tags:
+        - team
+      summary: Update an existing team with team object
+      operationId: updateTeam
+      requestBody:
+        description: Team object that needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Team'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Team'
+        required: true
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: Team not found
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+      security:
+        - appointment_auth:
+            - write:teams
+            - read:teams
+      x-codegen-request-body-name: body
+    post:
+      tags:
+        - team
+      summary: Add a new team to calcom
+      operationId: addTeam
+      requestBody:
+        description: Team object that needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Team'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Team'
+        required: true
+      responses:
+        405:
+          description: Invalid input
+          content: { }
+      security:
+        - appointment_auth:
+            - write:teams
+            - read:teams
+      x-codegen-request-body-name: body
+  /team/{teamId}:
+    get:
+      tags:
+        - team
+      summary: Find team by ID
+      description: Returns a single user
+      operationId: getTeamById
+      parameters:
+        - name: teamId
+          in: path
+          description: ID of team to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Team'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: Team not found
+          content: { }
+      security:
+        - appointment_auth:
+            - read:teams
+    post:
+      tags:
+        - team
+      summary: Updates a team with form data
+      operationId: updateTeamWithForm
+      parameters:
+        - name: teamId
+          in: path
+          description: ID of team to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        405:
+          description: Invalid input
+          content: { }
+      security:
+        - appointment_auth:
+            - write:teams
+            - read:teams
+    delete:
+      tags:
+        - team
+      summary: Deletes a team
+      operationId: deleteTeam
+      parameters:
+        - name: teamId
+          in: path
+          description: Team id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: Team not found
+          content: { }
+      security:
+        - appointment_auth:
+            - write:teams
+            - read:teams
+  /team/{teamId}/eventType:
+    get:
+      tags:
+        - team
+      summary: Get all eventTypes of team
+      operationId: getAllEventTypesOfTeam
+      parameters:
+        - name: teamId
+          in: path
+          description: ID of team
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ArrayOfEventTypes'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfEventTypes'
+      security:
+        - appointment_auth:
+            - write:eventTypes
+            - read:eventTypes
+    post:
+      tags:
+        - team
+      summary: Add a new eventType to a calcom team
+      operationId: addEventTypeToTeam
+      parameters:
+        - name: teamId
+          in: path
+          description: ID of user
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: EventType object that needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventType'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/EventType'
+        required: true
+      responses:
+        405:
+          description: Invalid input
+          content: { }
+      security:
+        - appointment_auth:
+            - write:eventTypes
+            - read:eventTypes
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    EventType:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        duration:
+          type: integer
+          format: int64
+      xml:
+        name: EventType
+    ArrayOfEventTypes:
+      type: array
+      items:
+        $ref: '#/components/schemas/EventType'
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        eventType:
+          type: object
+          properties: { }
+          xml:
+            name: eventType
+            wrapped: true
+      xml:
+        name: Booking
+    ArrayOfBookings:
+      type: array
+      items:
+        $ref: '#/components/schemas/Booking'
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        users:
+          type: array
+          xml:
+            name: user
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/User'
+        eventTypes:
+          type: array
+          xml:
+            name: eventType
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/EventType'
+      xml:
+        name: Team
+    ArrayOfTeams:
+      type: array
+      items:
+        $ref: '#/components/schemas/Team'
+    Availability:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+      xml:
+        name: Availability
+    ArrayOfAvailabilities:
+      type: array
+      items:
+        $ref: '#/components/schemas/Availability'
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+        teams:
+          type: array
+          xml:
+            name: team
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/ArrayOfTeams'
+        availabilities:
+          type: array
+          xml:
+            name: availability
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/ArrayOfAvailabilities'
+        eventTypes:
+          type: array
+          xml:
+            name: eventType
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/EventType'
+        password:
+          type: string
+        bookings:
+          type: array
+          xml:
+            name: booking
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Booking'
+      xml:
+        name: User
+  securitySchemes:
+    appointment_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://<url>:<port>/auth/realms/<...>/auth
+          scopes:
+            write:users: modify users
+            read:users: read users
+            write:teams: modify teams
+            read:teams: read teams
+            write:eventTypes: modify eventTypes
+            read:eventTypes: read eventTypes
+            write:bookings: modify bookings
+            read:bookings: read bookings
+            write:availabilities: modify availabilities
+            read:availabilities: read availabilities
