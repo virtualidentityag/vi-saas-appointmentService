@@ -3,8 +3,7 @@ info:
   title: Appointment Service
   description: "!UNFINISHED! Spec for Appointment Service"
   version: 0.2.0
-servers:
-  - url: /
+
 tags:
   - name: user
     description: Cal.com appointment givers
@@ -29,9 +28,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/User'
         required: true
       responses:
         400:
@@ -43,15 +39,11 @@ paths:
         405:
           description: Validation exception
           content: { }
-      security:
-        - appointment_auth:
-            - write:users
-            - read:users
       x-codegen-request-body-name: body
     post:
       tags:
         - user
-      summary: Add a new user to calcom with user object
+      summary: Add a new user to cal.com with user object
       operationId: createUser
       requestBody:
         description: User object that needs to be added to cal.com
@@ -59,18 +51,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/User'
         required: true
       responses:
         405:
           description: Invalid input
           content: { }
-      security:
-        - appointment_auth:
-            - write:users
-            - read:users
       x-codegen-request-body-name: body
   /user/{userId}:
     get:
@@ -91,9 +76,6 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/User'
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
@@ -103,9 +85,6 @@ paths:
         404:
           description: User not found
           content: { }
-      security:
-        - appointment_auth:
-            - read:users
     post:
       tags:
         - user
@@ -134,10 +113,6 @@ paths:
         405:
           description: Invalid input
           content: { }
-      security:
-        - appointment_auth:
-            - write:users
-            - read:users
     delete:
       tags:
         - user
@@ -158,10 +133,6 @@ paths:
         404:
           description: User not found
           content: { }
-      security:
-        - appointment_auth:
-            - write:users
-            - read:users
   /user/{userId}/eventType:
     get:
       tags:
@@ -180,20 +151,13 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/ArrayOfEventTypes'
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfEventTypes'
-      security:
-        - appointment_auth:
-            - write:eventTypes
-            - read:eventTypes
     post:
       tags:
         - user
-      summary: Add a new eventType to a calcom user
+      summary: Add a new eventType to a cal.com user
       operationId: addEventTypeToUser
       parameters:
         - name: userId
@@ -209,18 +173,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EventType'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/EventType'
         required: true
       responses:
         405:
           description: Invalid input
           content: { }
-      security:
-        - appointment_auth:
-            - write:eventTypes
-            - read:eventTypes
       x-codegen-request-body-name: body
   /user/{userId}/booking:
     get:
@@ -240,16 +197,9 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/ArrayOfBookings'
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfBookings'
-      security:
-        - appointment_auth:
-            - write:bookings
-            - read:bookings
   /user/{userId}/availability:
     get:
       tags:
@@ -268,16 +218,9 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/ArrayOfAvailabilities'
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfAvailabilities'
-      security:
-        - appointment_auth:
-            - write:availabilities
-            - read:availabilities
   /eventType/{eventTypeId}:
     get:
       tags:
@@ -297,9 +240,6 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/EventType'
             application/json:
               schema:
                 $ref: '#/components/schemas/EventType'
@@ -309,9 +249,6 @@ paths:
         404:
           description: User not found
           content: { }
-      security:
-        - appointment_auth:
-            - read:eventTypes
     post:
       tags:
         - eventType
@@ -329,10 +266,6 @@ paths:
         405:
           description: Invalid input
           content: { }
-      security:
-        - appointment_auth:
-            - write:eventTypes
-            - read:eventTypes
     delete:
       tags:
         - eventType
@@ -353,10 +286,6 @@ paths:
         404:
           description: EventType not found
           content: { }
-      security:
-        - appointment_auth:
-            - write:eventTypes
-            - read:eventTypes
   /availability/{availabilityId}:
     get:
       tags:
@@ -376,9 +305,6 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Availability'
             application/json:
               schema:
                 $ref: '#/components/schemas/Availability'
@@ -388,9 +314,6 @@ paths:
         404:
           description: availability not found
           content: { }
-      security:
-        - appointment_auth:
-            - read:availabilities
     post:
       tags:
         - availability
@@ -408,10 +331,6 @@ paths:
         405:
           description: Invalid input
           content: { }
-      security:
-        - appointment_auth:
-            - write:availabilities
-            - read:availabilities
     delete:
       tags:
         - availability
@@ -432,10 +351,6 @@ paths:
         404:
           description: Availability not found
           content: { }
-      security:
-        - appointment_auth:
-            - write:availabilities
-            - read:eventTypes
   /booking/{bookingId}:
     get:
       tags:
@@ -455,9 +370,6 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Booking'
             application/json:
               schema:
                 $ref: '#/components/schemas/Booking'
@@ -467,9 +379,6 @@ paths:
         404:
           description: Booking not found
           content: { }
-      security:
-        - appointment_auth:
-            - read:bookings
   /team:
     get:
       tags:
@@ -480,9 +389,6 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/ArrayOfTeams'
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfTeams'
@@ -497,9 +403,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Team'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Team'
         required: true
       responses:
         400:
@@ -511,15 +414,11 @@ paths:
         405:
           description: Validation exception
           content: { }
-      security:
-        - appointment_auth:
-            - write:teams
-            - read:teams
       x-codegen-request-body-name: body
     post:
       tags:
         - team
-      summary: Add a new team to calcom
+      summary: Add a new team to cal.com
       operationId: addTeam
       requestBody:
         description: Team object that needs to be added to cal.com
@@ -527,18 +426,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Team'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Team'
         required: true
       responses:
         405:
           description: Invalid input
           content: { }
-      security:
-        - appointment_auth:
-            - write:teams
-            - read:teams
       x-codegen-request-body-name: body
   /team/{teamId}:
     get:
@@ -559,9 +451,6 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Team'
             application/json:
               schema:
                 $ref: '#/components/schemas/Team'
@@ -571,9 +460,6 @@ paths:
         404:
           description: Team not found
           content: { }
-      security:
-        - appointment_auth:
-            - read:teams
     post:
       tags:
         - team
@@ -591,10 +477,6 @@ paths:
         405:
           description: Invalid input
           content: { }
-      security:
-        - appointment_auth:
-            - write:teams
-            - read:teams
     delete:
       tags:
         - team
@@ -615,10 +497,6 @@ paths:
         404:
           description: Team not found
           content: { }
-      security:
-        - appointment_auth:
-            - write:teams
-            - read:teams
   /team/{teamId}/eventType:
     get:
       tags:
@@ -637,20 +515,13 @@ paths:
         200:
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/ArrayOfEventTypes'
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfEventTypes'
-      security:
-        - appointment_auth:
-            - write:eventTypes
-            - read:eventTypes
     post:
       tags:
         - team
-      summary: Add a new eventType to a calcom team
+      summary: Add a new eventType to a cal.com team
       operationId: addEventTypeToTeam
       parameters:
         - name: teamId
@@ -666,18 +537,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EventType'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/EventType'
         required: true
       responses:
         405:
           description: Invalid input
           content: { }
-      security:
-        - appointment_auth:
-            - write:eventTypes
-            - read:eventTypes
       x-codegen-request-body-name: body
 components:
   schemas:
@@ -805,20 +669,3 @@ components:
             $ref: '#/components/schemas/Booking'
       xml:
         name: User
-  securitySchemes:
-    appointment_auth:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: http://<url>:<port>/auth/realms/<...>/auth
-          scopes:
-            write:users: modify users
-            read:users: read users
-            write:teams: modify teams
-            read:teams: read teams
-            write:eventTypes: modify eventTypes
-            read:eventTypes: read eventTypes
-            write:bookings: modify bookings
-            read:bookings: read bookings
-            write:availabilities: modify availabilities
-            read:availabilities: read availabilities
