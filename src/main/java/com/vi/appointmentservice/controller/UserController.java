@@ -1,13 +1,14 @@
 package com.vi.appointmentservice.controller;
 
-import com.vi.appointmentservice.api.model.Availability;
-import com.vi.appointmentservice.api.model.Booking;
-import com.vi.appointmentservice.api.model.EventType;
-import com.vi.appointmentservice.api.model.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vi.appointmentservice.api.model.*;
 import com.vi.appointmentservice.generated.api.controller.UserApi;
+import com.vi.appointmentservice.service.CalComService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,10 +19,18 @@ import java.util.List;
  * Controller for user API operations.
  */
 @RestController
-@RequiredArgsConstructor
 @Api(tags = "user")
 @Slf4j
 public class UserController implements UserApi {
+
+    CalComService calComService;
+    ObjectMapper objectMapper;
+
+    @Autowired
+    public UserController(CalComService calComService, ObjectMapper objectMapper) {
+        this.calComService = calComService;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public ResponseEntity<Void> addEventTypeToUser(Long userId, EventType body) {
@@ -54,8 +63,12 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<User> getUserById(Long userId) {
-        return new ResponseEntity("TEST!!", HttpStatus.OK);
+    public ResponseEntity<CalcomUser> getUserById(Long userId) {
+        try {
+            return new ResponseEntity(objectMapper.writeValueAsString(this.calComService.getUserById(userId)), HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
