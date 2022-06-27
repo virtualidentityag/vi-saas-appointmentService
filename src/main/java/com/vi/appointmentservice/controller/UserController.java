@@ -1,5 +1,7 @@
 package com.vi.appointmentservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.*;
 import com.vi.appointmentservice.generated.api.controller.UserApi;
 import com.vi.appointmentservice.service.CalComService;
@@ -17,16 +19,17 @@ import java.util.List;
  * Controller for user API operations.
  */
 @RestController
-@RequiredArgsConstructor
 @Api(tags = "user")
 @Slf4j
 public class UserController implements UserApi {
 
     CalComService calComService;
+    ObjectMapper objectMapper;
 
     @Autowired
-    public UserController(CalComService calComService) {
+    public UserController(CalComService calComService, ObjectMapper objectMapper) {
         this.calComService = calComService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -60,9 +63,12 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<User> getUserById(Long userId) {
-        List<CalcomUser> testUsers = calComService.getUsers();
-        return new ResponseEntity(testUsers.toString(), HttpStatus.OK);
+    public ResponseEntity<CalcomUser> getUserById(Long userId) {
+        try {
+            return new ResponseEntity(objectMapper.writeValueAsString(this.calComService.getUserById(userId)), HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
