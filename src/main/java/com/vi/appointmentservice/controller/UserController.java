@@ -1,13 +1,12 @@
 package com.vi.appointmentservice.controller;
 
-import com.vi.appointmentservice.api.model.Availability;
-import com.vi.appointmentservice.api.model.Booking;
-import com.vi.appointmentservice.api.model.EventType;
-import com.vi.appointmentservice.api.model.User;
+import com.vi.appointmentservice.api.model.*;
 import com.vi.appointmentservice.generated.api.controller.UserApi;
+import com.vi.appointmentservice.service.CalComService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +21,13 @@ import java.util.List;
 @Api(tags = "user")
 @Slf4j
 public class UserController implements UserApi {
+
+    CalComService calComService;
+
+    @Autowired
+    public UserController(CalComService calComService) {
+        this.calComService = calComService;
+    }
 
     @Override
     public ResponseEntity<Void> addEventTypeToUser(Long userId, EventType body) {
@@ -55,7 +61,8 @@ public class UserController implements UserApi {
 
     @Override
     public ResponseEntity<User> getUserById(Long userId) {
-        return new ResponseEntity("TEST!!", HttpStatus.OK);
+        List<CalcomUser> testUsers = calComService.getUsers();
+        return new ResponseEntity(testUsers.toString(), HttpStatus.OK);
     }
 
     @Override
