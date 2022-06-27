@@ -1,5 +1,6 @@
 package com.vi.appointmentservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import lombok.SneakyThrows;
@@ -33,8 +34,8 @@ public class CalComService {
         return UriComponentsBuilder.newInstance().scheme("https").host(calcomApiUrl).path(path).queryParam("apiKey", calcomApiKey).build().toUriString();
     }
 
-    @SneakyThrows
-    public List<CalcomUser> getUsers() {
+
+    public List<CalcomUser> getUsers() throws JsonProcessingException {
         // ResponseEntity<CalcomUser[]> response = restTemplate.getForEntity(String.format(this.buildUri("/users"), calcomApiUrl, calcomApiKey), CalcomUser[].class);
 
         String response = restTemplate.getForObject(String.format(this.buildUri("/v1/users"), calcomApiUrl, calcomApiKey), String.class);
@@ -48,8 +49,8 @@ public class CalComService {
         return List.of(Objects.requireNonNull(result));
     }
 
-    @SneakyThrows
-    public CalcomUser getUserById(Long userId) {
+
+    public CalcomUser getUserById(Long userId) throws JsonProcessingException {
         String response = restTemplate.getForObject(String.format(this.buildUri("/v1/users/"+userId), calcomApiUrl, calcomApiKey), String.class);
         JSONObject jsonObject = new JSONObject(response);
         log.debug(String.valueOf(jsonObject));
@@ -58,5 +59,7 @@ public class CalComService {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(response, CalcomUser.class);
     }
+
+
 
 }
