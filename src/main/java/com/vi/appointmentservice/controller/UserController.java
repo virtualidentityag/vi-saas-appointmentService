@@ -4,9 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.*;
 import com.vi.appointmentservice.generated.api.controller.UserApi;
-import com.vi.appointmentservice.service.CalComService;
+import com.vi.appointmentservice.service.CalComUserService;
 import io.swagger.annotations.Api;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,12 +22,12 @@ import java.util.List;
 @Slf4j
 public class UserController implements UserApi {
 
-    CalComService calComService;
+    CalComUserService calComUserService;
     ObjectMapper objectMapper;
 
     @Autowired
-    public UserController(CalComService calComService, ObjectMapper objectMapper) {
-        this.calComService = calComService;
+    public UserController(CalComUserService calComUserService, ObjectMapper objectMapper) {
+        this.calComUserService = calComUserService;
         this.objectMapper = objectMapper;
     }
 
@@ -65,7 +64,7 @@ public class UserController implements UserApi {
     @Override
     public ResponseEntity<CalcomUser> getUserById(Long userId) {
         try {
-            return new ResponseEntity(objectMapper.writeValueAsString(this.calComService.getUserById(userId)), HttpStatus.OK);
+            return new ResponseEntity(objectMapper.writeValueAsString(this.calComUserService.getUserById(userId)), HttpStatus.OK);
         } catch (JsonProcessingException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
