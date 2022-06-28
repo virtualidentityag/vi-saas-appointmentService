@@ -15,7 +15,6 @@ public class AppointmentServiceApplication {
    * @param args possible provided args
    */
   public static void main(String[] args) {
-    SpringApplication.run(com.vi.appointmentservice.AppointmentServiceApplication.class, args);
+    SpringApplication.run(AppointmentServiceApplication.class, args);
   }
-
 }

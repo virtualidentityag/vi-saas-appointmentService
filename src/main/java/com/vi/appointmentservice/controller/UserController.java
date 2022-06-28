@@ -25,7 +25,7 @@ public class UserController implements UserApi {
     CalComUserService calComUserService;
 
     @Autowired
-    public UserController(CalComUserService calComUserService, ObjectMapper objectMapper) {
+    public UserController(CalComUserService calComUserService) {
         this.calComUserService = calComUserService;
     }
 

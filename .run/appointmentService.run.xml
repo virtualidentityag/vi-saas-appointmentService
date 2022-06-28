@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="appointmentService" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" />
+    <option name="ACTIVE_PROFILES" value="local" />
     <module name="appointmentservice" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.vi.appointmentservice.AppointmentServiceApplication" />
     <extension name="net.ashald.envfile">
