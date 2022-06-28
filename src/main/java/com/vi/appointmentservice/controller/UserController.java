@@ -23,60 +23,41 @@ import java.util.List;
 public class UserController implements UserApi {
 
     CalComUserService calComUserService;
-    ObjectMapper objectMapper;
 
     @Autowired
     public UserController(CalComUserService calComUserService, ObjectMapper objectMapper) {
         this.calComUserService = calComUserService;
-        this.objectMapper = objectMapper;
     }
 
     @Override
-    public ResponseEntity<Void> addEventTypeToUser(Long userId, EventType body) {
-        return UserApi.super.addEventTypeToUser(userId, body);
+    public ResponseEntity<CalcomEventType> addEventTypeToUser(String userId, CalcomEventType calcomEventType) {
+        return UserApi.super.addEventTypeToUser(userId, calcomEventType);
     }
 
     @Override
-    public ResponseEntity<Void> createUser(User body) {
-        return UserApi.super.createUser(body);
+    public ResponseEntity<CalcomUser> createUser(OnberUser onberUser) {
+        return UserApi.super.createUser(onberUser);
     }
 
     @Override
-    public ResponseEntity<Void> deleteUser(Long userId) {
-        return UserApi.super.deleteUser(userId);
-    }
-
-    @Override
-    public ResponseEntity<List<Availability>> getAllAvailabilitiesOfUser(Long userId) {
-        return UserApi.super.getAllAvailabilitiesOfUser(userId);
-    }
-
-    @Override
-    public ResponseEntity<List<Booking>> getAllBookingsOfUser(Long userId) {
+    public ResponseEntity<List<CalcomBooking>> getAllBookingsOfUser(String userId) {
         return UserApi.super.getAllBookingsOfUser(userId);
     }
 
     @Override
-    public ResponseEntity<List<EventType>> getAllEventTypesOfUser(Long userId) {
+    public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfUser(String userId) {
         return UserApi.super.getAllEventTypesOfUser(userId);
     }
 
     @Override
-    public ResponseEntity<CalcomUser> getUserById(Long userId) {
-        try {
-            return new ResponseEntity(objectMapper.writeValueAsString(this.calComUserService.getUserById(userId)), HttpStatus.OK);
-        } catch (JsonProcessingException e) {
-            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> getUserMeetingLink(String userId) {
+        switch(userId){
+            case "1":
+                return new ResponseEntity<>("https://calcom-develop.suchtberatung.digital/consultant.hamburg.1", HttpStatus.OK);
+            case "2":
+                return new ResponseEntity<>("https://calcom-develop.suchtberatung.digital/consultant.hamburg.2", HttpStatus.OK);
+            default:
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-    }
-
-    @Override
-    public ResponseEntity<Void> updateUser(User body) {
-        return UserApi.super.updateUser(body);
-    }
-
-    @Override
-    public ResponseEntity<Void> updateUserWithForm(Long userId, String name, String status) {
-        return UserApi.super.updateUserWithForm(userId, name, status);
     }
 }
