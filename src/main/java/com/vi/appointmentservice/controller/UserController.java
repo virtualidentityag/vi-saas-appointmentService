@@ -7,6 +7,7 @@ import com.vi.appointmentservice.generated.api.controller.UserApi;
 import com.vi.appointmentservice.service.CalComUserService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,13 +52,17 @@ public class UserController implements UserApi {
 
     @Override
     public ResponseEntity<String> getUserMeetingLink(String userId) {
+        JSONObject meetingLink = new JSONObject();
         switch(userId){
-            case "1":
-                return new ResponseEntity<>("https://calcom-develop.suchtberatung.digital/consultant.hamburg.1", HttpStatus.OK);
+            case "1" :
+                meetingLink.put("meetingLink", "https://calcom-develop.suchtberatung.digital/consultant.hamburg.1");
+                break;
             case "2":
-                return new ResponseEntity<>("https://calcom-develop.suchtberatung.digital/consultant.hamburg.2", HttpStatus.OK);
+                meetingLink.put("meetingLink", "https://calcom-develop.suchtberatung.digital/consultant.hamburg.2");
+                break;
             default:
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>(meetingLink.toString(), HttpStatus.OK);
     }
 }

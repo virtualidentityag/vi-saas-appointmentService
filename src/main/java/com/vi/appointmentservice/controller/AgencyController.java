@@ -5,6 +5,7 @@ import com.vi.appointmentservice.generated.api.controller.AgencyApi;
 import com.vi.appointmentservice.service.CalComAgencyService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +37,17 @@ public class AgencyController implements AgencyApi {
 
     @Override
     public ResponseEntity<String> getInitialMeetingLink(Long agencyId) {
+        JSONObject meetingLink = new JSONObject();
         switch(agencyId.intValue()){
-            case 1:
-                return new ResponseEntity<>("https://calcom-develop.suchtberatung.digital/team/team-munich", HttpStatus.OK);
+            case 1 :
+                meetingLink.put("meetingLink", "https://calcom-develop.suchtberatung.digital/team/team-munich");
+                break;
             case 2:
-                return new ResponseEntity<>("https://calcom-develop.suchtberatung.digital/team/team-hamburg", HttpStatus.OK);
+                meetingLink.put("meetingLink", "https://calcom-develop.suchtberatung.digital/team/team-hamburg");
+                break;
             default:
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>(meetingLink.toString(), HttpStatus.OK);
     }
 }
