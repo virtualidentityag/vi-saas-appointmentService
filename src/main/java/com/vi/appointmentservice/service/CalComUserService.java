@@ -7,7 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -35,6 +39,29 @@ public class CalComUserService extends CalComService {
         CalcomUser[] result = mapper.readValue(response, CalcomUser[].class);
 
         return List.of(Objects.requireNonNull(result));
+    }
+
+
+    public CalcomUser createUser(CalcomUser user) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        // MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        MultiValueMap<String, String> map = objectMapper.convertValue(user, MultiValueMap.class);
+        JSONObject userObject = new JSONObject(user);
+        log.debug("Creating calcom user: {}", userObject);
+        HttpEntity<String> request = new HttpEntity<>(userObject.toString(), headers);
+        return restTemplate.postForEntity(this.buildUri("/v1/user"), request, CalcomUser.class).getBody();
+    }
+
+    public CalcomUser updateUser(CalcomUser user) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        // MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        MultiValueMap<String, String> map = objectMapper.convertValue(user, MultiValueMap.class);
+        JSONObject userObject = new JSONObject(user);
+        log.debug("Updating calcom user: {}", userObject);
+        HttpEntity<String> request = new HttpEntity<>(userObject.toString(), headers);
+        return restTemplate.postForEntity(this.buildUri("/v1/user/" + user.getId()), request, CalcomUser.class).getBody();
     }
 
 

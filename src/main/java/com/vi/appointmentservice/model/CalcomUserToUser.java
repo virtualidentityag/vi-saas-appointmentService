@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
 
-@Entity
+@Entity(name = "CalcomUserToUser")
 @Table(name = "calcom_user_to_user")
 @Getter
 @Setter

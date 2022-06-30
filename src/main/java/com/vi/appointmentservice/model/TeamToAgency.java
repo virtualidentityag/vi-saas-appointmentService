@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
 
-@Entity
+@Entity(name = "TeamToAgency")
 @Table(name = "team_to_agency")
 @Getter
 @Setter
