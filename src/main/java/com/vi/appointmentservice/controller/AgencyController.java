@@ -1,6 +1,7 @@
 package com.vi.appointmentservice.controller;
 
 import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.MeetingLink;
 import com.vi.appointmentservice.generated.api.controller.AgencyApi;
 import com.vi.appointmentservice.service.CalComAgencyService;
 import io.swagger.annotations.Api;
@@ -36,18 +37,18 @@ public class AgencyController implements AgencyApi {
     }
 
     @Override
-    public ResponseEntity<String> getInitialMeetingLink(Long agencyId) {
-        JSONObject meetingLink = new JSONObject();
+    public ResponseEntity<MeetingLink> getInitialMeetingLink(Long agencyId) {
+        MeetingLink meetingLink = new MeetingLink();
         switch(agencyId.intValue()){
             case 1 :
-                meetingLink.put("meetingLink", "https://calcom-develop.suchtberatung.digital/team/team-munich");
+                meetingLink.setMeetlingLink("https://calcom-develop.suchtberatung.digital/team/team-munich");
                 break;
             case 2:
-                meetingLink.put("meetingLink", "https://calcom-develop.suchtberatung.digital/team/team-hamburg");
+                meetingLink.setMeetlingLink("https://calcom-develop.suchtberatung.digital/team/team-hamburg");
                 break;
             default:
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(meetingLink.toString(), HttpStatus.OK);
+        return new ResponseEntity<>(meetingLink, HttpStatus.OK);
     }
 }

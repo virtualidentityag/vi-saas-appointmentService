@@ -3,14 +3,18 @@ package com.vi.appointmentservice.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.*;
+import com.vi.appointmentservice.generated.api.controller.ApiUtil;
 import com.vi.appointmentservice.generated.api.controller.UserApi;
 import com.vi.appointmentservice.service.CalComUserService;
-import io.swagger.annotations.Api;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -51,18 +55,18 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<String> getUserMeetingLink(String userId) {
-        JSONObject meetingLink = new JSONObject();
+    public ResponseEntity<MeetingLink> getUserMeetingLink(String userId) {
+        MeetingLink meetingLink = new MeetingLink();
         switch(userId){
             case "1" :
-                meetingLink.put("meetingLink", "https://calcom-develop.suchtberatung.digital/consultant.hamburg.1");
+                meetingLink.setMeetlingLink("https://calcom-develop.suchtberatung.digital/consultant.hamburg.1");
                 break;
             case "2":
-                meetingLink.put("meetingLink", "https://calcom-develop.suchtberatung.digital/consultant.hamburg.2");
+                meetingLink.setMeetlingLink("https://calcom-develop.suchtberatung.digital/consultant.hamburg.2");
                 break;
             default:
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(meetingLink.toString(), HttpStatus.OK);
+        return new ResponseEntity<>(meetingLink, HttpStatus.OK);
     }
 }
