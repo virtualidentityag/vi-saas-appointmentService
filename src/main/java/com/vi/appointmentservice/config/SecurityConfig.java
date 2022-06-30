@@ -2,8 +2,8 @@ package com.vi.appointmentservice.config;
 
 import com.vi.appointmentservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import com.vi.appointmentservice.filter.StatelessCsrfFilter;
-// import org.keycloak.adapters.KeycloakConfigResolver;
-// import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
+import org.keycloak.adapters.KeycloakConfigResolver;
+import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.client.KeycloakClientRequestFactory;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
@@ -80,12 +80,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * Use the KeycloakSpringBootConfigResolver to be able to save the Keycloak settings in the spring
    * application properties.
    */
-  /*
   @Bean
   public KeycloakConfigResolver keyCloakConfigResolver() {
     return new KeycloakSpringBootConfigResolver();
   }
-  */
 
   /**
    * Change springs authentication strategy to be stateless (no session is being created).
