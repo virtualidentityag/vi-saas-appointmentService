@@ -265,7 +265,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CalcomEventType'
+              $ref: '#/components/schemas/TeamEventType'
         required: true
       responses:
         '200':
@@ -273,7 +273,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CalcomEventType'
+                $ref: '#/components/schemas/TeamEventType'
   /agencies/{agencyId}/initialMeetingSlug:
     get:
       tags:
@@ -355,7 +355,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CalcomEventType'
+                anyOf:
+                  - $ref: '#/components/schemas/CalcomEventType'
+                  - $ref: '#/components/schemas/TeamEventType'
+                discriminator:
+                  propertyName: event_type
     put:
       tags:
         - eventType
@@ -374,7 +378,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CalcomEventType'
+              anyOf:
+                - $ref: '#/components/schemas/CalcomEventType'
+                - $ref: '#/components/schemas/TeamEventType'
+              discriminator:
+                propertyName: event_type
         required: true
       responses:
         '200':
@@ -382,7 +390,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CalcomEventType'
+                anyOf:
+                  - $ref: '#/components/schemas/CalcomEventType'
+                  - $ref: '#/components/schemas/TeamEventType'
+                discriminator:
+                  propertyName: event_type
     delete:
       tags:
         - eventType
@@ -588,10 +600,21 @@ components:
         metadata:
           type: string
           format: nullable
+      discriminator:
+        propertyName: event_type
     ArrayOfCalcomEventTypes:
       type: array
       items:
         $ref: '#/components/schemas/CalcomEventType'
+    TeamEventType:
+      allOf:
+        - $ref: '#/components/schemas/CalcomEventType'
+        - type: object
+          properties:
+            consultantIds:
+              type: array
+              items:
+                  type: string
     MeetingSlug:
       type: object
       properties:

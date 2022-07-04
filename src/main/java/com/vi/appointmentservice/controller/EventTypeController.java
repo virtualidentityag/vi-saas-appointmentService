@@ -1,6 +1,7 @@
 package com.vi.appointmentservice.controller;
 
 import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.GetEventTypeById200Response;
 import com.vi.appointmentservice.generated.api.controller.EventTypesApi;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +22,12 @@ public class EventTypeController implements EventTypesApi {
     }
 
     @Override
-    public ResponseEntity<CalcomEventType> getEventTypeById(Long eventTypeId) {
+    public ResponseEntity<GetEventTypeById200Response> getEventTypeById(Long eventTypeId) {
         return EventTypesApi.super.getEventTypeById(eventTypeId);
     }
 
     @Override
-    public ResponseEntity<CalcomEventType> updateEventType(Long eventTypeId, CalcomEventType calcomEventType) {
-        return EventTypesApi.super.updateEventType(eventTypeId, calcomEventType);
+    public ResponseEntity<GetEventTypeById200Response> updateEventType(Long eventTypeId, GetEventTypeById200Response getEventTypeById200Response) {
+        return EventTypesApi.super.updateEventType(eventTypeId, getEventTypeById200Response);
     }
 }

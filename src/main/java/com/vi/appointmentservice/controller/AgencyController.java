@@ -1,9 +1,6 @@
 package com.vi.appointmentservice.controller;
 
-import com.vi.appointmentservice.api.model.AgencyResponseDTO;
-import com.vi.appointmentservice.api.model.CalcomEventType;
-import com.vi.appointmentservice.api.model.CalcomTeam;
-import com.vi.appointmentservice.api.model.MeetingSlug;
+import com.vi.appointmentservice.api.model.*;
 import com.vi.appointmentservice.generated.api.controller.AgenciesApi;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
@@ -79,8 +76,8 @@ public class AgencyController implements AgenciesApi {
     }
 
     @Override
-    public ResponseEntity<CalcomEventType> addEventTypeToAgency(Long agencyId, CalcomEventType calcomEventType) {
-        return AgenciesApi.super.addEventTypeToAgency(agencyId, calcomEventType);
+    public ResponseEntity<TeamEventType> addEventTypeToAgency(Long agencyId, TeamEventType teamEventType) {
+        return AgenciesApi.super.addEventTypeToAgency(agencyId, teamEventType);
     }
 
     @Override
