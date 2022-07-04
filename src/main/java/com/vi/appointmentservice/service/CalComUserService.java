@@ -7,9 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -62,6 +60,10 @@ public class CalComUserService extends CalComService {
         log.debug("Updating calcom user: {}", userObject);
         HttpEntity<String> request = new HttpEntity<>(userObject.toString(), headers);
         return restTemplate.postForEntity(this.buildUri("/v1/user/" + user.getId()), request, CalcomUser.class).getBody();
+    }
+
+    public HttpStatus deleteUser(Long userId) {
+        return restTemplate.exchange(this.buildUri("/v1/user/" + userId), HttpMethod.DELETE, null, String.class).getStatusCode();
     }
 
 

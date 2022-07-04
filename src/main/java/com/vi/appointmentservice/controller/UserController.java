@@ -32,7 +32,6 @@ public class UserController implements UserApi {
     CalComUserService calComUserService;
     CalComTeamService calComTeamService;
     CalcomUserToUserRepository calcomUserToUserRepository;
-
     TeamToAgencyRepository teamToAgencyRepository;
 
 
@@ -99,7 +98,9 @@ public class UserController implements UserApi {
 
     @Override
     public ResponseEntity<Void> deleteUser(String userId) {
-        return UserApi.super.deleteUser(userId);
+        Long calcomUserId = calcomUserToUserRepository.findByUserId(userId).getCalComUserId();
+        HttpStatus responseCode = calComUserService.deleteUser(calcomUserId);
+        return new ResponseEntity<>(responseCode);
     }
 
     @Override

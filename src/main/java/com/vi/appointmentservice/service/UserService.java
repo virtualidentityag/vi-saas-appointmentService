@@ -15,7 +15,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
-
     private final @NonNull UserControllerApi userControllerApi;
 
     public List<AgencyDTO> getAgenciesOfUser() {
@@ -27,6 +26,4 @@ public class UserService {
         // TODO: Get and return agencyID somehow
         return new ConsultantDTO();
     }
-
-
 }
