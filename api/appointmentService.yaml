@@ -60,7 +60,7 @@ paths:
     delete:
       tags:
         - user
-      summary: Add a new eventType to a user
+      summary: Delete a user
       operationId: deleteUser
       parameters:
         - name: userId
