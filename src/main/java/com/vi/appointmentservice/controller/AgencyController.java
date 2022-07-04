@@ -3,8 +3,8 @@ package com.vi.appointmentservice.controller;
 import com.vi.appointmentservice.api.model.AgencyResponseDTO;
 import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.api.model.CalcomTeam;
-import com.vi.appointmentservice.api.model.MeetingLink;
-import com.vi.appointmentservice.generated.api.controller.AgencyApi;
+import com.vi.appointmentservice.api.model.MeetingSlug;
+import com.vi.appointmentservice.generated.api.controller.AgenciesApi;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.service.CalComTeamService;
@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @Api(tags = "agency")
 @Slf4j
-public class AgencyController implements AgencyApi {
+public class AgencyController implements AgenciesApi {
 
     CalComTeamService calComTeamService;
     TeamToAgencyRepository teamToAgencyRepository;
@@ -44,7 +44,7 @@ public class AgencyController implements AgencyApi {
      * @return
      */
     @PostMapping(
-            value = "/agency/{agencyId}/associateTeam",
+            value = "appointments/agencies/{agencyId}/associateTeam",
             produces = {"application/json"},
             consumes = {"application/json"}
     )
@@ -62,35 +62,36 @@ public class AgencyController implements AgencyApi {
         }
     }
 
+
     @Override
     public ResponseEntity<CalcomTeam> createAgency(AgencyResponseDTO agencyResponseDTO) {
-        return AgencyApi.super.createAgency(agencyResponseDTO);
+        return AgenciesApi.super.createAgency(agencyResponseDTO);
     }
 
     @Override
     public ResponseEntity<Void> deleteAgency(Long agencyId) {
-        return AgencyApi.super.deleteAgency(agencyId);
+        return AgenciesApi.super.deleteAgency(agencyId);
     }
 
     @Override
     public ResponseEntity<CalcomTeam> updateAgency(Long agencyId, AgencyResponseDTO agencyResponseDTO) {
-        return AgencyApi.super.updateAgency(agencyId, agencyResponseDTO);
+        return AgenciesApi.super.updateAgency(agencyId, agencyResponseDTO);
     }
 
     @Override
     public ResponseEntity<CalcomEventType> addEventTypeToAgency(Long agencyId, CalcomEventType calcomEventType) {
-        return AgencyApi.super.addEventTypeToAgency(agencyId, calcomEventType);
+        return AgenciesApi.super.addEventTypeToAgency(agencyId, calcomEventType);
     }
 
     @Override
     public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfAgency(Long agencyId) {
-        return AgencyApi.super.getAllEventTypesOfAgency(agencyId);
+        return AgenciesApi.super.getAllEventTypesOfAgency(agencyId);
     }
 
     @Override
-    public ResponseEntity<MeetingLink> getInitialMeetingLink(Long agencyId) {
+    public ResponseEntity<MeetingSlug> getInitialMeetingSlug(Long agencyId) {
         // TODO: add verification, sanitization and general cleanliness
-        MeetingLink meetingLink = new MeetingLink();
+        MeetingSlug meetingLink = new MeetingSlug();
         Long teamId;
         try {
             teamId = teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid();
@@ -103,7 +104,7 @@ public class AgencyController implements AgencyApi {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        meetingLink.setMeetlingLink("https://calcom-develop.suchtberatung.digital/team/" + slug);
+        meetingLink.setSlug(slug);
         return new ResponseEntity<>(meetingLink, HttpStatus.OK);
     }
 }

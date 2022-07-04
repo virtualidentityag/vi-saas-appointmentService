@@ -7,17 +7,19 @@ info:
 tags:
   - name: agency
     description: All cal.com objects with a connection a unique agency
-  - name: user
-    description: Everything related to a onBer user
+  - name: consultant
+    description: Everything related to a onBer consultant
+  - name: asker
+    description: Everything related to a onBer asker
 paths:
-  /user:
+  /consultants:
     post:
       tags:
-        - user
-      summary: Add a new user to cal.com with user object
-      operationId: createUser
+        - consultant
+      summary: Add a new consultant to cal.com with consultant object
+      operationId: createConsultant
       requestBody:
-        description: User object that needs to be added to cal.com
+        description: consultant object that needs to be added to cal.com
         content:
           application/json:
             schema:
@@ -30,21 +32,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomUser'
-  /user/{userId}:
+  /consultants/{consultantId}:
     put:
       tags:
-        - user
-      summary: Update a new user to cal.com with user object
-      operationId: updateUser
+        - consultant
+      summary: Update a new consultant to cal.com with consultant object
+      operationId: updateConsultant
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
       requestBody:
-        description: User object that needs to be updated
+        description: Consultant object that needs to be updated
         content:
           application/json:
             schema:
@@ -59,29 +61,29 @@ paths:
                 $ref: '#/components/schemas/CalcomUser'
     delete:
       tags:
-        - user
-      summary: Delete a user
-      operationId: deleteUser
+        - consultant
+      summary: Delete a consultant
+      operationId: deleteConsultant
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
       responses:
         '200':
           description: successful operation
-  /user/{userId}/eventType:
+  /consultants/{consultantId}/eventTypes:
     get:
       tags:
-        - user
-      summary: Get all eventTypes of user
-      operationId: getAllEventTypesOfUser
+        - consultant
+      summary: Get all eventTypes of consultant
+      operationId: getAllEventTypesOfConsultant
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
@@ -94,13 +96,13 @@ paths:
                 $ref: '#/components/schemas/ArrayOfCalcomEventTypes'
     post:
       tags:
-        - user
-      summary: Add a new eventType to a user
-      operationId: addEventTypeToUser
+        - consultant
+      summary: Add a new eventType to a consultant
+      operationId: addEventTypeToConsultant
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
@@ -118,16 +120,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomEventType'
-  /user/{userId}/booking:
+  /consultants/{consultantId}/bookings:
     get:
       tags:
-        - user
-      summary: Get all bookings of a user
-      operationId: getAllBookingsOfUser
+        - consultant
+      summary: Get all bookings of a consultant
+      operationId: getAllBookingsOfConsultant
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
@@ -138,16 +140,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
-  /user/{userId}/meetingLink:
+  /consultants/{consultantId}/meetingSlug:
     get:
       tags:
-        - user
-      summary: Get meeting booking link for user
-      operationId: getUserMeetingLink
+        - consultant
+      summary: Get meeting booking link for consultant
+      operationId: getConsultantMeetingSlug
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
@@ -157,8 +159,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeetingLink'
-  /agency:
+                $ref: '#/components/schemas/MeetingSlug'
+  /agencies:
     post:
       tags:
         - agency
@@ -178,7 +180,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomTeam'
-  /agency/{agencyId}:
+  /agencies/{agencyId}:
     put:
       tags:
         - agency
@@ -222,7 +224,7 @@ paths:
       responses:
         '200':
           description: successful operation
-  /agency/{agencyId}/eventTypes:
+  /agencies/{agencyId}/eventTypes:
     get:
       tags:
         - agency
@@ -270,12 +272,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomEventType'
-  /agency/{agencyId}/initialMeetingLink:
+  /agencies/{agencyId}/initialMeetingSlug:
     get:
       tags:
         - agency
       summary: Get initial meeting booking link for agency
-      operationId: getInitialMeetingLink
+      operationId: getInitialMeetingSlug
       parameters:
         - name: agencyId
           in: path
@@ -290,7 +292,47 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeetingLink'
+                $ref: '#/components/schemas/MeetingSlug'
+  /askers/{askerId}/meetingSlug:
+    get:
+      tags:
+        - asker
+      summary: Get meeting booking link for an askers assigned consultant
+      operationId: getAskerMeetingSlug
+      parameters:
+        - name: askerId
+          in: path
+          description: ID of onber asker
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingSlug'
+  /askers/{askerId}/bookings:
+    get:
+      tags:
+        - asker
+      summary: Get all bookings of a asker
+      operationId: getAllBookingsOfAsker
+      parameters:
+        - name: askerId
+          in: path
+          description: ID of onber asker
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfCalcomBookings'
 components:
   schemas:
     CalcomBooking:
@@ -379,21 +421,6 @@ components:
         invitedTo:
           type: string
           format: nullable
-    OnberUser:
-      type: object
-      properties:
-        id:
-          type: string
-        username:
-          type: string
-        name:
-          type: string
-        email:
-          type: string
-        agencyId:
-          type: integer
-          format: int64
-          example: 1
     CalcomEventType:
       type: object
       properties:
@@ -499,12 +526,11 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/CalcomEventType'
-    MeetingLink:
+    MeetingSlug:
       type: object
       properties:
-        meetlingLink:
+        slug:
           type: string
-          example: https://mydomain.local/myConsultant
     CalcomTeam:
       type: object
       properties:

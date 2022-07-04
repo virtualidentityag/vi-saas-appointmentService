@@ -1,9 +1,9 @@
 package com.vi.appointmentservice.controller;
 
 import com.vi.appointmentservice.api.model.*;
-import com.vi.appointmentservice.generated.api.controller.UserApi;
-import com.vi.appointmentservice.model.CalcomUserToUser;
-import com.vi.appointmentservice.repository.CalcomUserToUserRepository;
+import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
+import com.vi.appointmentservice.model.CalcomUserToConsultant;
+import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.service.CalComTeamService;
 import com.vi.appointmentservice.service.CalComUserService;
@@ -22,45 +22,46 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Controller for user API operations.
+ * Controller for consultant API operations.
  */
 @RestController
-@Api(tags = "user")
+@Api(tags = "consultant")
 @Slf4j
-public class UserController implements UserApi {
+public class ConsultantController implements ConsultantsApi {
 
     CalComUserService calComUserService;
     CalComTeamService calComTeamService;
-    CalcomUserToUserRepository calcomUserToUserRepository;
+
+    CalcomUserToConsultantRepository calcomUserToConsultantRepository;
     TeamToAgencyRepository teamToAgencyRepository;
 
 
     @Autowired
-    public UserController(CalComUserService calComUserService, CalComTeamService calComTeamService, CalcomUserToUserRepository calcomUserToUserRepository, TeamToAgencyRepository teamToAgencyRepository) {
+    public ConsultantController(CalComUserService calComUserService, CalComTeamService calComTeamService, CalcomUserToConsultantRepository calcomUserToConsultantRepository, TeamToAgencyRepository teamToAgencyRepository) {
         this.calComUserService = calComUserService;
         this.calComTeamService = calComTeamService;
-        this.calcomUserToUserRepository = calcomUserToUserRepository;
+        this.calcomUserToConsultantRepository = calcomUserToConsultantRepository;
         this.teamToAgencyRepository = teamToAgencyRepository;
     }
 
     /**
-     * TEMP Admin route to associate onberUser to calcomUser
+     * TEMP Admin route to associate consultant to calcomUser
      *
-     * @param userId
+     * @param consultantId
      * @param requestBodyString
      * @return
      */
     @PostMapping(
-            value = "/user/{userId}/associateUser",
+            value = "/consultant/{consultantId}/associateUser",
             produces = {"application/json"},
             consumes = {"application/json"}
     )
-    ResponseEntity<CalcomUserToUser> associateUser(@ApiParam(value = "ID of onber user", required = true) @PathVariable("userId") String userId, @RequestBody String requestBodyString) {
+    ResponseEntity<CalcomUserToConsultant> associateConsultant(@ApiParam(value = "ID of onber user", required = true) @PathVariable("consultantId") String consultantId, @RequestBody String requestBodyString) {
         try {
             JSONObject requestBody = new JSONObject(requestBodyString);
-            if (userId != null && !userId.isEmpty() && !requestBody.isNull("calcomUserId")) {
-                CalcomUserToUser userAssociation = new CalcomUserToUser(userId, requestBody.getLong("calcomUserId"));
-                return new ResponseEntity<>(calcomUserToUserRepository.save(userAssociation), HttpStatus.OK);
+            if (consultantId != null && !consultantId.isEmpty() && !requestBody.isNull("calcomUserId")) {
+                CalcomUserToConsultant userAssociation = new CalcomUserToConsultant(consultantId, requestBody.getLong("calcomUserId"));
+                return new ResponseEntity<>(calcomUserToConsultantRepository.save(userAssociation), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
@@ -70,7 +71,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<CalcomUser> createUser(UserDTO userDTO) {
+    public ResponseEntity<CalcomUser> createConsultant(UserDTO userDTO) {
         CalcomUser creationUser = new CalcomUser();
         creationUser.setName(userDTO.getUsername());
         creationUser.setUsername(userDTO.getUsername());
@@ -97,49 +98,49 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteUser(String userId) {
-        Long calcomUserId = calcomUserToUserRepository.findByUserId(userId).getCalComUserId();
+    public ResponseEntity<Void> deleteConsultant(String userId) {
+        Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(userId).getCalComUserId();
         HttpStatus responseCode = calComUserService.deleteUser(calcomUserId);
         return new ResponseEntity<>(responseCode);
     }
 
     @Override
-    public ResponseEntity<CalcomUser> updateUser(String userId, UserDTO userDTO) {
-        return UserApi.super.updateUser(userId, userDTO);
+    public ResponseEntity<CalcomUser> updateConsultant(String userId, UserDTO userDTO) {
+        return ConsultantsApi.super.updateConsultant(userId, userDTO);
     }
 
     @Override
-    public ResponseEntity<CalcomEventType> addEventTypeToUser(String userId, CalcomEventType calcomEventType) {
-        return UserApi.super.addEventTypeToUser(userId, calcomEventType);
+    public ResponseEntity<CalcomEventType> addEventTypeToConsultant(String userId, CalcomEventType calcomEventType) {
+        return ConsultantsApi.super.addEventTypeToConsultant(userId, calcomEventType);
     }
 
 
     @Override
-    public ResponseEntity<List<CalcomBooking>> getAllBookingsOfUser(String userId) {
-        return UserApi.super.getAllBookingsOfUser(userId);
+    public ResponseEntity<List<CalcomBooking>> getAllBookingsOfConsultant(String userId) {
+        return ConsultantsApi.super.getAllBookingsOfConsultant(userId);
     }
 
     @Override
-    public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfUser(String userId) {
-        return UserApi.super.getAllEventTypesOfUser(userId);
+    public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfConsultant(String userId) {
+        return ConsultantsApi.super.getAllEventTypesOfConsultant(userId);
     }
 
     @Override
-    public ResponseEntity<MeetingLink> getUserMeetingLink(String userId) {
-        MeetingLink meetingLink = new MeetingLink();
+    public ResponseEntity<MeetingSlug> getConsultantMeetingSlug(String userId) {
+        MeetingSlug meetingSlug = new MeetingSlug();
         // TODO: find associated Berater
         // TODO: match associated Berater to Calcomuser
         // TODO: get meeting link for calcom user
         switch (userId) {
             case "1":
-                meetingLink.setMeetlingLink("https://calcom-develop.suchtberatung.digital/consultant.hamburg.1");
+                meetingSlug.setSlug("consultant.hamburg.1");
                 break;
             case "2":
-                meetingLink.setMeetlingLink("https://calcom-develop.suchtberatung.digital/consultant.hamburg.2");
+                meetingSlug.setSlug("consultant.hamburg.2");
                 break;
             default:
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(meetingLink, HttpStatus.OK);
+        return new ResponseEntity<>(meetingSlug, HttpStatus.OK);
     }
 }
