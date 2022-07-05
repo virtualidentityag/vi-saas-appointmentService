@@ -13,4 +13,8 @@ public class KeycloakException extends RuntimeException {
     super(message);
   }
 
+  public KeycloakException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
 }

@@ -34,6 +34,20 @@ public class SecurityHeaderSupplier {
     return header;
   }
 
+  /**
+   * Creates the headers containing keycloak token of technical user and csrf headers {@link
+   * HttpHeaders} object.
+   *
+   * @param accessToken the token used for keycloak authorization header
+   * @return the created {@link HttpHeaders}
+   */
+  public HttpHeaders getKeycloakAndCsrfHttpHeaders(String accessToken) {
+    var header = getCsrfHttpHeaders();
+    this.addKeycloakAuthorizationHeader(header, accessToken);
+
+    return header;
+  }
+
   public HttpHeaders getCsrfHttpHeaders() {
     var httpHeaders = new HttpHeaders();
 
@@ -52,5 +66,9 @@ public class SecurityHeaderSupplier {
 
   private void addKeycloakAuthorizationHeader(HttpHeaders httpHeaders) {
     httpHeaders.add("Authorization", "Bearer " + authenticatedUser.getAccessToken());
+  }
+
+  private void addKeycloakAuthorizationHeader(HttpHeaders httpHeaders, String accessToken) {
+    httpHeaders.add("Authorization", "Bearer " + accessToken);
   }
 }
