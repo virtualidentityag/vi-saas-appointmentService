@@ -7,17 +7,16 @@ import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.service.CalComTeamService;
 import com.vi.appointmentservice.service.CalComUserService;
+import com.vi.appointmentservice.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.keycloak.authorization.client.util.Http;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,15 +30,17 @@ public class ConsultantController implements ConsultantsApi {
 
     CalComUserService calComUserService;
     CalComTeamService calComTeamService;
+    UserService userService;
 
     CalcomUserToConsultantRepository calcomUserToConsultantRepository;
     TeamToAgencyRepository teamToAgencyRepository;
 
 
     @Autowired
-    public ConsultantController(CalComUserService calComUserService, CalComTeamService calComTeamService, CalcomUserToConsultantRepository calcomUserToConsultantRepository, TeamToAgencyRepository teamToAgencyRepository) {
+    public ConsultantController(CalComUserService calComUserService, CalComTeamService calComTeamService, UserService userService, CalcomUserToConsultantRepository calcomUserToConsultantRepository, TeamToAgencyRepository teamToAgencyRepository) {
         this.calComUserService = calComUserService;
         this.calComTeamService = calComTeamService;
+        this.userService = userService;
         this.calcomUserToConsultantRepository = calcomUserToConsultantRepository;
         this.teamToAgencyRepository = teamToAgencyRepository;
     }
@@ -68,6 +69,16 @@ public class ConsultantController implements ConsultantsApi {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping(
+            value = "/consultants",
+            produces = {"application/json"}
+    )
+    ResponseEntity<String> getAllConsultants() {
+        com.vi.appointmentservice.userservice.generated.web.model.ConsultantSearchResultDTO consultants = this.userService.getAllConsultants();
+        JSONObject jsonObject = new JSONObject(consultants);
+        return new ResponseEntity<>(jsonObject.toString(), HttpStatus.OK);
     }
 
     @Override

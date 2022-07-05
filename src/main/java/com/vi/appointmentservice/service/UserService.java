@@ -32,7 +32,7 @@ public class UserService {
     @Value("${keycloakService.technical.password}")
     private String keycloakTechnicalPassword;
 
-    public void getAllConsultants() {
+    public ConsultantSearchResultDTO getAllConsultants() {
         addTechnicalUserHeaders(userControllerApi.getApiClient());
         ConsultantSearchResultDTO consultants = userControllerApi.searchConsultants(
                 "",
@@ -42,6 +42,7 @@ public class UserService {
                 ""
         );
         log.debug(String.valueOf(consultants));
+        return consultants;
     }
 
     private void addTechnicalUserHeaders(ApiClient apiClient) {
