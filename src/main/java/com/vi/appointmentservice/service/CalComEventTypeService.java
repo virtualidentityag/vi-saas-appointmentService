@@ -3,21 +3,15 @@ package com.vi.appointmentservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.CalcomEventType;
-import com.vi.appointmentservice.api.model.CalcomTeam;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,11 +57,16 @@ public class CalComEventTypeService extends CalComService {
         return restTemplate.postForEntity(this.buildUri("/v1/event-types"), request , CalcomEventType.class ).getBody();
     }
 
-    public CalcomEventType editTeam(JSONObject eventType){
+    public CalcomEventType editEventType(JSONObject eventType){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
         return restTemplate.postForEntity(this.buildUri("/v1/event-types/"+eventType.get("id")), request , CalcomEventType.class ).getBody();
     }
+
+    public HttpStatus deleteEventType(Long eventTypeId) {
+        return restTemplate.exchange(this.buildUri("/v1/event-types/" + eventTypeId), HttpMethod.DELETE, null, String.class).getStatusCode();
+    }
+
 
 }

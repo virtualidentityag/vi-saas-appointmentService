@@ -77,6 +77,10 @@ public class AgencyController implements AgenciesApi {
 
     @Override
     public ResponseEntity<TeamEventType> addEventTypeToAgency(Long agencyId, TeamEventType teamEventType) {
+        Long teamId = teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid();
+        // TODO: Get User IDs
+        // TODO: save eventType
+        // TODO: EVENT TYPE USER API??
         return AgenciesApi.super.addEventTypeToAgency(agencyId, teamEventType);
     }
 
