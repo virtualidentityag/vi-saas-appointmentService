@@ -10,18 +10,18 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
 
-@Entity
-@Table(name = "calcom_user_to_user")
+@Entity(name = "CalcomUserToConsultant")
+@Table(name = "calcom_user_to_consultant")
 @Getter
 @Setter
 @ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CalcomUserToUser implements Serializable {
+public class CalcomUserToConsultant implements Serializable {
     @Id
-    @Column(name = "userid", unique = true, nullable = false)
-    private String userId;
+    @Column(name = "consultantid", unique = true, nullable = false)
+    private String consultantId;
 
     @Column(name = "calcomuserid", unique = true, nullable = false)
     private Long calComUserId;
@@ -30,8 +30,8 @@ public class CalcomUserToUser implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        CalcomUserToUser that = (CalcomUserToUser) o;
-        return userId != null && Objects.equals(userId, that.userId);
+        CalcomUserToConsultant that = (CalcomUserToConsultant) o;
+        return consultantId != null && Objects.equals(consultantId, that.consultantId);
     }
 
     @Override

@@ -7,21 +7,23 @@ info:
 tags:
   - name: agency
     description: All cal.com objects with a connection a unique agency
-  - name: user
-    description: Everything related to a onBer user
+  - name: consultant
+    description: Everything related to a onBer consultant
+  - name: asker
+    description: Everything related to a onBer asker
 paths:
-  /user:
+  /consultants:
     post:
       tags:
-        - user
-      summary: Add a new user to cal.com with user object
-      operationId: createUser
+        - consultant
+      summary: Add a new consultant to cal.com with consultant object
+      operationId: createConsultant
       requestBody:
-        description: User object that needs to be added to cal.com
+        description: consultant object that needs to be added to cal.com
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OnberUser'
+              $ref: './../services/userservice.yaml#/components/schemas/UserDTO'
         required: true
       responses:
         '200':
@@ -30,16 +32,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomUser'
-  /user/{userId}/eventType:
+  /consultants/{consultantId}:
+    put:
+      tags:
+        - consultant
+      summary: Update a new consultant to cal.com with consultant object
+      operationId: updateConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: ID of onber consultant
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Consultant object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: './../services/userservice.yaml#/components/schemas/UserDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomUser'
+    delete:
+      tags:
+        - consultant
+      summary: Delete a consultant
+      operationId: deleteConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: ID of onber consultant
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+  /consultants/{consultantId}/eventTypes:
     get:
       tags:
-        - user
-      summary: Get all eventTypes of user
-      operationId: getAllEventTypesOfUser
+        - consultant
+      summary: Get all eventTypes of consultant
+      operationId: getAllEventTypesOfConsultant
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
@@ -52,13 +96,13 @@ paths:
                 $ref: '#/components/schemas/ArrayOfCalcomEventTypes'
     post:
       tags:
-        - user
-      summary: Add a new eventType to a user
-      operationId: addEventTypeToUser
+        - consultant
+      summary: Add a new eventType to a consultant
+      operationId: addEventTypeToConsultant
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
@@ -76,16 +120,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomEventType'
-  /user/{userId}/booking:
+  /consultants/{consultantId}/bookings:
     get:
       tags:
-        - user
-      summary: Get all bookings of a user
-      operationId: getAllBookingsOfUser
+        - consultant
+      summary: Get all bookings of a consultant
+      operationId: getAllBookingsOfConsultant
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
@@ -96,16 +140,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
-  /user/{userId}/meetingLink:
+  /consultants/{consultantId}/meetingSlug:
     get:
       tags:
-        - user
-      summary: Get meeting booking link for user
-      operationId: getUserMeetingLink
+        - consultant
+      summary: Get meeting booking link for consultant
+      operationId: getConsultantMeetingSlug
       parameters:
-        - name: userId
+        - name: consultantId
           in: path
-          description: ID of onber user
+          description: ID of onber consultant
           required: true
           schema:
             type: string
@@ -113,11 +157,74 @@ paths:
         '200':
           description: successful operation
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: https://calcom-develop.suchtberatung.digital/max-mustermann/my-type
-  /agency/{agencyId}/eventTypes:
+                $ref: '#/components/schemas/MeetingSlug'
+  /agencies:
+    post:
+      tags:
+        - agency
+      summary: Add an new team to cal.com based on an agency
+      operationId: createAgency
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomTeam'
+  /agencies/{agencyId}:
+    put:
+      tags:
+        - agency
+      summary: Update agency team with an agency object
+      operationId: updateAgency
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Agency object for which a team needs to be updated in cal.com
+        content:
+          application/json:
+            schema:
+              $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomTeam'
+    delete:
+      tags:
+        - agency
+      summary: Delete teams of an agency
+      operationId: deleteAgency
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+  /agencies/{agencyId}/eventTypes:
     get:
       tags:
         - agency
@@ -165,12 +272,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomEventType'
-  /agency/{agencyId}/initialMeetingLink:
+  /agencies/{agencyId}/initialMeetingSlug:
     get:
       tags:
         - agency
       summary: Get initial meeting booking link for agency
-      operationId: getInitialMeetingLink
+      operationId: getInitialMeetingSlug
       parameters:
         - name: agencyId
           in: path
@@ -183,11 +290,49 @@ paths:
         '200':
           description: successful operation
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: https://calcom-develop.suchtberatung.digital/team/myTeam
-
+                $ref: '#/components/schemas/MeetingSlug'
+  /askers/{askerId}/meetingSlug:
+    get:
+      tags:
+        - asker
+      summary: Get meeting booking link for an askers assigned consultant
+      operationId: getAskerMeetingSlug
+      parameters:
+        - name: askerId
+          in: path
+          description: ID of onber asker
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingSlug'
+  /askers/{askerId}/bookings:
+    get:
+      tags:
+        - asker
+      summary: Get all bookings of a asker
+      operationId: getAllBookingsOfAsker
+      parameters:
+        - name: askerId
+          in: path
+          description: ID of onber asker
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfCalcomBookings'
 components:
   schemas:
     CalcomBooking:
@@ -226,7 +371,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
         username:
           type: string
         name:
@@ -276,21 +421,6 @@ components:
         invitedTo:
           type: string
           format: nullable
-    OnberUser:
-      type: object
-      properties:
-        id:
-          type: string
-        username:
-          type: string
-        name:
-          type: string
-        email:
-          type: string
-        agencyId:
-          type: integer
-          format: int64
-          example: 1
     CalcomEventType:
       type: object
       properties:
@@ -396,3 +526,42 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/CalcomEventType'
+    MeetingSlug:
+      type: object
+      properties:
+        slug:
+          type: string
+    CalcomTeam:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          format: nullable
+        slug:
+          type: string
+          format: nullable
+        logo:
+          type: string
+          format: nullable
+        bio:
+          type: string
+          format: nullable
+        hideBranding:
+          type: boolean
+          format: nullable
+    CalcomMembership:
+      type: object
+      properties:
+        teamId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        accepted:
+          type: boolean
+        role:
+          type: string
