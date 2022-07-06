@@ -121,7 +121,6 @@ public class ConsultantController implements ConsultantsApi {
         } else {
             CalcomUser creationUser = new CalcomUser();
             creationUser.setName(consultant.getFirstname() + " " + consultant.getLastname());
-            creationUser.setUsername(consultant.getUsername().replace("enc.", ""));
             creationUser.setEmail(consultant.getEmail());
             // Default values
             creationUser.setTimeZone("Europe/Berlin");
@@ -129,6 +128,7 @@ public class ConsultantController implements ConsultantsApi {
             creationUser.setLocale("de");
             creationUser.setTimeFormat(24);
             creationUser.setAllowDynamicBooking(false);
+            creationUser.setAway(false);
             // TODO: Any more default values?
             ObjectMapper objectMapper = new ObjectMapper();
             // Ignore null values
@@ -161,7 +161,6 @@ public class ConsultantController implements ConsultantsApi {
             CalcomUser updateUser = new CalcomUser();
             updateUser.setId(calcomUserId);
             updateUser.setName(consultant.getFirstname() + " " + consultant.getLastname());
-            updateUser.setUsername(consultant.getUsername().replace("enc.", ""));
             updateUser.setEmail(consultant.getEmail());
             // Default values
             updateUser.setTimeZone("Europe/Berlin");
@@ -169,6 +168,7 @@ public class ConsultantController implements ConsultantsApi {
             updateUser.setLocale("de");
             updateUser.setTimeFormat(24);
             updateUser.setAllowDynamicBooking(false);
+            updateUser.setAway(false);
             // TODO: Any more default values?
             ObjectMapper objectMapper = new ObjectMapper();
             // Ignore null values
