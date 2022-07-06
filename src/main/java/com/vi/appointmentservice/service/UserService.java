@@ -10,6 +10,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,12 +35,13 @@ public class UserService {
 
     public ConsultantSearchResultDTO getAllConsultants() {
         addTechnicalUserHeaders(userControllerApi.getApiClient());
+        log.debug("Api Client: {}", userControllerApi.getApiClient().toString());
         ConsultantSearchResultDTO consultants = userControllerApi.searchConsultants(
-                "",
+                "*",
                 1,
                 999,
-                "",
-                ""
+                "FIRSTNAME",
+                "ASC"
         );
         log.debug(String.valueOf(consultants));
         return consultants;
@@ -49,7 +51,7 @@ public class UserService {
         KeycloakLoginResponseDTO keycloakLoginResponseDTO = identityClient.loginUser(
                 keycloakTechnicalUsername, keycloakTechnicalPassword
         );
-        var headers = this.securityHeaderSupplier
+        HttpHeaders headers = this.securityHeaderSupplier
                 .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
         headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
     }
