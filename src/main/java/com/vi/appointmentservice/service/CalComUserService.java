@@ -27,7 +27,6 @@ public class CalComUserService extends CalComService {
     // Users
     public List<CalcomUser> getUsers() throws JsonProcessingException {
         // ResponseEntity<CalcomUser[]> response = restTemplate.getForEntity(String.format(this.buildUri("/users"), calcomApiUrl, calcomApiKey), CalcomUser[].class);
-
         String response = this.restTemplate.getForObject(String.format(this.buildUri("/v1/users"), calcomApiUrl, calcomApiKey), String.class);
         JSONObject jsonObject = new JSONObject(response);
         log.debug(String.valueOf(jsonObject));
@@ -43,21 +42,21 @@ public class CalComUserService extends CalComService {
     public CalcomUser createUser(JSONObject user) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        log.debug("Creating calcom user: {}", user);
+        log.info("Creating calcom user: {}", user);
         HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
-        return restTemplate.postForEntity(this.buildUri("/v1/user"), request, CalcomUser.class).getBody();
+        return restTemplate.postForEntity(this.buildUri("/v1/users"), request, CalcomUser.class).getBody();
     }
 
     public CalcomUser updateUser(JSONObject user) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        log.debug("Updating calcom user: {}", user);
+        log.info("Updating calcom user: {}", user);
         HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
-        return restTemplate.postForEntity(this.buildUri("/v1/user/" + user.getLong("id")), request, CalcomUser.class).getBody();
+        return restTemplate.postForEntity(this.buildUri("/v1/users/" + user.getLong("id")), request, CalcomUser.class).getBody();
     }
 
     public HttpStatus deleteUser(Long userId) {
-        return restTemplate.exchange(this.buildUri("/v1/user/" + userId), HttpMethod.DELETE, null, String.class).getStatusCode();
+        return restTemplate.exchange(this.buildUri("/v1/users/" + userId), HttpMethod.DELETE, null, String.class).getStatusCode();
     }
 
 
