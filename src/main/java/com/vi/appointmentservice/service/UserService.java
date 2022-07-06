@@ -9,6 +9,7 @@ import com.vi.appointmentservice.userservice.generated.web.model.ConsultantSearc
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -34,19 +35,24 @@ public class UserService {
     @Value("${keycloakService.technical.password}")
     private String keycloakTechnicalPassword;
 
-    public ConsultantSearchResultDTO getAllConsultants() {
+    public JSONArray getAllConsultants() {
         addTechnicalUserHeaders(userControllerApi.getApiClient());
         log.debug("Api Client: {}", userControllerApi.getApiClient().toString());
-        ConsultantSearchResultDTO consultants = userControllerApi.searchConsultants(
+        ConsultantSearchResultDTO consultantsResponse = userControllerApi.searchConsultants(
                 "*",
                 1,
                 999,
                 "FIRSTNAME",
                 "ASC"
         );
-        JSONObject consultantJson = new JSONObject(consultants);
-        log.debug("Consultants: {}", consultantJson);
-        return consultants;
+        JSONObject consultantSearchResultDTOJson = new JSONObject(consultantsResponse);
+        log.debug("consultantSearchResultDTOJson: {}", consultantSearchResultDTOJson);
+        JSONArray consultantsArray = consultantSearchResultDTOJson.getJSONArray("embedded");
+        JSONArray consultantsResult = new JSONArray();
+        for (int i=0; i < consultantsArray.length(); i++) {
+            consultantsResult.put(consultantsArray.getJSONObject(i).getJSONObject("embedded"));
+        }
+        return consultantsResult;
     }
 
     private void addTechnicalUserHeaders(ApiClient apiClient) {

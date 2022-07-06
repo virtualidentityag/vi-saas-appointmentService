@@ -1,5 +1,7 @@
 package com.vi.appointmentservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.*;
 import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
@@ -8,12 +10,15 @@ import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.service.CalComTeamService;
 import com.vi.appointmentservice.service.CalComUserService;
 import com.vi.appointmentservice.service.UserService;
+import com.vi.appointmentservice.userservice.generated.web.model.ConsultantDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.keycloak.authorization.client.util.Http;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,24 +31,15 @@ import java.util.List;
 @RestController
 @Api(tags = "consultant")
 @Slf4j
+@RequiredArgsConstructor
 public class ConsultantController implements ConsultantsApi {
 
-    CalComUserService calComUserService;
-    CalComTeamService calComTeamService;
-    UserService userService;
-
-    CalcomUserToConsultantRepository calcomUserToConsultantRepository;
-    TeamToAgencyRepository teamToAgencyRepository;
-
-
-    @Autowired
-    public ConsultantController(CalComUserService calComUserService, CalComTeamService calComTeamService, UserService userService, CalcomUserToConsultantRepository calcomUserToConsultantRepository, TeamToAgencyRepository teamToAgencyRepository) {
-        this.calComUserService = calComUserService;
-        this.calComTeamService = calComTeamService;
-        this.userService = userService;
-        this.calcomUserToConsultantRepository = calcomUserToConsultantRepository;
-        this.teamToAgencyRepository = teamToAgencyRepository;
-    }
+    private final @NonNull CalComUserService calComUserService;
+    private final @NonNull CalComTeamService calComTeamService;
+    private final @NonNull UserService userService;
+    private final @NonNull ObjectMapper objectMapper;
+    private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+    private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
 
     /**
      * TEMP Admin route to associate consultant to calcomUser
@@ -76,9 +72,35 @@ public class ConsultantController implements ConsultantsApi {
             produces = {"application/json"}
     )
     ResponseEntity<String> getAllConsultants() {
-        com.vi.appointmentservice.userservice.generated.web.model.ConsultantSearchResultDTO consultants = this.userService.getAllConsultants();
-        JSONObject jsonObject = new JSONObject(consultants);
-        return new ResponseEntity<>(jsonObject.toString(), HttpStatus.OK);
+        JSONArray consultantsArray = this.userService.getAllConsultants();
+        return new ResponseEntity<>(consultantsArray.toString(), HttpStatus.OK);
+    }
+
+    @GetMapping(
+            value = "/updateConsultants",
+            produces = {"application/json"}
+    )
+    ResponseEntity<String> updateConsultants(){
+        JSONArray consultantsArray = this.userService.getAllConsultants();
+        try {
+            for (int i = 0; i < consultantsArray.length(); i++) {
+                ConsultantDTO consultant = objectMapper.readValue(consultantsArray.getJSONObject(i).toString(), ConsultantDTO.class);
+
+                if(calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())){
+                    // TODO: If yes, update
+                    Long calComUserId = calcomUserToConsultantRepository.findByConsultantId(consultant.getId()).getCalComUserId();
+
+                    // calComUserService.updateUser()
+                }else{
+                    // TODO: If not, create
+
+                }
+
+            }
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(consultantsArray.toString(), HttpStatus.OK);
     }
 
     @Override
