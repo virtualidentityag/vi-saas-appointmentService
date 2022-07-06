@@ -40,26 +40,20 @@ public class CalComUserService extends CalComService {
     }
 
 
-    public CalcomUser createUser(CalcomUser user) {
+    public CalcomUser createUser(JSONObject user) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        // MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        MultiValueMap<String, String> map = objectMapper.convertValue(user, MultiValueMap.class);
-        JSONObject userObject = new JSONObject(user);
-        log.debug("Creating calcom user: {}", userObject);
-        HttpEntity<String> request = new HttpEntity<>(userObject.toString(), headers);
+        log.debug("Creating calcom user: {}", user);
+        HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
         return restTemplate.postForEntity(this.buildUri("/v1/user"), request, CalcomUser.class).getBody();
     }
 
-    public CalcomUser updateUser(CalcomUser user) {
+    public CalcomUser updateUser(JSONObject user) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        // MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        MultiValueMap<String, String> map = objectMapper.convertValue(user, MultiValueMap.class);
-        JSONObject userObject = new JSONObject(user);
-        log.debug("Updating calcom user: {}", userObject);
-        HttpEntity<String> request = new HttpEntity<>(userObject.toString(), headers);
-        return restTemplate.postForEntity(this.buildUri("/v1/user/" + user.getId()), request, CalcomUser.class).getBody();
+        log.debug("Updating calcom user: {}", user);
+        HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
+        return restTemplate.postForEntity(this.buildUri("/v1/user/" + user.getLong("id")), request, CalcomUser.class).getBody();
     }
 
     public HttpStatus deleteUser(Long userId) {
@@ -68,12 +62,14 @@ public class CalComUserService extends CalComService {
 
 
     public CalcomUser getUserById(Long userId) throws JsonProcessingException {
-        String response = restTemplate.getForObject(String.format(this.buildUri("/v1/users/" + userId), calcomApiUrl, calcomApiKey), String.class);
-        JSONObject jsonObject = new JSONObject(response);
-        log.debug(String.valueOf(jsonObject));
-        response = jsonObject.getJSONObject("user").toString();
-        log.debug(response);
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(response, CalcomUser.class);
+        ResponseEntity<java.lang.String> response = restTemplate.exchange(this.buildUri("/v1/users/" + userId), HttpMethod.GET, null, String.class);
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null){
+            JSONObject jsonObject = new JSONObject(response.getBody());
+            if(jsonObject.getJSONObject("user") != null){
+                return mapper.readValue(jsonObject.getJSONObject("user").toString(), CalcomUser.class);
+            }
+        }
+        return null;
     }
 }

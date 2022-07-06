@@ -686,7 +686,7 @@ components:
         agencies:
           type: array
           items:
-            $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
+            $ref: './agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
 
     ConsultantAdminResponseDTO:
       type: object
@@ -793,7 +793,7 @@ components:
         _embedded:
           type: array
           items:
-            $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminFullResponseDTO'
+            $ref: './agencyadminservice.yaml#/components/schemas/AgencyAdminFullResponseDTO'
         _links:
           $ref: '#/components/schemas/ConsultantAgencyLinks'
         total:

@@ -2434,7 +2434,7 @@ components:
         agencies:
           type: array
           items:
-            $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
+            $ref: './agencyservice.yaml#/components/schemas/AgencyResponseDTO'
 
     PasswordDTO:
       type: object

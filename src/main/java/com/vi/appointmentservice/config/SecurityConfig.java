@@ -70,9 +70,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
             .antMatchers(WHITE_LIST).permitAll()
-            .antMatchers("/agencies", "/agencies/**").permitAll()
-            .antMatchers("/consultants", "/consultants/**").permitAll()
-            .antMatchers("/askers", "/askers/**").permitAll()
+            //.antMatchers("/agencies", "/agencies/**").permitAll()
+            //.antMatchers("/consultants", "/consultants/**").permitAll()
+            //.antMatchers("/askers", "/askers/**").permitAll()
             .anyRequest().permitAll();
   }
 

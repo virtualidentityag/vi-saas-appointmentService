@@ -8,4 +8,8 @@ public interface CalcomUserToConsultantRepository extends JpaRepository<CalcomUs
 
     boolean existsByConsultantId(String consultantId);
 
+    long deleteByConsultantId(String consultantId);
+
+
+
 }
