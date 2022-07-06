@@ -9,6 +9,7 @@ import com.vi.appointmentservice.userservice.generated.web.model.ConsultantSearc
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,8 @@ public class UserService {
                 "FIRSTNAME",
                 "ASC"
         );
-        log.debug(String.valueOf(consultants));
+        JSONObject consultantJson = new JSONObject(consultants);
+        log.debug("Consultants: {}", consultantJson);
         return consultants;
     }
 
@@ -51,6 +53,7 @@ public class UserService {
         KeycloakLoginResponseDTO keycloakLoginResponseDTO = identityClient.loginUser(
                 keycloakTechnicalUsername, keycloakTechnicalPassword
         );
+        log.debug("Technical Acces Token: {}", keycloakLoginResponseDTO.getAccessToken());
         HttpHeaders headers = this.securityHeaderSupplier
                 .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
         headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
