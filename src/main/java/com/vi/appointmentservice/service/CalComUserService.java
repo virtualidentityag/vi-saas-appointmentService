@@ -29,30 +29,35 @@ public class CalComUserService extends CalComService {
         // ResponseEntity<CalcomUser[]> response = restTemplate.getForEntity(String.format(this.buildUri("/users"), calcomApiUrl, calcomApiKey), CalcomUser[].class);
         String response = this.restTemplate.getForObject(this.buildUri("/v1/users"), String.class);
         JSONObject jsonObject = new JSONObject(response);
-        log.debug(String.valueOf(jsonObject));
         response = jsonObject.getJSONArray("users").toString();
-        log.debug(response);
         ObjectMapper mapper = new ObjectMapper();
         CalcomUser[] result = mapper.readValue(response, CalcomUser[].class);
-
         return List.of(Objects.requireNonNull(result));
     }
 
 
-    public CalcomUser createUser(JSONObject user) {
+    public CalcomUser createUser(JSONObject user) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         log.info("Creating calcom user: {}", user);
         HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
-        return restTemplate.postForEntity(this.buildUri("/v1/users"), request, CalcomUser.class).getBody();
+        String response = restTemplate.postForEntity(this.buildUri("/v1/users"), request, String.class).getBody();
+        JSONObject jsonObject = new JSONObject(response);
+        response = jsonObject.getJSONArray("users").toString();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(response, CalcomUser.class);
     }
 
-    public CalcomUser updateUser(JSONObject user) {
+    public CalcomUser updateUser(JSONObject user) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        log.info("Updating calcom user: {}", user);
+        log.info("Creating calcom user: {}", user);
         HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
-        return restTemplate.postForEntity(this.buildUri("/v1/users/" + user.getLong("id")), request, CalcomUser.class).getBody();
+        String response = restTemplate.postForEntity(this.buildUri("/v1/users" + user.getLong("id")), request, String.class).getBody();
+        JSONObject jsonObject = new JSONObject(response);
+        response = jsonObject.getJSONArray("users").toString();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(response, CalcomUser.class);
     }
 
     public HttpStatus deleteUser(Long userId) {

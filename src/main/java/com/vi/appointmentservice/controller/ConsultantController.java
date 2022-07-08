@@ -84,6 +84,7 @@ public class ConsultantController implements ConsultantsApi {
         try {
             for (int i = 0; i < consultantsArray.length(); i++) {
                 ConsultantDTO consultant = objectMapper.readValue(consultantsArray.getJSONObject(i).toString(), ConsultantDTO.class);
+                // TODO: Check calcom for email match
                 if (calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())) {
                     // Found user association
                     Long calComUserId = calcomUserToConsultantRepository.findByConsultantId(consultant.getId()).getCalComUserId();
