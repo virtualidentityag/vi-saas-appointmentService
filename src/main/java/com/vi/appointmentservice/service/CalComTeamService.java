@@ -100,7 +100,7 @@ public class CalComTeamService extends CalComService{
         membership.put("accepted", true);
         membership.put("userId", "MEMBER");
         HttpEntity<String> request = new HttpEntity<>(membership.toString(), headers);
-        return restTemplate.postForEntity(this.buildUri("/v1/teams"), request , CalcomMembership.class ).getBody();
+        return restTemplate.postForEntity(this.buildUri("/v1/memberships"), request , CalcomMembership.class ).getBody();
     }
 
 

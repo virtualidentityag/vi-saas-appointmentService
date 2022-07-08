@@ -5,17 +5,13 @@ import com.vi.appointmentservice.generated.api.controller.AgenciesApi;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.service.CalComTeamService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -91,6 +87,29 @@ public class AgencyController implements AgenciesApi {
 
     @Override
     public ResponseEntity<MeetingSlug> getInitialMeetingSlug(Long agencyId) {
+        // TODO: add verification, sanitization and general cleanliness
+        MeetingSlug meetingSlug = new MeetingSlug();
+        switch (agencyId.intValue()) {
+            case 1:
+                meetingSlug.setSlug("team-munich");
+                break;
+            case 2:
+                meetingSlug.setSlug("team-hamburg");
+                break;
+            default:
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(meetingSlug, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Get initial meeting booking link for agency", nickname = "getInitialMeetingSlugReal", notes = "", response = MeetingSlug.class, tags={ "agency", })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "successful operation", response = MeetingSlug.class) })
+    @GetMapping(
+            value = "/agencies/{agencyId}/initialMeetingSlugReal",
+            produces = { "application/json" }
+    )
+    public ResponseEntity<MeetingSlug> getInitialMeetingSlugReal(@ApiParam(value = "ID of agency",required=true) @PathVariable("agencyId") Long agencyId) {
         // TODO: add verification, sanitization and general cleanliness
         MeetingSlug meetingLink = new MeetingSlug();
         Long teamId;
