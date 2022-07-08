@@ -242,21 +242,8 @@ public class ConsultantController implements ConsultantsApi {
     @Override
     public ResponseEntity<MeetingSlug> getConsultantMeetingSlug(String userId) {
         MeetingSlug meetingSlug = new MeetingSlug();
-        // TODO: find associated Berater
-        // TODO: match associated Berater to Calcomuser
-        // TODO: get meeting link for calcom user
-        switch (userId) {
-            case "1":
-                meetingSlug.setSlug("consultant.hamburg.1");
-                break;
-            case "2":
-                meetingSlug.setSlug("consultant.hamburg.2");
-                break;
-            default:
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        meetingSlug.setSlug("andre-soares");
         return new ResponseEntity<>(meetingSlug, HttpStatus.OK);
     }
-
 
 }
