@@ -40,7 +40,7 @@ public class CalComUserService extends CalComService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         log.info("Creating calcom user: {}", user);
         HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(this.buildUri("/v1/users"), request, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(this.buildUri("/v1/users"), HttpMethod.POST, request, String.class);
         String body = response.getBody();
         if(response.getStatusCode() == HttpStatus.OK){
             JSONObject jsonObject = new JSONObject(body);
@@ -55,13 +55,18 @@ public class CalComUserService extends CalComService {
     public CalcomUser updateUser(JSONObject user) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        log.info("Creating calcom user: {}", user);
+        log.info("updating calcom user: {}", user);
         HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
-        String response = restTemplate.postForEntity(this.buildUri("/v1/users" + user.getLong("id")), request, String.class).getBody();
-        JSONObject jsonObject = new JSONObject(response);
-        response = jsonObject.getJSONArray("users").toString();
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(response, CalcomUser.class);
+        ResponseEntity<String> response = restTemplate.exchange(this.buildUri("/v1/users/" + user.getLong("id")), HttpMethod.PATCH, request, String.class);
+        String body = response.getBody();
+        if(response.getStatusCode() == HttpStatus.OK){
+            JSONObject jsonObject = new JSONObject(body);
+            body = jsonObject.getJSONArray("users").toString();
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(body, CalcomUser.class);
+        } else {
+            return null;
+        }
     }
 
     public HttpStatus deleteUser(Long userId) {
