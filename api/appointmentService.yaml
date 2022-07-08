@@ -11,6 +11,8 @@ tags:
     description: Everything related to a onBer consultant
   - name: asker
     description: Everything related to a onBer asker
+  - name: eventType
+    description: Everything related to a calcom event-type
 paths:
   /consultants:
     post:
@@ -263,7 +265,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CalcomEventType'
+              $ref: '#/components/schemas/TeamEventType'
         required: true
       responses:
         '200':
@@ -271,7 +273,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CalcomEventType'
+                $ref: '#/components/schemas/TeamEventType'
   /agencies/{agencyId}/initialMeetingSlug:
     get:
       tags:
@@ -333,6 +335,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
+  /eventTypes/{eventTypeId}:
+    get:
+      tags:
+        - eventType
+      summary: Get specific event-type by id
+      operationId: getEventTypeById
+      parameters:
+        - name: eventTypeId
+          in: path
+          description: ID of calcom eventType
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/CalcomEventType'
+                  - $ref: '#/components/schemas/TeamEventType'
+                discriminator:
+                  propertyName: event_type
+    put:
+      tags:
+        - eventType
+      summary: Update an event-type with event-type object
+      operationId: updateEventType
+      parameters:
+        - name: eventTypeId
+          in: path
+          description: ID of calcom eventType
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: event-type object that needs to be updated
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/CalcomEventType'
+                - $ref: '#/components/schemas/TeamEventType'
+              discriminator:
+                propertyName: event_type
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/CalcomEventType'
+                  - $ref: '#/components/schemas/TeamEventType'
+                discriminator:
+                  propertyName: event_type
+    delete:
+      tags:
+        - eventType
+      summary: Delete an event-type
+      operationId: deleteEventType
+      parameters:
+        - name: eventTypeId
+          in: path
+          description: ID of calcom eventType
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
 components:
   schemas:
     CalcomBooking:
@@ -522,10 +600,21 @@ components:
         metadata:
           type: string
           format: nullable
+      discriminator:
+        propertyName: event_type
     ArrayOfCalcomEventTypes:
       type: array
       items:
         $ref: '#/components/schemas/CalcomEventType'
+    TeamEventType:
+      allOf:
+        - $ref: '#/components/schemas/CalcomEventType'
+        - type: object
+          properties:
+            consultantIds:
+              type: array
+              items:
+                  type: string
     MeetingSlug:
       type: object
       properties:
