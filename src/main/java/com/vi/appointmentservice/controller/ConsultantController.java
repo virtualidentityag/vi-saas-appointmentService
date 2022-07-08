@@ -8,6 +8,7 @@ import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
+import com.vi.appointmentservice.service.CalComEventTypeService;
 import com.vi.appointmentservice.service.CalComTeamService;
 import com.vi.appointmentservice.service.CalComUserService;
 import com.vi.appointmentservice.service.UserService;
@@ -38,6 +39,7 @@ public class ConsultantController implements ConsultantsApi {
 
     private final @NonNull CalComUserService calComUserService;
     private final @NonNull CalComTeamService calComTeamService;
+    private final @NonNull CalComEventTypeService calComEventTypeService;
     private final @NonNull UserService userService;
     private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
     private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
@@ -221,7 +223,19 @@ public class ConsultantController implements ConsultantsApi {
 
     @Override
     public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfConsultant(String userId) {
-        return ConsultantsApi.super.getAllEventTypesOfConsultant(userId);
+        // TODO: remove "true" once users are associated
+        if(true || calcomUserToConsultantRepository.existsByConsultantId(userId)){
+            List<CalcomEventType> eventTypes;
+            try {
+                // eventTypes = calComEventTypeService.getAllEventTypesOfUser(calcomUserToConsultantRepository.findByConsultantId(userId || 0);
+                eventTypes = calComEventTypeService.getAllEventTypesOfUser(0L);
+            } catch (JsonProcessingException e) {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return new ResponseEntity<>(eventTypes, HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @Override
@@ -242,4 +256,6 @@ public class ConsultantController implements ConsultantsApi {
         }
         return new ResponseEntity<>(meetingSlug, HttpStatus.OK);
     }
+
+
 }

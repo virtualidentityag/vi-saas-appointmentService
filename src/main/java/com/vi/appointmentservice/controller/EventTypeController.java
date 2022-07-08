@@ -8,11 +8,14 @@ import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.service.CalComEventTypeService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.authorization.client.util.Http;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * Controller for event-type API operations.
@@ -42,7 +45,16 @@ public class EventTypeController implements EventTypesApi {
 
     @Override
     public ResponseEntity<CalcomEventType> getEventTypeById(Long eventTypeId) {
-        return EventTypesApi.super.getEventTypeById(eventTypeId);
+        try {
+            CalcomEventType result = calComEventTypeService.getEventTypeById(eventTypeId);
+            if(result != null){
+                return new ResponseEntity<>(calComEventTypeService.getEventTypeById(eventTypeId), HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (JsonProcessingException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override

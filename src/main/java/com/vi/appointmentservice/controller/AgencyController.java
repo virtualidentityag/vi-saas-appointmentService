@@ -84,27 +84,19 @@ public class AgencyController implements AgenciesApi {
 
     @Override
     public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfAgency(Long agencyId) {
-        List<CalcomEventType> eventTypes;
-        try {
-            eventTypes = calComEventTypeService.getAllEventTypes();
-            return new ResponseEntity<>(eventTypes, HttpStatus.OK);
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        /*
-        // TODO: Can be used once team are associated to agencies
-        if(teamToAgencyRepository.existsByAgencyId(agencyId)){
+        // TODO: remove "true" once team are associated to agencies
+        if(true || teamToAgencyRepository.existsByAgencyId(agencyId)){
             List<CalcomEventType> eventTypes;
             try {
-                eventTypes = calComEventTypeService.getAllEventTypesOfTeam(teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid());
+                // eventTypes = calComEventTypeService.getAllEventTypesOfTeam(teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid());
+                eventTypes = calComEventTypeService.getAllEventTypesOfTeam(0L);
             } catch (JsonProcessingException e) {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
             return new ResponseEntity<>(eventTypes, HttpStatus.OK);
         }else{
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }*/
+        }
     }
 
     @Override
