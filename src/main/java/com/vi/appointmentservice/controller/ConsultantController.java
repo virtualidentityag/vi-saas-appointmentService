@@ -139,21 +139,25 @@ public class ConsultantController implements ConsultantsApi {
             JSONObject createJson = new JSONObject(objectMapper.writeValueAsString(creationUser));
             CalcomUser createdUser = calComUserService.createUser(createJson);
             // Create association
-            calcomUserToConsultantRepository.save(new CalcomUserToConsultant(consultant.getId(), createdUser.getId()));
-            // Add user to team of teams of agencies
-            List<AgencyAdminResponseDTO> agencies = consultant.getAgencies();
-            for (AgencyAdminResponseDTO agency : agencies) {
-                if (teamToAgencyRepository.existsByAgencyId(agency.getId())) {
+            if(createdUser != null){
+                calcomUserToConsultantRepository.save(new CalcomUserToConsultant(consultant.getId(), createdUser.getId()));
+                // Add user to team of teams of agencies
+                List<AgencyAdminResponseDTO> agencies = consultant.getAgencies();
+                for (AgencyAdminResponseDTO agency : agencies) {
                     if (teamToAgencyRepository.existsByAgencyId(agency.getId())) {
-                        Long teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get(0).getTeamid();
-                    }else{
-                        // TODO: Create team for agency
+                        if (teamToAgencyRepository.existsByAgencyId(agency.getId())) {
+                            Long teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get(0).getTeamid();
+                        }else{
+                            // TODO: Create team for agency
+                        }
+                        // TODO: Check if membership already exists (calcom route currently limited to memerships of api key creator)
+                        // TODO: calComTeamService.addUserToTeam(updatedUser.getId(), teamId);
                     }
-                    // TODO: Check if membership already exists (calcom route currently limited to memerships of api key creator)
-                    // TODO: calComTeamService.addUserToTeam(updatedUser.getId(), teamId);
                 }
+                return createdUser;
+            }else{
+                return null;
             }
-            return createdUser;
         }
     }
 

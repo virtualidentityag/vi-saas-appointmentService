@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -41,11 +40,16 @@ public class CalComUserService extends CalComService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         log.info("Creating calcom user: {}", user);
         HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
-        String response = restTemplate.postForEntity(this.buildUri("/v1/users"), request, String.class).getBody();
-        JSONObject jsonObject = new JSONObject(response);
-        response = jsonObject.getJSONArray("users").toString();
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(response, CalcomUser.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(this.buildUri("/v1/users"), request, String.class);
+        String body = response.getBody();
+        if(response.getStatusCode() == HttpStatus.OK){
+            JSONObject jsonObject = new JSONObject(body);
+            body = jsonObject.getJSONArray("users").toString();
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(body, CalcomUser.class);
+        } else {
+            return null;
+        }
     }
 
     public CalcomUser updateUser(JSONObject user) throws JsonProcessingException {
