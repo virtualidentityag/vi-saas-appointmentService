@@ -1,11 +1,15 @@
 package com.vi.appointmentservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vi.appointmentservice.api.model.*;
 import com.vi.appointmentservice.generated.api.controller.AgenciesApi;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
+import com.vi.appointmentservice.service.CalComEventTypeService;
 import com.vi.appointmentservice.service.CalComTeamService;
 import io.swagger.annotations.*;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +22,14 @@ import java.util.List;
 @RestController
 @Api(tags = "agency")
 @Slf4j
+@RequiredArgsConstructor
 public class AgencyController implements AgenciesApi {
 
-    CalComTeamService calComTeamService;
-    TeamToAgencyRepository teamToAgencyRepository;
+    @NonNull private final CalComTeamService calComTeamService;
 
-    @Autowired
-    public AgencyController(CalComTeamService calComTeamService, TeamToAgencyRepository teamToAgencyRepository) {
-        this.calComTeamService = calComTeamService;
-        this.teamToAgencyRepository = teamToAgencyRepository;
-    }
+    @NonNull private final CalComEventTypeService calComEventTypeService;
+    @NonNull private final TeamToAgencyRepository teamToAgencyRepository;
+
 
     /**
      * TEMP Admin route to associate initialMeeting team to onberAgency
@@ -72,7 +74,7 @@ public class AgencyController implements AgenciesApi {
     }
 
     @Override
-    public ResponseEntity<TeamEventType> addEventTypeToAgency(Long agencyId, TeamEventType teamEventType) {
+    public ResponseEntity<CalcomEventType> addEventTypeToAgency(Long agencyId, CalcomEventType teamEventType) {
         Long teamId = teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid();
         // TODO: Get User IDs
         // TODO: save eventType
@@ -82,7 +84,27 @@ public class AgencyController implements AgenciesApi {
 
     @Override
     public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfAgency(Long agencyId) {
-        return AgenciesApi.super.getAllEventTypesOfAgency(agencyId);
+        List<CalcomEventType> eventTypes;
+        try {
+            eventTypes = calComEventTypeService.getAllEventTypes();
+            return new ResponseEntity<>(eventTypes, HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        /*
+        // TODO: Can be used once team are associated to agencies
+        if(teamToAgencyRepository.existsByAgencyId(agencyId)){
+            List<CalcomEventType> eventTypes;
+            try {
+                eventTypes = calComEventTypeService.getAllEventTypesOfTeam(teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid());
+            } catch (JsonProcessingException e) {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return new ResponseEntity<>(eventTypes, HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }*/
     }
 
     @Override

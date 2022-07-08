@@ -1,7 +1,7 @@
 package com.vi.appointmentservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.vi.appointmentservice.api.model.GetEventTypeById200Response;
+import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.generated.api.controller.EventTypesApi;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
@@ -25,7 +25,6 @@ public class EventTypeController implements EventTypesApi {
 
     CalcomUserToConsultantRepository calcomUserToConsultantRepository;
     TeamToAgencyRepository teamToAgencyRepository;
-
     CalComEventTypeService calComEventTypeService;
 
     @Autowired
@@ -40,18 +39,14 @@ public class EventTypeController implements EventTypesApi {
         return new ResponseEntity<>(calComEventTypeService.deleteEventType(eventTypeId));
     }
 
-    @Override
-    public ResponseEntity<GetEventTypeById200Response> getEventTypeById(Long eventTypeId) {
-        try{
-            return new ResponseEntity<>((MultiValueMap<String, String>) calComEventTypeService.getEventTypeById(eventTypeId), HttpStatus.OK);
-        } catch(JsonProcessingException e){
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
 
+    @Override
+    public ResponseEntity<CalcomEventType> getEventTypeById(Long eventTypeId) {
+        return EventTypesApi.super.getEventTypeById(eventTypeId);
     }
 
     @Override
-    public ResponseEntity<GetEventTypeById200Response> updateEventType(Long eventTypeId, GetEventTypeById200Response getEventTypeById200Response) {
-        return EventTypesApi.super.updateEventType(eventTypeId, getEventTypeById200Response);
+    public ResponseEntity<CalcomEventType> updateEventType(Long eventTypeId, CalcomEventType calcomEventType) {
+        return EventTypesApi.super.updateEventType(eventTypeId, calcomEventType);
     }
 }

@@ -1,30 +1,34 @@
 package com.vi.appointmentservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.CalcomEventType;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class CalComEventTypeService extends CalComService {
-    @Autowired
-    public CalComEventTypeService(RestTemplate restTemplate, @Value("${calcom.apiUrl}") String calcomApiUrl, @Value("${calcom.apiKey}") String calcomApiKey) {
+
+    public CalComEventTypeService(@NonNull RestTemplate restTemplate, @Value("${calcom.apiUrl}") String calcomApiUrl, @Value("${calcom.apiKey}") String calcomApiKey, @NonNull ObjectMapper objectMapper) {
         super(restTemplate, calcomApiUrl, calcomApiKey);
     }
 
-    public String generateSlug(String name){
+    public String generateSlug(String name) {
         name = name.toLowerCase();
         String regex = "[^\\w]+"; // Relace everyting but word characters (digits, numbers)
         String subst = "-";
@@ -34,34 +38,58 @@ public class CalComEventTypeService extends CalComService {
     }
 
     public List<CalcomEventType> getAllEventTypes() throws JsonProcessingException {
-        String response = this.restTemplate.getForObject(String.format(this.buildUri("/v1/event-types"), calcomApiUrl, calcomApiKey), String.class);
+        String response = this.restTemplate.getForObject(this.buildUri("/v1/event-types"), String.class);
         JSONObject jsonObject = new JSONObject(response);
-        response = jsonObject.getJSONArray("teams").toString();
+        response = jsonObject.getJSONArray("event_types").toString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<CalcomEventType> result = mapper.readValue(response, new TypeReference<List<CalcomEventType>>(){});
+        log.debug("result list: {}", result);
+        return result;
+    }
+
+    public List<CalcomEventType> getAllEventTypesOfTeam(Long teamId) throws JsonProcessingException {
+        String response = this.restTemplate.getForObject(this.buildUri("/v1/event-types"), String.class);
+        JSONObject jsonObject = new JSONObject(response);
+        response = jsonObject.getJSONArray("event_types").toString();
         ObjectMapper mapper = new ObjectMapper();
         CalcomEventType[] result = mapper.readValue(response, CalcomEventType[].class);
-        return List.of(Objects.requireNonNull(result));
+        return new ArrayList<>(List.of(result)).stream()
+                .filter(eventType -> eventType.getTeamId() != null && eventType.getTeamId() == teamId.intValue())
+                .collect(Collectors.toList());
+    }
+
+    public List<CalcomEventType> getAllEventTypesOfUser(Long userId) throws JsonProcessingException {
+        String response = this.restTemplate.getForObject(this.buildUri("/v1/event-types"), String.class);
+        JSONObject jsonObject = new JSONObject(response);
+        response = jsonObject.getJSONArray("event_types").toString();
+        ObjectMapper mapper = new ObjectMapper();
+        CalcomEventType[] result = mapper.readValue(response, CalcomEventType[].class);
+        return new ArrayList<>(List.of(result)).stream()
+                .filter(eventType -> eventType.getUserId() != null && eventType.getUserId() == userId.intValue())
+                .collect(Collectors.toList());
     }
 
     public CalcomEventType getEventTypeById(Long eventTypeId) throws JsonProcessingException {
-        String response = restTemplate.getForObject(String.format(this.buildUri("/v1/event-types/" + eventTypeId), calcomApiUrl, calcomApiKey), String.class);
+        String response = restTemplate.getForObject(this.buildUri("/v1/event-types/" + eventTypeId), String.class);
         JSONObject jsonObject = new JSONObject(response);
-        response = jsonObject.getJSONObject("event_type").toString();
+        response = jsonObject.getJSONObject("event_types").toString();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(response, CalcomEventType.class);
     }
 
-    public CalcomEventType createEventType(JSONObject eventType){
+    public CalcomEventType createEventType(JSONObject eventType) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
-        return restTemplate.postForEntity(this.buildUri("/v1/event-types"), request , CalcomEventType.class ).getBody();
+        return restTemplate.postForEntity(this.buildUri("/v1/event-types"), request, CalcomEventType.class).getBody();
     }
 
-    public CalcomEventType editEventType(JSONObject eventType){
+    public CalcomEventType editEventType(JSONObject eventType) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
-        return restTemplate.postForEntity(this.buildUri("/v1/event-types/"+eventType.get("id")), request , CalcomEventType.class ).getBody();
+        return restTemplate.postForEntity(this.buildUri("/v1/event-types/" + eventType.get("id")), request, CalcomEventType.class).getBody();
     }
 
     public HttpStatus deleteEventType(Long eventTypeId) {

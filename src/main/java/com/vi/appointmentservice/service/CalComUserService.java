@@ -27,7 +27,7 @@ public class CalComUserService extends CalComService {
     // Users
     public List<CalcomUser> getUsers() throws JsonProcessingException {
         // ResponseEntity<CalcomUser[]> response = restTemplate.getForEntity(String.format(this.buildUri("/users"), calcomApiUrl, calcomApiKey), CalcomUser[].class);
-        String response = this.restTemplate.getForObject(String.format(this.buildUri("/v1/users"), calcomApiUrl, calcomApiKey), String.class);
+        String response = this.restTemplate.getForObject(this.buildUri("/v1/users"), String.class);
         JSONObject jsonObject = new JSONObject(response);
         log.debug(String.valueOf(jsonObject));
         response = jsonObject.getJSONArray("users").toString();

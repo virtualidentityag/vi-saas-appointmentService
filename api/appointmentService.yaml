@@ -265,7 +265,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TeamEventType'
+              $ref: '#/components/schemas/CalcomEventType'
         required: true
       responses:
         '200':
@@ -273,7 +273,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TeamEventType'
+                $ref: '#/components/schemas/CalcomEventType'
   /agencies/{agencyId}/initialMeetingSlug:
     get:
       tags:
@@ -355,11 +355,7 @@ paths:
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/CalcomEventType'
-                  - $ref: '#/components/schemas/TeamEventType'
-                discriminator:
-                  propertyName: event_type
+                $ref: '#/components/schemas/CalcomEventType'
     put:
       tags:
         - eventType
@@ -378,11 +374,7 @@ paths:
         content:
           application/json:
             schema:
-              anyOf:
-                - $ref: '#/components/schemas/CalcomEventType'
-                - $ref: '#/components/schemas/TeamEventType'
-              discriminator:
-                propertyName: event_type
+              $ref: '#/components/schemas/CalcomEventType'
         required: true
       responses:
         '200':
@@ -390,11 +382,7 @@ paths:
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/CalcomEventType'
-                  - $ref: '#/components/schemas/TeamEventType'
-                discriminator:
-                  propertyName: event_type
+                $ref: '#/components/schemas/CalcomEventType'
     delete:
       tags:
         - eventType
@@ -505,60 +493,43 @@ components:
         id:
           type: integer
           format: int32
-          example: 1
         title:
           type: string
-          example: 30 Min Meeting
         slug:
           type: string
-          example: 30min
         length:
           type: integer
           format: int32
-          example: 30
         hidden:
           type: boolean
-          example: false
         position:
           type: integer
           format: int32
-          example: 0
         userId:
           type: integer
           format: int32
-          nullable: true
-          example: 1
         teamId:
           type: integer
           format: int32
-          nullable: true
-          example: 1
         eventName:
           type: string
-          format: nullable
         timeZone:
           type: string
-          format: nullable
         periodType:
           type: string
-          example: UNLIMITED
         periodStartDate:
           type: string
-          format: nullable
         periodEndDate:
           type: string
-          format: nullable
         periodDays:
-          type: string
-          format: nullable
+          type: integer
+          format: int32
         periodCountCalendarDays:
-          type: string
-          format: nullable
+          type: boolean
         requiresConfirmation:
           type: boolean
         recurringEvent:
           type: string
-          format: nullable
         disableGuests:
           type: boolean
         hideCalendarNotes:
@@ -566,55 +537,44 @@ components:
         minimumBookingNotice:
           type: integer
           format: int32
-          example: 120
         beforeEventBuffer:
           type: integer
           format: int32
-          example: 0
         afterEventBuffer:
           type: integer
           format: int32
-          example: 0
         schedulingType:
           type: string
-          format: nullable
         price:
           type: integer
           format: int32
-          example: 0
         currency:
           type: string
-          example: usd
         slotInterval:
           type: string
-          format: nullable
         successRedirectUrl:
           type: string
-          format: nullable
         description:
           type: string
-          format: nullable
         locations:
-          type: string
-          format: nullable
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
         metadata:
+          type: object
+        type:
           type: string
-          format: nullable
-      discriminator:
-        propertyName: event_type
+        consultantIds:
+          type: array
+          items:
+            type: string
     ArrayOfCalcomEventTypes:
       type: array
       items:
         $ref: '#/components/schemas/CalcomEventType'
-    TeamEventType:
-      allOf:
-        - $ref: '#/components/schemas/CalcomEventType'
-        - type: object
-          properties:
-            consultantIds:
-              type: array
-              items:
-                  type: string
     MeetingSlug:
       type: object
       properties:
