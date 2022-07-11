@@ -64,9 +64,8 @@ public class CalComEventTypeService extends CalComService {
         response = jsonObject.getJSONArray("event_types").toString();
         ObjectMapper mapper = new ObjectMapper();
         List<CalcomEventType> result = mapper.readValue(response, new TypeReference<List<CalcomEventType>>(){});
-        // TODO: add correct filter .filter(eventType -> eventType.getUserId() != null && eventType.getUserId() == userId.intValue())
         return new ArrayList<>(result).stream()
-                .filter(eventType -> eventType.getUserId() != null)
+                .filter(eventType -> eventType.getUserId() != null && eventType.getUserId() == userId.intValue())
                 .collect(Collectors.toList());
     }
 

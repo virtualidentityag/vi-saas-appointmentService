@@ -58,6 +58,9 @@ public class AgencyController implements AgenciesApi {
     }
 
 
+
+
+
     @Override
     public ResponseEntity<CalcomTeam> createAgency(AgencyResponseDTO agencyResponseDTO) {
         return AgenciesApi.super.createAgency(agencyResponseDTO);
@@ -125,7 +128,7 @@ public class AgencyController implements AgenciesApi {
     )
     public ResponseEntity<MeetingSlug> getInitialMeetingSlugReal(@ApiParam(value = "ID of agency",required=true) @PathVariable("agencyId") Long agencyId) {
         // TODO: add verification, sanitization and general cleanliness
-        MeetingSlug meetingLink = new MeetingSlug();
+        MeetingSlug meetingSlug = new MeetingSlug();
         Long teamId;
         try {
             teamId = teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid();
@@ -138,7 +141,7 @@ public class AgencyController implements AgenciesApi {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        meetingLink.setSlug(slug);
-        return new ResponseEntity<>(meetingLink, HttpStatus.OK);
+        meetingSlug.setSlug(slug);
+        return new ResponseEntity<>(meetingSlug, HttpStatus.OK);
     }
 }

@@ -446,7 +446,6 @@ components:
           type: string
         emailVerified:
           type: string
-          format: nullable
         bio:
           type: string
         avatar:
@@ -463,7 +462,6 @@ components:
           format: int32
         theme:
           type: string
-          format: nullable
         defaultScheduleId:
           type: integer
           format: int32
@@ -486,7 +484,37 @@ components:
           type: boolean
         invitedTo:
           type: string
+        role:
+          type: string
+        metadata:
+          type: object
+        disableImpersonation:
+          type: boolean
+        password:
+          type: string
           format: nullable
+        startTime:
+          type: integer
+          format: int32
+        hideBranding:
+          type: boolean
+        trialEndsAt:
+          type: string
+          format: nullable
+        completedOnboarding:
+          type: boolean
+        twoFactorSecret:
+          type: string
+          format: nullable
+        twoFactorEnabled:
+          type: boolean
+        identityProvider:
+          type: string
+        identityProviderId:
+          type: string
+          format: nullable
+        plan:
+          type: string
     CalcomEventType:
       type: object
       properties:
