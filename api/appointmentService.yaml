@@ -395,7 +395,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CalcomEventType'
-              required: true
+        required: true
       responses:
         '200':
           description: successful operation

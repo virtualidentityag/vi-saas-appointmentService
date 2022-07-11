@@ -40,6 +40,8 @@ public class ConsultantController implements ConsultantsApi {
     private final @NonNull CalComUserService calComUserService;
     private final @NonNull CalComTeamService calComTeamService;
     private final @NonNull CalComEventTypeService calComEventTypeService;
+
+    private final @NonNull CalComBookingService calComBookingService;
     private final @NonNull UserService userService;
     private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
     private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
