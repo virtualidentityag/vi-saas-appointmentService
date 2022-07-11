@@ -1,7 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="appointmentService" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="ACTIVE_PROFILES" value="local" />
-    <module name="appointmentservice" />
+    <envs>
+      <env name="calcom_apikey" value="cal_32b0eb8376bcbe49a44a68c8a7ade2cb" />
+    </envs>
+    <module name="onlineBeratung-appointmentService" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.vi.appointmentservice.AppointmentServiceApplication" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />

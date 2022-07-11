@@ -5,6 +5,7 @@ import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
+import com.vi.appointmentservice.service.CalComBookingService;
 import com.vi.appointmentservice.service.CalComTeamService;
 import com.vi.appointmentservice.service.CalComUserService;
 import io.swagger.annotations.Api;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for consultant API operations.
@@ -30,6 +32,7 @@ import java.util.List;
 public class ConsultantController implements ConsultantsApi {
 
     CalComUserService calComUserService;
+    CalComBookingService calComBookingService;
     CalComTeamService calComTeamService;
 
     CalcomUserToConsultantRepository calcomUserToConsultantRepository;
@@ -37,8 +40,15 @@ public class ConsultantController implements ConsultantsApi {
 
 
     @Autowired
-    public ConsultantController(CalComUserService calComUserService, CalComTeamService calComTeamService, CalcomUserToConsultantRepository calcomUserToConsultantRepository, TeamToAgencyRepository teamToAgencyRepository) {
+    public ConsultantController(
+            CalComUserService calComUserService,
+            CalComBookingService calComBookingService,
+            CalComTeamService calComTeamService,
+            CalcomUserToConsultantRepository calcomUserToConsultantRepository,
+            TeamToAgencyRepository teamToAgencyRepository)
+    {
         this.calComUserService = calComUserService;
+        this.calComBookingService = calComBookingService;
         this.calComTeamService = calComTeamService;
         this.calcomUserToConsultantRepository = calcomUserToConsultantRepository;
         this.teamToAgencyRepository = teamToAgencyRepository;
@@ -117,7 +127,18 @@ public class ConsultantController implements ConsultantsApi {
 
     @Override
     public ResponseEntity<List<CalcomBooking>> getAllBookingsOfConsultant(String userId) {
-        return ConsultantsApi.super.getAllBookingsOfConsultant(userId);
+        try {
+            Integer calcomUserId = Math.toIntExact(calcomUserToConsultantRepository.findByConsultantId(userId).getCalComUserId());
+
+            List<CalcomBooking> bookings = calComBookingService.getBookings().stream()
+                    .filter(o -> o.getUserId().equals(calcomUserId))
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(bookings, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
