@@ -1,10 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="appointmentService" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="appointmentService clean compile" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="ACTIVE_PROFILES" value="local" />
-    <envs>
-      <env name="calcom_apikey" value="cal_32b0eb8376bcbe49a44a68c8a7ade2cb" />
-    </envs>
-    <module name="onlineBeratung-appointmentService" />
+    <option name="ENABLE_JMX_AGENT" value="false" />
+    <module name="appointmentservice" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.vi.appointmentservice.AppointmentServiceApplication" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />

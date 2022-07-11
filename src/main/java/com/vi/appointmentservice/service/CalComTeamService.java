@@ -40,7 +40,7 @@ public class CalComTeamService extends CalComService{
     }
 
     public List<CalcomTeam> getAllTeams() throws JsonProcessingException {
-        String response = this.restTemplate.getForObject(String.format(this.buildUri("/v1/teams"), calcomApiUrl, calcomApiKey), String.class);
+        String response = this.restTemplate.getForObject(this.buildUri("/v1/teams"), String.class);
         JSONObject jsonObject = new JSONObject(response);
         response = jsonObject.getJSONArray("teams").toString();
         ObjectMapper mapper = new ObjectMapper();
@@ -49,7 +49,7 @@ public class CalComTeamService extends CalComService{
     }
 
     public CalcomTeam getTeamById(Long teamId) throws JsonProcessingException {
-        String response = restTemplate.getForObject(String.format(this.buildUri("/v1/teams/" + teamId), calcomApiUrl, calcomApiKey), String.class);
+        String response = restTemplate.getForObject(this.buildUri("/v1/teams/" + teamId), String.class);
         JSONObject jsonObject = new JSONObject(response);
         response = jsonObject.getJSONObject("team").toString();
         ObjectMapper mapper = new ObjectMapper();
@@ -100,7 +100,7 @@ public class CalComTeamService extends CalComService{
         membership.put("accepted", true);
         membership.put("userId", "MEMBER");
         HttpEntity<String> request = new HttpEntity<>(membership.toString(), headers);
-        return restTemplate.postForEntity(this.buildUri("/v1/teams"), request , CalcomMembership.class ).getBody();
+        return restTemplate.postForEntity(this.buildUri("/v1/memberships"), request , CalcomMembership.class ).getBody();
     }
 
 
