@@ -431,7 +431,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CalcomWebhook'
-              required: true
+        required: true
       responses:
         '200':
           description: successful operation
