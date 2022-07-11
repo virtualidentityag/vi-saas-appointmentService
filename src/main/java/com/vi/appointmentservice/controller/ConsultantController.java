@@ -12,18 +12,16 @@ import com.vi.appointmentservice.service.CalComEventTypeService;
 import com.vi.appointmentservice.service.CalComTeamService;
 import com.vi.appointmentservice.service.CalComUserService;
 import com.vi.appointmentservice.service.UserService;
-import com.vi.appointmentservice.api.model.ConsultantDTO;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.keycloak.authorization.client.util.Http;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,26 +42,6 @@ public class ConsultantController implements ConsultantsApi {
     private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
     private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
 
-
-    @PostMapping(
-            value = "/consultant/{consultantId}/associateUser",
-            produces = {"application/json"},
-            consumes = {"application/json"}
-    )
-    ResponseEntity<CalcomUserToConsultant> associateConsultant(@ApiParam(value = "ID of onber user", required = true) @PathVariable("consultantId") String consultantId, @RequestBody String requestBodyString) {
-        try {
-            JSONObject requestBody = new JSONObject(requestBodyString);
-            if (consultantId != null && !consultantId.isEmpty() && !requestBody.isNull("calcomUserId")) {
-                CalcomUserToConsultant userAssociation = new CalcomUserToConsultant(consultantId, requestBody.getLong("calcomUserId"));
-                return new ResponseEntity<>(calcomUserToConsultantRepository.save(userAssociation), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     @GetMapping(
             value = "/consultants",
             produces = {"application/json"}
@@ -77,34 +55,57 @@ public class ConsultantController implements ConsultantsApi {
             value = "/updateConsultants",
             produces = {"application/json"}
     )
-    ResponseEntity<String> updateConsultants() {
+    ResponseEntity<String> updateConsultants() throws JsonProcessingException {
+        log.info("updateConsultants");
         ObjectMapper objectMapper = new ObjectMapper();
         JSONArray consultantsArray = this.userService.getAllConsultants();
-        List<CalcomUser> consultantsList = new ArrayList<>();
-        try {
-            for (int i = 0; i < consultantsArray.length(); i++) {
-                ConsultantDTO consultant = objectMapper.readValue(consultantsArray.getJSONObject(i).toString(), ConsultantDTO.class);
-                // TODO: Check calcom for email match
-                if (calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())) {
-                    // Found user association
-                    Long calComUserId = calcomUserToConsultantRepository.findByConsultantId(consultant.getId()).getCalComUserId();
-                    // Check if user really exists
-                    CalcomUser foundUser = calComUserService.getUserById(calComUserId);
-                    if (foundUser == null) {
-                        // User missing, create
-                        consultantsList.add(this.createCalcomUser(consultant));
+        JSONObject response = new JSONObject();
+        List<CalcomUser> createdList = new ArrayList<>();
+        List<CalcomUser> updatedList = new ArrayList<>();
+        List<ConsultantDTO> skippedList = new ArrayList<>();
+        CalcomUser createdUser;
+        for (int i = 0; i < consultantsArray.length(); i++) {
+            createdUser = null;
+            ConsultantDTO consultant = objectMapper.readValue(consultantsArray.getJSONObject(i).toString(), ConsultantDTO.class);
+            // TODO: Check calcom for email match
+            if (calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())) {
+                // Found user association
+                Long calComUserId = calcomUserToConsultantRepository.findByConsultantId(consultant.getId()).getCalComUserId();
+                // Check if user really exists
+                CalcomUser foundUser = calComUserService.getUserById(calComUserId);
+                if (foundUser == null) {
+                    // User missing, create
+                    createdUser = this.createCalcomUser(consultant);
+                    if (createdUser != null) {
+                        createdList.add(createdUser);
                     } else {
-                        // User exists, update
-                        consultantsList.add(this.updateCalcomUser(consultant));
+                        skippedList.add(consultant);
                     }
                 } else {
-                    consultantsList.add(this.createCalcomUser(consultant));
+                    // User exists, update
+                    // TODO: User PATCH API of calcom currently buggy and only updates the user that created the API Key
+                    // createdUser = this.updateCalcomUser(consultant);
+                    if (createdUser != null) {
+                        updatedList.add(createdUser);
+                    } else {
+                        skippedList.add(consultant);
+                    }
+                }
+            } else {
+                // TODO: email already exists in calcom?
+                createdUser = this.createCalcomUser(consultant);
+                if (createdUser != null) {
+                    createdList.add(createdUser);
+                } else {
+                    skippedList.add(consultant);
                 }
             }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(new JSONObject(consultantsList).toString(), HttpStatus.OK);
+        response.put("created", new JSONArray(createdList));
+        response.put("updated", new JSONArray(updatedList));
+        response.put("skipped", new JSONArray(skippedList));
+        log.info("Consultant Sync: {}", response);
+        return new ResponseEntity<>(response.toString(), HttpStatus.OK);
     }
 
     @Override
@@ -139,23 +140,27 @@ public class ConsultantController implements ConsultantsApi {
             JSONObject createJson = new JSONObject(objectMapper.writeValueAsString(creationUser));
             CalcomUser createdUser = calComUserService.createUser(createJson);
             // Create association
-            if(createdUser != null){
+            if (createdUser != null) {
                 calcomUserToConsultantRepository.save(new CalcomUserToConsultant(consultant.getId(), createdUser.getId()));
                 // Add user to team of teams of agencies
                 List<AgencyAdminResponseDTO> agencies = consultant.getAgencies();
                 for (AgencyAdminResponseDTO agency : agencies) {
-                    if (teamToAgencyRepository.existsByAgencyId(agency.getId())) {
-                        if (teamToAgencyRepository.existsByAgencyId(agency.getId())) {
-                            Long teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get(0).getTeamid();
-                        }else{
-                            // TODO: Create team for agency
-                        }
-                        // TODO: Check if membership already exists (calcom route currently limited to memerships of api key creator)
-                        // TODO: calComTeamService.addUserToTeam(updatedUser.getId(), teamId);
+                    Long teamId;
+                    if (!teamToAgencyRepository.existsByAgencyId(agency.getId())) {
+                        // TODO: Create team for agency
+                        // teamId = newlyCreatedTeam.getId();
+                        // TODO: Create eventType for agency
+                    } else {
+                        teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get(0).getTeamid();
                     }
+                    // TODO: Associate user to team+
+                    // TODO: Check event-type
+                    // TODO: Associate user to event-type?
+                    // TODO: Check if membership already exists (calcom route currently limited to memerships of api key creator)
+                    // TODO: calComTeamService.addUserToTeam(updatedUser.getId(), teamId);
                 }
                 return createdUser;
-            }else{
+            } else {
                 return null;
             }
         }
@@ -183,20 +188,32 @@ public class ConsultantController implements ConsultantsApi {
             JSONObject updateJson = new JSONObject(objectMapper.writeValueAsString(updateUser));
             CalcomUser updatedUser = calComUserService.updateUser(updateJson);
             // Add user to team of teams of agencies
-            List<AgencyAdminResponseDTO> agencies = consultant.getAgencies();
-            for (AgencyAdminResponseDTO agency : agencies) {
-                if (teamToAgencyRepository.existsByAgencyId(agency.getId())) {
-                    Long teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get(0).getTeamid();
-                }else{
-                    // TODO: Create team for agency
+            if (updatedUser != null) {
+                List<AgencyAdminResponseDTO> agencies = consultant.getAgencies();
+                for (AgencyAdminResponseDTO agency : agencies) {
+                    Long teamId;
+                    if (!teamToAgencyRepository.existsByAgencyId(agency.getId())) {
+                        // TODO: Create team for agency
+                        // teamId = newlyCreatedTeam.getId();
+                        // TODO: Create eventType for agency
+                    } else {
+                        teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get(0).getTeamid();
+                    }
+                    // TODO: Associate user to team+
+                    // TODO: Check event-type
+                    // TODO: Associate user to event-type?
+                    // TODO: Check if membership already exists (calcom route currently limited to memerships of api key creator)
+                    // TODO: calComTeamService.addUserToTeam(updatedUser.getId(), teamId);
                 }
-                // TODO: Check if membership already exists (calcom route currently limited to memerships of api key creator)
-                // TODO: calComTeamService.addUserToTeam(updatedUser.getId(), teamId);
+                return updatedUser;
+            } else {
+                return null;
+
             }
-            return updatedUser;
         } else {
             // Doesnt exists, create the user
             return this.createCalcomUser(consultant);
+
         }
     }
 
@@ -228,26 +245,32 @@ public class ConsultantController implements ConsultantsApi {
 
     @Override
     public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfConsultant(String userId) {
-        // TODO: remove "true" once users are associated
-        if(true || calcomUserToConsultantRepository.existsByConsultantId(userId)){
+        if (calcomUserToConsultantRepository.existsByConsultantId(userId)) {
             List<CalcomEventType> eventTypes;
             try {
-                // eventTypes = calComEventTypeService.getAllEventTypesOfUser(calcomUserToConsultantRepository.findByConsultantId(userId || 0);
-                eventTypes = calComEventTypeService.getAllEventTypesOfUser(0L);
+                eventTypes = calComEventTypeService.getAllEventTypesOfUser(calcomUserToConsultantRepository.findByConsultantId(userId).getCalComUserId());
             } catch (JsonProcessingException e) {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
             return new ResponseEntity<>(eventTypes, HttpStatus.OK);
-        }else{
+        } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @Override
     public ResponseEntity<MeetingSlug> getConsultantMeetingSlug(String userId) {
-        MeetingSlug meetingSlug = new MeetingSlug();
-        meetingSlug.setSlug("andre-soares");
-        return new ResponseEntity<>(meetingSlug, HttpStatus.OK);
+        if (calcomUserToConsultantRepository.existsByConsultantId(userId)) {
+            MeetingSlug meetingSlug = new MeetingSlug();
+            try {
+                meetingSlug.setSlug(calComUserService.getUserById(calcomUserToConsultantRepository.findByConsultantId(userId).getCalComUserId()).getUsername());
+            } catch (JsonProcessingException e) {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return new ResponseEntity<>(meetingSlug, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
 }
