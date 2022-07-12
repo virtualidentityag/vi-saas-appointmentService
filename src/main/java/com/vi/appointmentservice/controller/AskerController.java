@@ -6,17 +6,13 @@ import com.vi.appointmentservice.api.model.CalcomWebhookPayload;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.generated.api.controller.AskersApi;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
-import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.service.CalComBookingService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -77,7 +73,7 @@ public class AskerController implements AskersApi {
     }
 
     @Override
-    public ResponseEntity<Void> processBooking(CalcomWebhook calcomWebhook) {
+    public ResponseEntity<String> processBooking(CalcomWebhook calcomWebhook) {
         try {
             CalcomWebhookPayload payload = calcomWebhook.getPayload();
 
@@ -88,7 +84,7 @@ public class AskerController implements AskersApi {
                 CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(bookingId, askerId);
                 calcomBookingToAskerRepository.save(userAssociation);
 
-                return new ResponseEntity<>(HttpStatus.OK);
+                return new ResponseEntity<>(String.valueOf(bookingId), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }

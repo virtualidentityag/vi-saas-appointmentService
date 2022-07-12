@@ -435,6 +435,10 @@ paths:
       responses:
         '200':
           description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
     CalcomBooking:
@@ -767,3 +771,4 @@ components:
               properties:
                 user:
                   type: string
+
