@@ -335,6 +335,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
+  /askers/bookings/{bookingId}:
+    get:
+      tags:
+        - asker
+      summary: Get booking details
+      operationId: getBookingDetails
+      parameters:
+        - name: bookingId
+          in: path
+          description: ID of calcom booking id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomBooking'
   /eventTypes/{eventTypeId}:
     get:
       tags:
@@ -399,6 +419,26 @@ paths:
       responses:
         '200':
           description: successful operation
+  /askers/processBooking:
+    post:
+      tags:
+        - asker
+      summary: Webhook subscriber
+      operationId: processBooking
+      requestBody:
+        description: The json string provided by calcom
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalcomWebhook'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
     CalcomBooking:
@@ -642,3 +682,93 @@ components:
           type: boolean
         role:
           type: string
+    CalcomWebhook:
+      type: object
+      properties:
+        triggerEvent:
+          type: string
+        createdAt:
+          type: string
+        payload:
+          type: object
+          properties:
+            type:
+              type: string
+            title:
+              type: string
+            description:
+              type: string
+            additionalNotes:
+              type: string
+            startTime:
+              type: string
+              format: date-time
+            endTime:
+              type: string
+              format: date-time
+            organizer:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                timeZone:
+                  type: string
+                language:
+                  type: object
+                  properties:
+                    locale:
+                      type: string
+            attendees:
+              type: array
+              items:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  name:
+                    type: string
+                  timeZone:
+                    type: string
+                  language:
+                    type: object
+                    properties:
+                      locale:
+                        type: string
+            location:
+              type: string
+            destinationCalendar:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int32
+                integration:
+                  type: string
+                externalId:
+                  type: string
+                userId:
+                  type: integer
+                  format: int32
+                bookingId:
+                  type: integer
+                  format: int32
+                eventTypeId:
+                  type: string
+                  format: nullable
+            hideCalendarNotes:
+              type: boolean
+            requiresConfirmation:
+              type: boolean
+            uid:
+              type: string
+            bookingId:
+              type: integer
+              format: int32
+            metadata:
+              type: object
+              properties:
+                user:
+                  type: string
+
