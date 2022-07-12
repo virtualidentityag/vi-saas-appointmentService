@@ -8,6 +8,7 @@ import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
+import com.vi.appointmentservice.service.CalComBookingService;
 import com.vi.appointmentservice.service.CalComEventTypeService;
 import com.vi.appointmentservice.service.CalComTeamService;
 import com.vi.appointmentservice.service.CalComUserService;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for consultant API operations.
@@ -38,6 +40,7 @@ public class ConsultantController implements ConsultantsApi {
     private final @NonNull CalComUserService calComUserService;
     private final @NonNull CalComTeamService calComTeamService;
     private final @NonNull CalComEventTypeService calComEventTypeService;
+    private final @NonNull CalComBookingService calComBookingService;
     private final @NonNull UserService userService;
     private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
     private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
@@ -240,7 +243,18 @@ public class ConsultantController implements ConsultantsApi {
 
     @Override
     public ResponseEntity<List<CalcomBooking>> getAllBookingsOfConsultant(String userId) {
-        return ConsultantsApi.super.getAllBookingsOfConsultant(userId);
+        try {
+            Integer calcomUserId = Math.toIntExact(calcomUserToConsultantRepository.findByConsultantId(userId).getCalComUserId());
+
+            List<CalcomBooking> bookings = calComBookingService.getBookings().stream()
+                    .filter(o -> o.getUserId().equals(calcomUserId))
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(bookings, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
