@@ -81,10 +81,9 @@ public class AskerController implements AskersApi {
           calcomBookingToAskerRepository.save(userAssociation);
         } else if(calcomWebhook.getTriggerEvent().equals("BOOKING_RESCHEDULED")){
           String askerId = payload.getMetadata().getUser();
-          CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(bookingId, askerId);
+          CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(Long.valueOf(payload.getBookingId()), askerId);
           calcomBookingToAskerRepository.save(userAssociation);
-          bookingId = payload.getMetadata().getBookingId();
-          calcomBookingToAskerRepository.deleteByCalcomBookingId(bookingId);
+          calcomBookingToAskerRepository.deleteByCalcomBookingId(payload.getMetadata().getBookingId());
         } else {
           //TODO: change this. we need to get booking id based on uuid or save it also in the relational
           // entity
