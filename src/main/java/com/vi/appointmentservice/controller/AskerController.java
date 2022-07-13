@@ -76,16 +76,15 @@ public class AskerController implements AskersApi {
             CalcomWebhookPayload payload = calcomWebhook.getPayload();
 
             if (payload != null) {
-                String askerId = payload.getMetadata().getUser();
                 Long bookingId = Long.valueOf(payload.getBookingId());
-
-                CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(bookingId, askerId);
-
                 if (calcomWebhook.getTriggerEvent().equals("BOOKING_CREATED")) {
+                    String askerId = payload.getMetadata().getUser();
+                    CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(bookingId, askerId);
+
                     calcomBookingToAskerRepository.save(userAssociation);
 
                 } else {
-                    calcomBookingToAskerRepository.delete(userAssociation);
+                    calcomBookingToAskerRepository.deleteByCalcomBookingId(bookingId);
                 }
 
                 return new ResponseEntity<>(String.valueOf(bookingId), HttpStatus.OK);

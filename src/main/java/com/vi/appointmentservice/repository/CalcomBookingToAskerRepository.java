@@ -8,4 +8,5 @@ import java.util.List;
 public interface CalcomBookingToAskerRepository extends JpaRepository<CalcomBookingToAsker, String> {
 
     List<CalcomBookingToAsker> findByAskerId(String askerId);
+    void deleteByCalcomBookingId(Long calcomBookingId);
 }
