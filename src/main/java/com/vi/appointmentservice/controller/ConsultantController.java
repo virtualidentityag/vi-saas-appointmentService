@@ -3,13 +3,31 @@ package com.vi.appointmentservice.controller;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vi.appointmentservice.api.model.*;
+import com.vi.appointmentservice.api.model.AgencyAdminResponseDTO;
+import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.CalcomEventTypeLocationsInner;
+import com.vi.appointmentservice.api.model.CalcomUser;
+import com.vi.appointmentservice.api.model.ConsultantDTO;
+import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
-import com.vi.appointmentservice.service.*;
+import com.vi.appointmentservice.service.CalComAvailabilityService;
+import com.vi.appointmentservice.service.CalComBookingService;
+import com.vi.appointmentservice.service.CalComEventTypeService;
+import com.vi.appointmentservice.service.CalComMembershipService;
+import com.vi.appointmentservice.service.CalComScheduleService;
+import com.vi.appointmentservice.service.CalComTeamService;
+import com.vi.appointmentservice.service.CalComUserService;
+import com.vi.appointmentservice.service.UserService;
 import io.swagger.annotations.Api;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +37,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Controller for consultant API operations.
@@ -38,6 +50,9 @@ public class ConsultantController implements ConsultantsApi {
     private final @NonNull CalComUserService calComUserService;
     private final @NonNull CalComTeamService calComTeamService;
     private final @NonNull CalComEventTypeService calComEventTypeService;
+    private final @NonNull CalComScheduleService calComScheduleService;
+    private final @NonNull CalComAvailabilityService calComAvailabilityService;
+    private final @NonNull CalComMembershipService calComMembershipService;
     private final @NonNull CalComBookingService calComBookingService;
     private final @NonNull UserService userService;
     private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
@@ -73,6 +88,7 @@ public class ConsultantController implements ConsultantsApi {
 
     private CalcomUser createOrUpdateCalcomUserHandler(ConsultantDTO consultant) throws JsonProcessingException {
         CalcomUser createdUser = null;
+        log.info("Creating or updating consultant: {}", consultant);
         if (calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())) {
             // Found user association
             Long calComUserId = calcomUserToConsultantRepository.findByConsultantId(consultant.getId()).getCalComUserId();
@@ -242,29 +258,41 @@ public class ConsultantController implements ConsultantsApi {
 
     @Override
     public ResponseEntity<Void> deleteConsultant(String consultantId) {
-        // return new ResponseEntity<>(this.delteConsultantHandler(consultantId));
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+      return new ResponseEntity<>(this.delteConsultantHandler(consultantId));
     }
 
-    private HttpStatus delteConsultantHandler(String consultantId){
-        if(calcomUserToConsultantRepository.existsByConsultantId(consultantId)) {
-            // Find associated user
-            Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId).getCalComUserId();
-            // TODO: DELETE TEAM AND EVENT TYPE MEMBERSHIPS
-            // TODO: DELETE PERSONAL EVENT-TYPES
-            // TODO: DELETE SCHEDULES
-            // TODO: DELETE AVAILABILITIES
-            // TODO: CANCEL BOOKINGS
-            // Delete user
-            HttpStatus deleteResponseCode = calComUserService.deleteUser(calcomUserId);
-            // Remove association
-            if (deleteResponseCode == HttpStatus.OK) {
-                calcomUserToConsultantRepository.deleteByConsultantId(consultantId);
-            }
-            // TODO: ANYTHING ELSE?
-            return deleteResponseCode;
+    private HttpStatus delteConsultantHandler(String consultantId) {
+      try {
+        if (calcomUserToConsultantRepository.existsByConsultantId(consultantId)) {
+          // Find associated user
+          Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(
+              consultantId).getCalComUserId();
+          // Delete team memberships
+          calComMembershipService.deleteAllMembershipsOfUser(calcomUserId);
+          // TODO: DELETE TEAM EVENT TYPE MEMBERSHIPS HOW?
+          // Delete personal event-types
+          calComEventTypeService.deleteAllEventTypesOfUser(calcomUserId);
+          // Delete schedules
+          List<Integer> deletedSchedules = calComScheduleService.deleteAllSchedulesOfUser(
+              calcomUserId);
+          // Delete availabilities for schedules
+          for (Integer scheduleId : deletedSchedules) {
+            calComAvailabilityService.deleteAvailability(scheduleId);
+          }
+          // TODO: CANCEL BOOKINGS
+          // Delete user
+          HttpStatus deleteResponseCode = calComUserService.deleteUser(calcomUserId);
+          // Remove association
+          if (deleteResponseCode == HttpStatus.OK) {
+            calcomUserToConsultantRepository.deleteByConsultantId(consultantId);
+          }
+          // TODO: ANYTHING ELSE?
+          return deleteResponseCode;
         }
-        return null;
+      } catch (Exception e) {
+        return HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+      return HttpStatus.OK;
     }
 
     @Override
