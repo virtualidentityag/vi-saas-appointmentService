@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -67,13 +68,14 @@ public class AskerController implements AskersApi {
   }
 
   @Override
+  @Transactional
   public ResponseEntity<String> processBooking(CalcomWebhook calcomWebhook) {
     try {
       CalcomWebhookPayload payload = calcomWebhook.getPayload();
       Long bookingId = null;
       if (payload != null) {
-        bookingId = Long.valueOf(payload.getBookingId());
         if (calcomWebhook.getTriggerEvent().equals("BOOKING_CREATED")) {
+          bookingId = Long.valueOf(payload.getBookingId());
           String askerId = payload.getMetadata().getUser();
           CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(bookingId, askerId);
 
