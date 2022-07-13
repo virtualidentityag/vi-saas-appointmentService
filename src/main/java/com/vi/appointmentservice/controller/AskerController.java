@@ -5,10 +5,13 @@ import com.vi.appointmentservice.api.model.CalcomWebhook;
 import com.vi.appointmentservice.api.model.CalcomWebhookPayload;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.generated.api.controller.AskersApi;
+import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.service.CalComBookingService;
 import io.swagger.annotations.Api;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,22 +26,12 @@ import java.util.List;
 @RestController
 @Api(tags = "asker")
 @Slf4j
+@RequiredArgsConstructor
 public class AskerController implements AskersApi {
 
-    CalComBookingService calComBookingService;
-
-
-
-    CalcomBookingToAskerRepository calcomBookingToAskerRepository;
-
-    @Autowired
-    public AskerController(
-            CalComBookingService calComBookingService,
-            CalcomBookingToAskerRepository calcomBookingToAskerRepository)
-    {
-        this.calComBookingService = calComBookingService;
-        this.calcomBookingToAskerRepository = calcomBookingToAskerRepository;
-    }
+    private final @NonNull CalComBookingService calComBookingService;
+    private final @NonNull RescheduleHelper rescheduleHelper;
+    private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
 
 
     @Override
@@ -49,6 +42,9 @@ public class AskerController implements AskersApi {
 
             for (CalcomBookingToAsker bookingId : bookingIds) {
                 bookings.add(calComBookingService.getBookingById(bookingId.getCalcomBookingId()));
+            }
+            for(CalcomBooking booking : bookings){
+                rescheduleHelper.attachRescheduleLink(booking);
             }
 
             return new ResponseEntity<>(bookings, HttpStatus.OK);
@@ -62,7 +58,7 @@ public class AskerController implements AskersApi {
     public ResponseEntity<CalcomBooking> getBookingDetails(String bookingId) {
         try {
             CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
-            return new ResponseEntity<>(booking, HttpStatus.OK);
+            return new ResponseEntity<>(rescheduleHelper.attachRescheduleLink(booking), HttpStatus.OK);
         }
         catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
