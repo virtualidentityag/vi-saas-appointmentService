@@ -468,6 +468,9 @@ components:
         endTime:
           type: string
           example: 2022-06-16T00:00:00.000
+        rescheduleLink:
+          type: string
+          example: /consultant-slug/event-typ-slug?rescheduleUid=myUId
     ArrayOfCalcomBookings:
       type: array
       items:
