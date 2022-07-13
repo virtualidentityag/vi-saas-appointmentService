@@ -27,6 +27,8 @@ public class AskerController implements AskersApi {
 
     CalComBookingService calComBookingService;
 
+
+
     CalcomBookingToAskerRepository calcomBookingToAskerRepository;
 
     @Autowired
@@ -82,7 +84,13 @@ public class AskerController implements AskersApi {
                 Long bookingId = Long.valueOf(payload.getBookingId());
 
                 CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(bookingId, askerId);
-                calcomBookingToAskerRepository.save(userAssociation);
+
+                if (calcomWebhook.getTriggerEvent().equals("BOOKING_CREATED")) {
+                    calcomBookingToAskerRepository.save(userAssociation);
+
+                } else {
+                    calcomBookingToAskerRepository.delete(userAssociation);
+                }
 
                 return new ResponseEntity<>(String.valueOf(bookingId), HttpStatus.OK);
             } else {
