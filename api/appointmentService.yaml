@@ -774,4 +774,6 @@ components:
               properties:
                 user:
                   type: string
+                bookingId:
+                  type: long
 
