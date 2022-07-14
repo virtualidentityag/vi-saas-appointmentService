@@ -244,9 +244,13 @@ public class ConsultantController implements ConsultantsApi {
     @Override
     public ResponseEntity<List<CalcomBooking>> getAllBookingsOfConsultant(String userId) {
         try {
-            Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(userId).getCalComUserId();
-            List<CalcomBooking> bookings = calComBookingService.getAllBookingsForConsultant(calcomUserId);
-            return new ResponseEntity<>(bookings, HttpStatus.OK);
+            if(calcomUserToConsultantRepository.existsByConsultantId(userId)){
+                Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(userId).getCalComUserId();
+                List<CalcomBooking> bookings = calComBookingService.getAllBookingsForConsultant(calcomUserId);
+                return new ResponseEntity<>(bookings, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
         } catch (Exception e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
