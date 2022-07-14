@@ -10,13 +10,13 @@ import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.service.CalComBookingService;
 import com.vi.appointmentservice.service.CalComEventTypeService;
-import com.vi.appointmentservice.service.CalComTeamService;
 import com.vi.appointmentservice.service.CalComUserService;
 import com.vi.appointmentservice.service.UserService;
 import io.swagger.annotations.Api;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Controller for consultant API operations.
@@ -38,7 +37,6 @@ import java.util.stream.Collectors;
 public class ConsultantController implements ConsultantsApi {
 
     private final @NonNull CalComUserService calComUserService;
-    private final @NonNull CalComTeamService calComTeamService;
     private final @NonNull CalComEventTypeService calComEventTypeService;
     private final @NonNull CalComBookingService calComBookingService;
     private final @NonNull UserService userService;
@@ -252,7 +250,7 @@ public class ConsultantController implements ConsultantsApi {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(ExceptionUtils.getStackTrace(e));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
