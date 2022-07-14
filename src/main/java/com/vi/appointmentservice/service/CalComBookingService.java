@@ -39,7 +39,7 @@ public class CalComBookingService extends CalComService {
         response = jsonObject.getJSONArray("bookings").toString();
         ObjectMapper mapper = new ObjectMapper();
         List<CalcomBooking> result = List.of(Objects.requireNonNull(mapper.readValue(response, CalcomBooking[].class)));
-        log.info("All bookings: {}", result);
+        log.info("Found total of {} bookings", result.size());
         return result;
     }
 
@@ -47,7 +47,7 @@ public class CalComBookingService extends CalComService {
         List<CalcomBooking> allBookings = this.getAllBookings();
         List<CalcomBooking> filteredBookings = allBookings.stream()
             .filter(booking ->  Integer.valueOf(userId.intValue()).equals(booking.getUserId())).collect(Collectors.toList());
-        log.info("Found bookings: {}", filteredBookings);
+        log.info("Found {} bookings for user {}", filteredBookings.size(), userId);
         for(CalcomBooking booking : filteredBookings){
             rescheduleHelper.attachRescheduleLink(booking);
         }
