@@ -12,6 +12,7 @@ import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.service.securityheader.SecurityHeaderSupplier;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -65,10 +66,10 @@ public class MessagesService {
     messageContent.put("counselor", "dummy counselor");
     messageContent.put("user", "dummy user");
     messageContent.put("title", booking.getTitle());
-    messageContent.put("startTime", booking.getStartTime());
-    messageContent.put("endTime", booking.getEndTime());
+//    messageContent.put("startTime", booking.getStartTime());
+//    messageContent.put("endTime", booking.getEndTime());
     message.setMessageType(MessageType.APPOINTMENT_RESCHEDULED);
-    messageContent.put("date", booking.getEndTime());
+    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).plusHours(2));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
     message.setContent(messageContent.toString());
@@ -81,10 +82,10 @@ public class MessagesService {
     messageContent.put("counselor", "dummy counselor");
     messageContent.put("user", "dummy user");
     messageContent.put("title", booking.getTitle());
-    messageContent.put("startTime", booking.getStartTime());
-    messageContent.put("endTime", booking.getEndTime());
+//    messageContent.put("startTime", booking.getStartTime());
+//    messageContent.put("endTime", booking.getEndTime());
     message.setMessageType(MessageType.APPOINTMENT_SET);
-    messageContent.put("date", booking.getEndTime());
+    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).plusHours(2));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
     message.setContent(messageContent.toString());
@@ -99,7 +100,7 @@ public class MessagesService {
     messageContent.put("title", booking.getTitle());
     messageContent.put("startTime", booking.getStartTime());
     messageContent.put("endTime", booking.getEndTime());
-    messageContent.put("date", booking.getEndTime());
+    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).plusHours(2));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
     message.setMessageType(MessageType.APPOINTMENT_CANCELLED);

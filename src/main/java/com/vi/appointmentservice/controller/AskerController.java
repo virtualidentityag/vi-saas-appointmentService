@@ -52,7 +52,7 @@ public class AskerController implements AskersApi {
 
                 return new ResponseEntity<>(bookings, HttpStatus.OK);
             } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+              return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
             }
         }
         catch (Exception e) {
