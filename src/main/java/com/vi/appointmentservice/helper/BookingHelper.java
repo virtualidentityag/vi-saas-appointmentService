@@ -46,6 +46,8 @@ public class BookingHelper {
           Long.valueOf(calcomBooking.getUserId())).getConsultantId();
       ConsultantDTO consultant = this.adminUserService.getConsultantById(consultantId);
       calcomBooking.setConsultantName(consultant.getFirstname() + " " + consultant.getLastname());
+    } else {
+      calcomBooking.setConsultantName("Unknown Consultant");
     }
     return calcomBooking;
   }

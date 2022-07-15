@@ -39,7 +39,6 @@ public class AdminUserService {
         adminUserControllerApi.getConsultant(consultantId)).getJSONObject("_embedded").toString();
     ObjectMapper mapper = new ObjectMapper().configure(
         DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    ;
     return mapper.readValue(consultantResponse, ConsultantDTO.class);
   }
 

@@ -58,7 +58,9 @@ public class AskerController implements AskersApi {
     public ResponseEntity<CalcomBooking> getBookingDetails(String bookingId) {
         try {
             CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
-            return new ResponseEntity<>(bookingHelper.attachRescheduleLink(booking), HttpStatus.OK);
+            bookingHelper.attachRescheduleLink(booking);
+            bookingHelper.attachConsultantName(booking);
+            return new ResponseEntity<>(booking, HttpStatus.OK);
         }
         catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
