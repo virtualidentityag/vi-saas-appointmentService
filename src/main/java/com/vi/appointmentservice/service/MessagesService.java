@@ -11,6 +11,8 @@ import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.service.securityheader.SecurityHeaderSupplier;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,19 +56,30 @@ public class MessagesService {
   private AliasMessageDTO createNewAppointmentMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
+
+    messageContent.append("counselor", "dummy counselor");
+    messageContent.append("user", "dummy user");
     messageContent.append("title", booking.getTitle());
     messageContent.append("startTime", booking.getStartTime());
     messageContent.append("endTime", booking.getEndTime());
     message.setMessageType(MessageType.APPOINTMENT_SET);
     message.setContent(messageContent.toString());
+    messageContent.append("date", booking.getEndTime());
+    messageContent.append("duration", ChronoUnit.MINUTES.between(
+        LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
     return message;
   }
   private AliasMessageDTO createCancellationMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
+    messageContent.append("counselor", "dummy counselor");
+    messageContent.append("user", "dummy user");
     messageContent.append("title", booking.getTitle());
     messageContent.append("startTime", booking.getStartTime());
     messageContent.append("endTime", booking.getEndTime());
+    messageContent.append("date", booking.getEndTime());
+    messageContent.append("duration", ChronoUnit.MINUTES.between(
+        LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
     message.setMessageType(MessageType.APPOINTMENT_CANCELLED);
     message.setContent(messageContent.toString());
     return message;
