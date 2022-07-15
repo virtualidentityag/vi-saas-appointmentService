@@ -76,6 +76,11 @@ public class UserService {
         return consultantsResult;
     }
 
+
+    public String getRocketChatGroupId(String consultantId, String askerId){
+        addTechnicalUserHeaders(userControllerApi.getApiClient());
+        return userControllerApi.getRocketChatGroupId(consultantId, askerId, 0).getGroupId();
+    }
     private void addTechnicalUserHeaders(ApiClient apiClient) {
         KeycloakLoginResponseDTO keycloakLoginResponseDTO = identityClient.loginUser(
                 keycloakTechnicalUsername, keycloakTechnicalPassword
@@ -85,4 +90,5 @@ public class UserService {
                 .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
         headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
     }
+
 }

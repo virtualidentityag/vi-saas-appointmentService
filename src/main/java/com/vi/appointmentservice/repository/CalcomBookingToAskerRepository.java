@@ -11,8 +11,9 @@ public interface CalcomBookingToAskerRepository extends
 
   CalcomBookingToAsker findByCalcomBookingId(Long calcomBookingId);
 
-  boolean existsByCalcomBookingId(
-      Long calcomBookingId);
+  boolean existsByCalcomBookingId(Long calcomBookingId);
 
   boolean existsByAskerId(String askerId);
+
+  void deleteByCalcomBookingId(Long calcomBookingId);
 }

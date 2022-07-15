@@ -778,4 +778,42 @@ components:
               properties:
                 user:
                   type: string
+                bookingId:
+                  type: long
+                isInitialAppointment:
+                  type: boolean
 
+    CalcomSchedule:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        userId:
+          type: integer
+          format: int32
+        name:
+          type: string
+        timeZone:
+          type: string
+    CalcomAvailability:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        days:
+          type: array
+          items:
+            type: integer
+            format: int32
+          example: [1,2,3,4,5]
+        startTime:
+          type: string
+          example: 1970-01-01T09:00:00.000Z
+        endTime:
+          type: string
+          example: 1970-01-01T17:00:00.000Z
+        scheduleId:
+          type: integer
+          format: int32

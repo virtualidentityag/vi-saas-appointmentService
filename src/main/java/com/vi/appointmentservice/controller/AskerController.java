@@ -5,21 +5,22 @@ import com.vi.appointmentservice.api.model.CalcomWebhook;
 import com.vi.appointmentservice.api.model.CalcomWebhookPayload;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.generated.api.controller.AskersApi;
-import com.vi.appointmentservice.helper.BookingHelper;
+import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.service.CalComBookingService;
+import com.vi.appointmentservice.service.MessagesService;
 import io.swagger.annotations.Api;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
-
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 @RestController
@@ -28,9 +29,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AskerController implements AskersApi {
 
-    private final @NonNull CalComBookingService calComBookingService;
-    private final @NonNull BookingHelper bookingHelper;
-    private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
+  private final @NonNull CalComBookingService calComBookingService;
+  private final @NonNull MessagesService messagesService;
+  private final @NonNull RescheduleHelper rescheduleHelper;
+  private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
 
 
     @Override
@@ -44,8 +46,8 @@ public class AskerController implements AskersApi {
                     bookings.add(calComBookingService.getBookingById(bookingId.getCalcomBookingId()));
                 }
                 for(CalcomBooking booking : bookings){
-                    bookingHelper.attachRescheduleLink(booking);
-                    bookingHelper.attachConsultantName(booking);
+                    rescheduleHelper.attachRescheduleLink(booking);
+                    rescheduleHelper.attachConsultantName(booking);
                 }
 
                 return new ResponseEntity<>(bookings, HttpStatus.OK);
@@ -63,8 +65,8 @@ public class AskerController implements AskersApi {
         try {
             CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
             if(booking != null){
-                bookingHelper.attachRescheduleLink(booking);
-                bookingHelper.attachConsultantName(booking);
+                rescheduleHelper.attachRescheduleLink(booking);
+                rescheduleHelper.attachConsultantName(booking);
                 return new ResponseEntity<>(booking, HttpStatus.OK);
             }else{
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -76,35 +78,54 @@ public class AskerController implements AskersApi {
         }
     }
 
-    @Override
-    public ResponseEntity<MeetingSlug> getAskerMeetingSlug(String askerId) {
-        return AskersApi.super.getAskerMeetingSlug(askerId);
-    }
+  @Override
+  public ResponseEntity<MeetingSlug> getAskerMeetingSlug(String askerId) {
+    return AskersApi.super.getAskerMeetingSlug(askerId);
+  }
 
-    @Override
-    public ResponseEntity<String> processBooking(CalcomWebhook calcomWebhook) {
-        try {
-            CalcomWebhookPayload payload = calcomWebhook.getPayload();
-
-            if (payload != null) {
-                String askerId = payload.getMetadata().getUser();
-                Long bookingId = Long.valueOf(payload.getBookingId());
-
-                CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(bookingId, askerId);
-
-                if (calcomWebhook.getTriggerEvent().equals("BOOKING_CREATED")) {
-                    calcomBookingToAskerRepository.save(userAssociation);
-
-                } else {
-                    calcomBookingToAskerRepository.delete(userAssociation);
-                }
-
-                return new ResponseEntity<>(String.valueOf(bookingId), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+  @Override
+  @Transactional
+  public ResponseEntity<String> processBooking(CalcomWebhook calcomWebhook) {
+    try {
+      CalcomWebhookPayload payload = calcomWebhook.getPayload();
+      Long bookingId = null;
+      if (payload != null) {
+        if (calcomWebhook.getTriggerEvent().equals("BOOKING_CREATED")) {
+          bookingId = Long.valueOf(payload.getBookingId());
+          String askerId = payload.getMetadata().getUser();
+          CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(bookingId, askerId);
+          calcomBookingToAskerRepository.save(userAssociation);
+          Boolean isInitialAppointment = payload.getMetadata().getIsInitialAppointment();
+          if (isInitialAppointment == null || isInitialAppointment.equals(false)) {
+            messagesService.publishNewAppointmentMessage(bookingId);
+          }
+        } else if (calcomWebhook.getTriggerEvent().equals("BOOKING_RESCHEDULED")) {
+          String askerId = payload.getMetadata().getUser();
+          Long newBookingId = Long.valueOf(payload.getBookingId());
+          CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId);
+          Long oldBookingId = payload.getMetadata().getBookingId();
+          messagesService.publishCancellationMessage(oldBookingId);
+          calcomBookingToAskerRepository.deleteByCalcomBookingId(oldBookingId);
+          calcomBookingToAskerRepository.save(userAssociation);
+          messagesService.publishNewAppointmentMessage(newBookingId);
+        } else {
+          //TODO: change this. we need to get booking id based on uuid or save it also in the relational
+          // entity
+          bookingId = Long.valueOf(calComBookingService.getAllBookings().stream()
+              .filter(el -> el.getUid().equals(payload.getUid())).collect(
+                  Collectors.toList()).get(0).getId());
+          messagesService.publishCancellationMessage(bookingId);
+          calcomBookingToAskerRepository.deleteByCalcomBookingId(bookingId);
         }
+
+        return new ResponseEntity<>(String.valueOf(bookingId), HttpStatus.OK);
+      } else {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      }
+    } catch (Exception e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+
 }
