@@ -1,13 +1,19 @@
 package com.vi.appointmentservice.repository;
 
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+public interface CalcomBookingToAskerRepository extends
+    JpaRepository<CalcomBookingToAsker, String> {
 
-public interface CalcomBookingToAskerRepository extends JpaRepository<CalcomBookingToAsker, String> {
+  List<CalcomBookingToAsker> findByAskerId(String askerId);
 
-    List<CalcomBookingToAsker> findByAskerId(String askerId);
-    CalcomBookingToAsker findByCalcomBookingId(Long bookingId);
-    void deleteByCalcomBookingId(Long calcomBookingId);
+  CalcomBookingToAsker findByCalcomBookingId(Long calcomBookingId);
+
+  boolean existsByCalcomBookingId(Long calcomBookingId);
+
+  boolean existsByAskerId(String askerId);
+
+  void deleteByCalcomBookingId(Long calcomBookingId);
 }
