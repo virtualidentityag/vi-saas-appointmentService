@@ -3,7 +3,7 @@ package com.vi.appointmentservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.helper.BookingHelper;
+import com.vi.appointmentservice.helper.RescheduleHelper;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +23,13 @@ import java.util.Objects;
 @Slf4j
 public class CalComBookingService extends CalComService {
 
-    private final @NonNull BookingHelper bookingHelper;
+    private final @NonNull RescheduleHelper rescheduleHelper;
 
     @Autowired
     public CalComBookingService(RestTemplate restTemplate, @Value("${calcom.apiUrl}") String calcomApiUrl, @Value("${calcom.apiKey}") String calcomApiKey,
-        @NonNull BookingHelper bookingHelper) {
+        @NonNull RescheduleHelper rescheduleHelper) {
         super(restTemplate, calcomApiUrl, calcomApiKey);
-        this.bookingHelper = bookingHelper;
+        this.rescheduleHelper = rescheduleHelper;
     }
 
     // Booking
@@ -49,8 +49,8 @@ public class CalComBookingService extends CalComService {
             .filter(booking ->  Integer.valueOf(userId.intValue()).equals(booking.getUserId())).collect(Collectors.toList());
         log.info("Found {} bookings for user {}", filteredBookings.size(), userId);
         for(CalcomBooking booking : filteredBookings){
-            bookingHelper.attachRescheduleLink(booking);
-            bookingHelper.attachAskerName(booking);
+            rescheduleHelper.attachRescheduleLink(booking);
+            rescheduleHelper.attachAskerName(booking);
         }
         return filteredBookings;
     }

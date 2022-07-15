@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class BookingHelper {
+public class RescheduleHelper {
 
   private final @NonNull CalComEventTypeService eventTypeService;
   private final @NonNull CalComUserService calComUserService;
