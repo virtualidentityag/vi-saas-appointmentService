@@ -774,6 +774,11 @@ components:
               properties:
                 user:
                   type: string
+                bookingId:
+                  type: long
+                isInitialAppointment:
+                  type: boolean
+
     CalcomSchedule:
       type: object
       properties:
