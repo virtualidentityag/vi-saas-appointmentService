@@ -46,12 +46,17 @@ public class CalComEventTypeService extends CalComService {
         return result;
     }
 
+    public void deleteAllEventTypesOfUser(Long userId) throws JsonProcessingException {
+        List<CalcomEventType> eventTypesOfUser = new ArrayList<>(this.getAllEventTypes()).stream()
+            .filter(eventType -> eventType.getUserId() != null && eventType.getUserId() == userId.intValue())
+            .collect(Collectors.toList());
+        for (CalcomEventType eventType : eventTypesOfUser) {
+            this.deleteEventType(Long.valueOf(eventType.getId()));
+        }
+    }
+
     public List<CalcomEventType> getAllEventTypesOfTeam(Long teamId) throws JsonProcessingException {
-        String response = this.restTemplate.getForObject(this.buildUri("/v1/event-types"), String.class);
-        JSONObject jsonObject = new JSONObject(response);
-        response = jsonObject.getJSONArray("event_types").toString();
-        ObjectMapper mapper = new ObjectMapper();
-        List<CalcomEventType> result = mapper.readValue(response, new TypeReference<List<CalcomEventType>>(){});
+        List<CalcomEventType> result = this.getAllEventTypes();
         // TODO: Add correct filter: .filter(eventType -> eventType.getTeamId() != null && eventType.getTeamId() == teamId.intValue())
         return new ArrayList<>(result).stream()
                 .filter(eventType -> eventType.getTeamId() != null)
@@ -59,11 +64,7 @@ public class CalComEventTypeService extends CalComService {
     }
 
     public List<CalcomEventType> getAllEventTypesOfUser(Long userId) throws JsonProcessingException {
-        String response = this.restTemplate.getForObject(this.buildUri("/v1/event-types"), String.class);
-        JSONObject jsonObject = new JSONObject(response);
-        response = jsonObject.getJSONArray("event_types").toString();
-        ObjectMapper mapper = new ObjectMapper();
-        List<CalcomEventType> result = mapper.readValue(response, new TypeReference<List<CalcomEventType>>(){});
+        List<CalcomEventType> result = this.getAllEventTypes();
         return new ArrayList<>(result).stream()
                 .filter(eventType -> eventType.getUserId() != null && eventType.getUserId() == userId.intValue())
                 .collect(Collectors.toList());
