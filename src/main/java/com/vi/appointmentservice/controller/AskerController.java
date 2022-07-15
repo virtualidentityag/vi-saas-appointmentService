@@ -36,18 +36,22 @@ public class AskerController implements AskersApi {
     @Override
     public ResponseEntity<List<CalcomBooking>> getAllBookingsOfAsker(String askerId) {
         try {
-            List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository.findByAskerId(askerId);
-            List<CalcomBooking> bookings = new ArrayList<>();
+            if(calcomBookingToAskerRepository.existsByAskerId(askerId)){
+                List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository.findByAskerId(askerId);
+                List<CalcomBooking> bookings = new ArrayList<>();
 
-            for (CalcomBookingToAsker bookingId : bookingIds) {
-                bookings.add(calComBookingService.getBookingById(bookingId.getCalcomBookingId()));
-            }
-            for(CalcomBooking booking : bookings){
-                bookingHelper.attachRescheduleLink(booking);
-                bookingHelper.attachConsultantName(booking);
-            }
+                for (CalcomBookingToAsker bookingId : bookingIds) {
+                    bookings.add(calComBookingService.getBookingById(bookingId.getCalcomBookingId()));
+                }
+                for(CalcomBooking booking : bookings){
+                    bookingHelper.attachRescheduleLink(booking);
+                    bookingHelper.attachConsultantName(booking);
+                }
 
-            return new ResponseEntity<>(bookings, HttpStatus.OK);
+                return new ResponseEntity<>(bookings, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
         }
         catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -58,9 +62,14 @@ public class AskerController implements AskersApi {
     public ResponseEntity<CalcomBooking> getBookingDetails(String bookingId) {
         try {
             CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
-            bookingHelper.attachRescheduleLink(booking);
-            bookingHelper.attachConsultantName(booking);
-            return new ResponseEntity<>(booking, HttpStatus.OK);
+            if(booking != null){
+                bookingHelper.attachRescheduleLink(booking);
+                bookingHelper.attachConsultantName(booking);
+                return new ResponseEntity<>(booking, HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
         }
         catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

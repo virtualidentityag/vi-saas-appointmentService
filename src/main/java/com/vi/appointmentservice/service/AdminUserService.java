@@ -14,18 +14,37 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class AdminUserService {
 
-  private final @NonNull AdminUserControllerApi adminUserControllerApi;
-  private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-  private final @NonNull IdentityClient identityClient;
+  @Qualifier("adminUser")
+  @Autowired
+  public void setAdminUserControllerApi(
+      AdminUserControllerApi adminUserControllerApi) {
+    this.adminUserControllerApi = adminUserControllerApi;
+  }
+
+  @Autowired
+  public void setSecurityHeaderSupplier(
+      SecurityHeaderSupplier securityHeaderSupplier) {
+    this.securityHeaderSupplier = securityHeaderSupplier;
+  }
+
+  @Autowired
+  public void setIdentityClient(IdentityClient identityClient) {
+    this.identityClient = identityClient;
+  }
+
+  private AdminUserControllerApi adminUserControllerApi;
+  private SecurityHeaderSupplier securityHeaderSupplier;
+  private IdentityClient identityClient;
 
   @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
@@ -36,7 +55,7 @@ public class AdminUserService {
   public ConsultantDTO getConsultantById(String consultantId) throws JsonProcessingException {
     addTechnicalUserHeaders(adminUserControllerApi.getApiClient());
     String consultantResponse = new JSONObject(
-        adminUserControllerApi.getConsultant(consultantId)).getJSONObject("_embedded").toString();
+        adminUserControllerApi.getConsultant(consultantId)).getJSONObject("embedded").toString();
     ObjectMapper mapper = new ObjectMapper().configure(
         DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     return mapper.readValue(consultantResponse, ConsultantDTO.class);
