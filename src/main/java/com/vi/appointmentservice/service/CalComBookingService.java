@@ -50,6 +50,7 @@ public class CalComBookingService extends CalComService {
         log.info("Found {} bookings for user {}", filteredBookings.size(), userId);
         for(CalcomBooking booking : filteredBookings){
             rescheduleHelper.attachRescheduleLink(booking);
+            rescheduleHelper.attachAskerName(booking);
         }
         return filteredBookings;
     }
