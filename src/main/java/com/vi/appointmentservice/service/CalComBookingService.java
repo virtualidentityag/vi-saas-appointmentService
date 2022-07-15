@@ -3,6 +3,9 @@ package com.vi.appointmentservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.helper.RescheduleHelper;
+import java.util.stream.Collectors;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,24 +23,36 @@ import java.util.Objects;
 @Slf4j
 public class CalComBookingService extends CalComService {
 
+    private final @NonNull RescheduleHelper rescheduleHelper;
+
     @Autowired
-    public CalComBookingService(RestTemplate restTemplate, @Value("${calcom.apiUrl}") String calcomApiUrl, @Value("${calcom.apiKey}") String calcomApiKey) {
+    public CalComBookingService(RestTemplate restTemplate, @Value("${calcom.apiUrl}") String calcomApiUrl, @Value("${calcom.apiKey}") String calcomApiKey,
+        @NonNull RescheduleHelper rescheduleHelper) {
         super(restTemplate, calcomApiUrl, calcomApiKey);
+        this.rescheduleHelper = rescheduleHelper;
     }
 
     // Booking
-    public List<CalcomBooking> getBookings() throws JsonProcessingException {
+    public List<CalcomBooking> getAllBookings() throws JsonProcessingException {
         String response = this.restTemplate.getForObject(String.format(this.buildUri("/v1/bookings"), calcomApiUrl, calcomApiKey), String.class);
         JSONObject jsonObject = new JSONObject(response);
-        log.debug(String.valueOf(jsonObject));
         response = jsonObject.getJSONArray("bookings").toString();
-        log.debug(response);
         ObjectMapper mapper = new ObjectMapper();
-        CalcomBooking[] result = mapper.readValue(response, CalcomBooking[].class);
-
-        return List.of(Objects.requireNonNull(result));
+        List<CalcomBooking> result = List.of(Objects.requireNonNull(mapper.readValue(response, CalcomBooking[].class)));
+        log.info("Found total of {} bookings", result.size());
+        return result;
     }
 
+    public List<CalcomBooking> getAllBookingsForConsultant(Long userId) throws JsonProcessingException {
+        List<CalcomBooking> allBookings = this.getAllBookings();
+        List<CalcomBooking> filteredBookings = allBookings.stream()
+            .filter(booking ->  Integer.valueOf(userId.intValue()).equals(booking.getUserId())).collect(Collectors.toList());
+        log.info("Found {} bookings for user {}", filteredBookings.size(), userId);
+        for(CalcomBooking booking : filteredBookings){
+            rescheduleHelper.attachRescheduleLink(booking);
+        }
+        return filteredBookings;
+    }
 
     public CalcomBooking createBooking(CalcomBooking booking) {
         HttpHeaders headers = new HttpHeaders();
