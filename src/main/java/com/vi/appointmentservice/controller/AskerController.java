@@ -9,6 +9,7 @@ import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.service.CalComBookingService;
+import com.vi.appointmentservice.service.MessagesService;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AskerController implements AskersApi {
 
   private final @NonNull CalComBookingService calComBookingService;
+  private final @NonNull MessagesService messagesService;
   private final @NonNull RescheduleHelper rescheduleHelper;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
 
@@ -79,11 +81,19 @@ public class AskerController implements AskersApi {
           String askerId = payload.getMetadata().getUser();
           CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(bookingId, askerId);
           calcomBookingToAskerRepository.save(userAssociation);
-        } else if(calcomWebhook.getTriggerEvent().equals("BOOKING_RESCHEDULED")){
+          Boolean isInitialAppointment = payload.getMetadata().getIsInitialAppointment();
+          if (isInitialAppointment == null || isInitialAppointment.equals(false)) {
+            messagesService.publishNewAppointmentMessage(bookingId);
+          }
+        } else if (calcomWebhook.getTriggerEvent().equals("BOOKING_RESCHEDULED")) {
           String askerId = payload.getMetadata().getUser();
-          CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(Long.valueOf(payload.getBookingId()), askerId);
+          Long newBookingId = Long.valueOf(payload.getBookingId());
+          CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId);
+          Long oldBookingId = payload.getMetadata().getBookingId();
+          messagesService.publishCancellationMessage(oldBookingId);
+          calcomBookingToAskerRepository.deleteByCalcomBookingId(oldBookingId);
           calcomBookingToAskerRepository.save(userAssociation);
-          calcomBookingToAskerRepository.deleteByCalcomBookingId(payload.getMetadata().getBookingId());
+          messagesService.publishNewAppointmentMessage(newBookingId);
         } else {
           //TODO: change this. we need to get booking id based on uuid or save it also in the relational
           // entity
@@ -91,6 +101,7 @@ public class AskerController implements AskersApi {
               .filter(el -> el.getUid().equals(payload.getUid())).collect(
                   Collectors.toList()).get(0).getId());
           calcomBookingToAskerRepository.deleteByCalcomBookingId(bookingId);
+          messagesService.publishCancellationMessage(bookingId);
         }
 
         return new ResponseEntity<>(String.valueOf(bookingId), HttpStatus.OK);
@@ -101,4 +112,6 @@ public class AskerController implements AskersApi {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+
 }
