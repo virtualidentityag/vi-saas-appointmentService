@@ -100,8 +100,8 @@ public class AskerController implements AskersApi {
           bookingId = Long.valueOf(calComBookingService.getAllBookings().stream()
               .filter(el -> el.getUid().equals(payload.getUid())).collect(
                   Collectors.toList()).get(0).getId());
-          calcomBookingToAskerRepository.deleteByCalcomBookingId(bookingId);
           messagesService.publishCancellationMessage(bookingId);
+          calcomBookingToAskerRepository.deleteByCalcomBookingId(bookingId);
         }
 
         return new ResponseEntity<>(String.valueOf(bookingId), HttpStatus.OK);
