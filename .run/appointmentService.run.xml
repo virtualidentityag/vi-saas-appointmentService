@@ -1,8 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="appointmentService clean compile" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="ACTIVE_PROFILES" value="local" />
+    <option name="ALTERNATIVE_JRE_PATH" value="11" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="ENABLE_JMX_AGENT" value="false" />
-    <module name="onlineBeratung-appointmentService" />
+    <module name="appointmentservice" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.vi.appointmentservice.AppointmentServiceApplication" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />
