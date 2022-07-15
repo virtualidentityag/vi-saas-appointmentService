@@ -56,29 +56,28 @@ public class MessagesService {
   private AliasMessageDTO createNewAppointmentMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
-
-    messageContent.append("counselor", "dummy counselor");
-    messageContent.append("user", "dummy user");
-    messageContent.append("title", booking.getTitle());
-    messageContent.append("startTime", booking.getStartTime());
-    messageContent.append("endTime", booking.getEndTime());
+    messageContent.put("counselor", "dummy counselor");
+    messageContent.put("user", "dummy user");
+    messageContent.put("title", booking.getTitle());
+    messageContent.put("startTime", booking.getStartTime());
+    messageContent.put("endTime", booking.getEndTime());
     message.setMessageType(MessageType.APPOINTMENT_SET);
-    message.setContent(messageContent.toString());
-    messageContent.append("date", booking.getEndTime());
-    messageContent.append("duration", ChronoUnit.MINUTES.between(
+    messageContent.put("date", booking.getEndTime());
+    messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
+    message.setContent(messageContent.toString());
     return message;
   }
   private AliasMessageDTO createCancellationMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
-    messageContent.append("counselor", "dummy counselor");
-    messageContent.append("user", "dummy user");
-    messageContent.append("title", booking.getTitle());
-    messageContent.append("startTime", booking.getStartTime());
-    messageContent.append("endTime", booking.getEndTime());
-    messageContent.append("date", booking.getEndTime());
-    messageContent.append("duration", ChronoUnit.MINUTES.between(
+    messageContent.put("counselor", "dummy counselor");
+    messageContent.put("user", "dummy user");
+    messageContent.put("title", booking.getTitle());
+    messageContent.put("startTime", booking.getStartTime());
+    messageContent.put("endTime", booking.getEndTime());
+    messageContent.put("date", booking.getEndTime());
+    messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
     message.setMessageType(MessageType.APPOINTMENT_CANCELLED);
     message.setContent(messageContent.toString());
