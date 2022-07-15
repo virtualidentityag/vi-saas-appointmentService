@@ -103,11 +103,9 @@ public class AskerController implements AskersApi {
           String askerId = payload.getMetadata().getUser();
           Long newBookingId = Long.valueOf(payload.getBookingId());
           CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId);
-          Long oldBookingId = payload.getMetadata().getBookingId();
-          messagesService.publishCancellationMessage(oldBookingId);
-          calcomBookingToAskerRepository.deleteByCalcomBookingId(oldBookingId);
+          calcomBookingToAskerRepository.deleteByCalcomBookingId(payload.getMetadata().getBookingId());
           calcomBookingToAskerRepository.save(userAssociation);
-          messagesService.publishNewAppointmentMessage(newBookingId);
+          messagesService.publishRescheduledAppointmentMessage(newBookingId);
         } else {
           //TODO: change this. we need to get booking id based on uuid or save it also in the relational
           // entity

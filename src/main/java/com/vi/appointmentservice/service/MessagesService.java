@@ -53,6 +53,28 @@ public class MessagesService {
     sendMessage(booking, message);
   }
 
+  public void publishRescheduledAppointmentMessage(Long bookingId) {
+    CalcomBooking booking = calComBookingService.getBookingById(bookingId);
+    AliasMessageDTO message = createRescheduleAppointmentMessage(booking);
+    sendMessage(booking, message);
+  }
+
+  private AliasMessageDTO createRescheduleAppointmentMessage(CalcomBooking booking) {
+    AliasMessageDTO message = new AliasMessageDTO();
+    JSONObject messageContent = new JSONObject();
+    messageContent.put("counselor", "dummy counselor");
+    messageContent.put("user", "dummy user");
+    messageContent.put("title", booking.getTitle());
+    messageContent.put("startTime", booking.getStartTime());
+    messageContent.put("endTime", booking.getEndTime());
+    message.setMessageType(MessageType.APPOINTMENT_RESCHEDULED);
+    messageContent.put("date", booking.getEndTime());
+    messageContent.put("duration", ChronoUnit.MINUTES.between(
+        LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
+    message.setContent(messageContent.toString());
+    return message;
+  }
+
   private AliasMessageDTO createNewAppointmentMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
@@ -68,6 +90,7 @@ public class MessagesService {
     message.setContent(messageContent.toString());
     return message;
   }
+
   private AliasMessageDTO createCancellationMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
