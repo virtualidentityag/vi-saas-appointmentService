@@ -69,7 +69,7 @@ public class MessagesService {
 //    messageContent.put("startTime", booking.getStartTime());
 //    messageContent.put("endTime", booking.getEndTime());
     message.setMessageType(MessageType.APPOINTMENT_RESCHEDULED);
-    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).plusHours(2));
+    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).minusHours(2));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
     message.setContent(messageContent.toString());
@@ -85,7 +85,7 @@ public class MessagesService {
 //    messageContent.put("startTime", booking.getStartTime());
 //    messageContent.put("endTime", booking.getEndTime());
     message.setMessageType(MessageType.APPOINTMENT_SET);
-    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).plusHours(2));
+    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).minusHours(2));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
     message.setContent(messageContent.toString());
@@ -100,7 +100,7 @@ public class MessagesService {
     messageContent.put("title", booking.getTitle());
     messageContent.put("startTime", booking.getStartTime());
     messageContent.put("endTime", booking.getEndTime());
-    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).plusHours(2));
+    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).minusHours(2));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
     message.setMessageType(MessageType.APPOINTMENT_CANCELLED);
