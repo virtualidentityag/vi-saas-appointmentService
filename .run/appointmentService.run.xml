@@ -42,7 +42,7 @@
       <env name="MESSAGE_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80/service" />
       <env name="MULTITENANCY_ENABLED" value="false" />
       <env name="TENANT_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80" />
-      <env name="USER_ADMIN_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80" />
+      <env name="USER_ADMIN_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80/service" />
       <env name="USER_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80/service" />
       <env name="KEYCLOAK_CONFIG_ADMIN_USERNAME" value="keycloak-realmadmin" />
       <env name="KEYCLOAK_CONFIG_ADMIN_PASSWORD" value="f.YxXZCf7C=SGvuN6#G =MJN bA`Q@gr" />
