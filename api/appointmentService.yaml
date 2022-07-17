@@ -475,6 +475,8 @@ components:
           type: string
         askerName:
           type: string
+        description:
+          type: string
     ArrayOfCalcomBookings:
       type: array
       items:
