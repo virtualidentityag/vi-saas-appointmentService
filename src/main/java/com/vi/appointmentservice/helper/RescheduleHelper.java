@@ -27,9 +27,9 @@ public class RescheduleHelper {
 
   public CalcomBooking attachRescheduleLink(CalcomBooking calcomBooking)
       throws JsonProcessingException {
-    CalcomUser user = this.calComUserService.getUserById(Long.valueOf(calcomBooking.getUserId()));
-    if (user != null && user.getUsername() != null) {
-      String userSlug = user.getUsername();
+    CalcomUser registeredCalcomUser = this.calComUserService.getUserById(Long.valueOf(calcomBooking.getUserId()));
+    if (registeredCalcomUser != null && registeredCalcomUser.getUsername() != null) {
+      String userSlug = registeredCalcomUser.getUsername();
       String eventTypeSlug = this.eventTypeService.getEventTypeById(
           Long.valueOf(calcomBooking.getEventTypeId())).getSlug();
       calcomBooking.setRescheduleLink(

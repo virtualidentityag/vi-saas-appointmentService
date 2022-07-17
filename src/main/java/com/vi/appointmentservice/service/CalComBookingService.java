@@ -7,7 +7,6 @@ import com.vi.appointmentservice.helper.RescheduleHelper;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -24,14 +23,16 @@ import org.springframework.web.client.RestTemplate;
 public class CalComBookingService extends CalComService {
 
   private final @NonNull RescheduleHelper rescheduleHelper;
+  private final @NonNull CalcomRepository calcomRepository;
 
   @Autowired
   public CalComBookingService(RestTemplate restTemplate,
       @Value("${calcom.apiUrl}") String calcomApiUrl,
       @Value("${calcom.apiKey}") String calcomApiKey,
-      @NonNull RescheduleHelper rescheduleHelper) {
+      @NonNull RescheduleHelper rescheduleHelper, CalcomRepository calcomRepository) {
     super(restTemplate, calcomApiUrl, calcomApiKey);
     this.rescheduleHelper = rescheduleHelper;
+    this.calcomRepository = calcomRepository;
   }
 
   // Booking
@@ -50,16 +51,12 @@ public class CalComBookingService extends CalComService {
 
   public List<CalcomBooking> getAllBookingsForConsultant(Long userId)
       throws JsonProcessingException {
-    List<CalcomBooking> allBookings = this.getAllBookings();
-    List<CalcomBooking> filteredBookings = allBookings.stream()
-        .filter(booking -> Integer.valueOf(userId.intValue()).equals(booking.getUserId()))
-        .collect(Collectors.toList());
-    log.info("Found {} bookings for user {}", filteredBookings.size(), userId);
-    for (CalcomBooking booking : filteredBookings) {
+    List<CalcomBooking> consultantBooking = calcomRepository.getAllBookingsByStatus(userId);
+    for (CalcomBooking booking : consultantBooking) {
       rescheduleHelper.attachRescheduleLink(booking);
       rescheduleHelper.attachAskerName(booking);
     }
-    return filteredBookings;
+    return consultantBooking;
   }
 
   public CalcomBooking createBooking(CalcomBooking booking) {
