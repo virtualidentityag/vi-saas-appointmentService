@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @Configuration
 public class DatabaseConnectionsConfiguration {
@@ -43,6 +44,11 @@ public class DatabaseConnectionsConfiguration {
     var template = new JdbcTemplate();
     template.setDataSource(calcomDBDataSource);
     return template;
+  }
+
+  @Bean(name = "calcomDBNamedParamterTemplate")
+  public NamedParameterJdbcTemplate calcomDBNamedParamterTemplate(@Qualifier("calcomDBDataSource") DataSource calcomDBDataSource){
+    return new NamedParameterJdbcTemplate(calcomDBDataSource);
   }
 
 }

@@ -9,6 +9,7 @@ import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.service.CalComBookingService;
+import com.vi.appointmentservice.service.CalcomRepository;
 import com.vi.appointmentservice.service.MessagesService;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
@@ -33,50 +34,48 @@ public class AskerController implements AskersApi {
   private final @NonNull MessagesService messagesService;
   private final @NonNull RescheduleHelper rescheduleHelper;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
+  private final @NonNull CalcomRepository calcomRepository;
 
 
-    @Override
-    public ResponseEntity<List<CalcomBooking>> getAllBookingsOfAsker(String askerId) {
-        try {
-            if(calcomBookingToAskerRepository.existsByAskerId(askerId)){
-                List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository.findByAskerId(askerId);
-                List<CalcomBooking> bookings = new ArrayList<>();
-
-                for (CalcomBookingToAsker bookingId : bookingIds) {
-                    bookings.add(calComBookingService.getBookingById(bookingId.getCalcomBookingId()));
-                }
-                for(CalcomBooking booking : bookings){
-                    rescheduleHelper.attachRescheduleLink(booking);
-                    rescheduleHelper.attachConsultantName(booking);
-                }
-
-                return new ResponseEntity<>(bookings, HttpStatus.OK);
-            } else {
-              return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
-            }
+  @Override
+  public ResponseEntity<List<CalcomBooking>> getAllBookingsOfAsker(String askerId) {
+    try {
+      if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
+        List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
+            .findByAskerId(askerId);
+        List<CalcomBooking> bookings = calcomRepository
+            .getByIds(bookingIds.stream().map(el -> el.getCalcomBookingId()).collect(
+                Collectors.toList()));
+        for (CalcomBooking booking : bookings) {
+          rescheduleHelper.attachRescheduleLink(booking);
+          rescheduleHelper.attachConsultantName(booking);
         }
-        catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+
+        return new ResponseEntity<>(bookings, HttpStatus.OK);
+      } else {
+        return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+      }
+    } catch (Exception e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 
-    @Override
-    public ResponseEntity<CalcomBooking> getBookingDetails(String bookingId) {
-        try {
-            CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
-            if(booking != null){
-                rescheduleHelper.attachRescheduleLink(booking);
-                rescheduleHelper.attachConsultantName(booking);
-                return new ResponseEntity<>(booking, HttpStatus.OK);
-            }else{
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+  @Override
+  public ResponseEntity<CalcomBooking> getBookingDetails(String bookingId) {
+    try {
+      CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
+      if (booking != null) {
+        rescheduleHelper.attachRescheduleLink(booking);
+        rescheduleHelper.attachConsultantName(booking);
+        return new ResponseEntity<>(booking, HttpStatus.OK);
+      } else {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      }
 
-        }
-        catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    } catch (Exception e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 
   @Override
   public ResponseEntity<MeetingSlug> getAskerMeetingSlug(String askerId) {
@@ -103,7 +102,8 @@ public class AskerController implements AskersApi {
           String askerId = payload.getMetadata().getUser();
           Long newBookingId = Long.valueOf(payload.getBookingId());
           CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId);
-          calcomBookingToAskerRepository.deleteByCalcomBookingId(payload.getMetadata().getBookingId());
+          calcomBookingToAskerRepository
+              .deleteByCalcomBookingId(payload.getMetadata().getBookingId());
           calcomBookingToAskerRepository.save(userAssociation);
           messagesService.publishRescheduledAppointmentMessage(newBookingId);
         } else {
