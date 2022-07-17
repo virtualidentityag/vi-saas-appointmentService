@@ -10,8 +10,6 @@ import com.vi.appointmentservice.useradminservice.generated.ApiClient;
 import com.vi.appointmentservice.useradminservice.generated.web.AdminUserControllerApi;
 import com.vi.appointmentservice.useradminservice.generated.web.model.AskerResponseDTO;
 import com.vi.appointmentservice.useradminservice.generated.web.model.ConsultantDTO;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +20,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+//TODO: what do you think that we move all onlineberatung services like, user, useradmin, messages
+// to one subpacke of service package
+//TODO: and all calcom services to calcom package. classes would not have calcom prefix than
 public class AdminUserService {
 
   @Qualifier("adminUser")

@@ -63,15 +63,16 @@ public class MessagesService {
   private AliasMessageDTO createRescheduleAppointmentMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
+    //TODO: next 2 lines should be removed in parallel to frontend
     messageContent.put("counselor", "dummy counselor");
     messageContent.put("user", "dummy user");
     messageContent.put("title", booking.getTitle());
-//    messageContent.put("startTime", booking.getStartTime());
-//    messageContent.put("endTime", booking.getEndTime());
     message.setMessageType(MessageType.APPOINTMENT_RESCHEDULED);
+    //TODO: find better solution how to handle zones
     messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).minusHours(2));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
-        LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
+        LocalDateTime.parse(booking.getStartTime().substring(0, 16)),
+        LocalDateTime.parse(booking.getEndTime().substring(0, 16))));
     message.setContent(messageContent.toString());
     return message;
   }
@@ -79,15 +80,16 @@ public class MessagesService {
   private AliasMessageDTO createNewAppointmentMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
+    //TODO: next 2 lines should be removed in parallel to frontend
     messageContent.put("counselor", "dummy counselor");
     messageContent.put("user", "dummy user");
     messageContent.put("title", booking.getTitle());
-//    messageContent.put("startTime", booking.getStartTime());
-//    messageContent.put("endTime", booking.getEndTime());
     message.setMessageType(MessageType.APPOINTMENT_SET);
+    //TODO: find better solution how to handle zones
     messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).minusHours(2));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
-        LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
+        LocalDateTime.parse(booking.getStartTime().substring(0, 16)),
+        LocalDateTime.parse(booking.getEndTime().substring(0, 16))));
     message.setContent(messageContent.toString());
     return message;
   }
@@ -98,11 +100,13 @@ public class MessagesService {
     messageContent.put("counselor", "dummy counselor");
     messageContent.put("user", "dummy user");
     messageContent.put("title", booking.getTitle());
-    messageContent.put("startTime", booking.getStartTime());
-    messageContent.put("endTime", booking.getEndTime());
+//    messageContent.put("startTime", booking.getStartTime());
+//    messageContent.put("endTime", booking.getEndTime());
     messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).minusHours(2));
+    //TODO: find better solution how to handle zones
     messageContent.put("duration", ChronoUnit.MINUTES.between(
-        LocalDateTime.parse(booking.getStartTime().substring(0,16)),LocalDateTime.parse(booking.getEndTime().substring(0,16))));
+        LocalDateTime.parse(booking.getStartTime().substring(0, 16)),
+        LocalDateTime.parse(booking.getEndTime().substring(0, 16))));
     message.setMessageType(MessageType.APPOINTMENT_CANCELLED);
     message.setContent(messageContent.toString());
     return message;

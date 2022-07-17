@@ -34,20 +34,23 @@ public class DatabaseConnectionsConfiguration {
 
   @Bean(name = "calcomDBDataSource")
   public DataSource calcomDBDataSource() {
+    //TODO: fetch this from env. variables
     return DataSourceBuilder.create().url("jdbc:postgresql://185.201.145.213:5432/calendso")
         .username("calendso").password("Testtest!12").driverClassName("org.postgresql.Driver")
         .build();
   }
 
   @Bean(name = "calcomDBTemplate")
-  public JdbcTemplate calcomDBTemplate(@Qualifier("calcomDBDataSource") DataSource calcomDBDataSource){
+  public JdbcTemplate calcomDBTemplate(
+      @Qualifier("calcomDBDataSource") DataSource calcomDBDataSource) {
     var template = new JdbcTemplate();
     template.setDataSource(calcomDBDataSource);
     return template;
   }
 
   @Bean(name = "calcomDBNamedParamterTemplate")
-  public NamedParameterJdbcTemplate calcomDBNamedParamterTemplate(@Qualifier("calcomDBDataSource") DataSource calcomDBDataSource){
+  public NamedParameterJdbcTemplate calcomDBNamedParamterTemplate(
+      @Qualifier("calcomDBDataSource") DataSource calcomDBDataSource) {
     return new NamedParameterJdbcTemplate(calcomDBDataSource);
   }
 
