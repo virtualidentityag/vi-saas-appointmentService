@@ -445,8 +445,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          format: int32
+          type: long
           example: 1
         userId:
           type: integer
@@ -474,6 +473,8 @@ components:
         consultantName:
           type: string
         askerName:
+          type: string
+        askerId:
           type: string
         description:
           type: string

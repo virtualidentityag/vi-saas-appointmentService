@@ -12,7 +12,7 @@ public class CalcomRepositoryBookingMapper implements RowMapper<CalcomBooking> {
   @Override
   public CalcomBooking mapRow(ResultSet rs, int rowNum) throws SQLException {
     CalcomBooking booking = new CalcomBooking();
-    booking.setId(rs.getInt("id"));
+    booking.setId(rs.getLong("id"));
     booking.setTitle(rs.getString("title"));
     booking.setStartTime(formatDate(rs.getString("startTime")));
     booking.setEndTime(formatDate(rs.getString("endTime")));

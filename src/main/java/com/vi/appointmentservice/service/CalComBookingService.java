@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.helper.RescheduleHelper;
+import com.vi.appointmentservice.model.CalcomBookingToAsker;
+import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -24,15 +26,19 @@ public class CalComBookingService extends CalComService {
 
   private final @NonNull RescheduleHelper rescheduleHelper;
   private final @NonNull CalcomRepository calcomRepository;
+  private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
 
   @Autowired
   public CalComBookingService(RestTemplate restTemplate,
       @Value("${calcom.apiUrl}") String calcomApiUrl,
       @Value("${calcom.apiKey}") String calcomApiKey,
-      @NonNull RescheduleHelper rescheduleHelper, CalcomRepository calcomRepository) {
+      @NonNull RescheduleHelper rescheduleHelper, CalcomRepository calcomRepository,
+      CalcomBookingToAskerRepository calcomBookingToAskerRepository
+  ) {
     super(restTemplate, calcomApiUrl, calcomApiKey);
     this.rescheduleHelper = rescheduleHelper;
     this.calcomRepository = calcomRepository;
+    this.calcomBookingToAskerRepository = calcomBookingToAskerRepository;
   }
 
   // Booking
@@ -49,10 +55,13 @@ public class CalComBookingService extends CalComService {
     return result;
   }
 
-  public List<CalcomBooking> getAllBookingsForConsultant(Long userId)
+  public List<CalcomBooking> getAllBookingsForConsultant(Long consultantId)
       throws JsonProcessingException {
-    List<CalcomBooking> consultantBooking = calcomRepository.getAllBookingsByStatus(userId);
+    List<CalcomBooking> consultantBooking = calcomRepository.getAllBookingsByStatus(consultantId);
     for (CalcomBooking booking : consultantBooking) {
+      CalcomBookingToAsker calcomBookingAsker = calcomBookingToAskerRepository
+          .findByCalcomBookingId(booking.getId());
+      booking.setAskerId(calcomBookingAsker.getAskerId());
       rescheduleHelper.attachRescheduleLink(booking);
       rescheduleHelper.attachAskerName(booking);
     }
