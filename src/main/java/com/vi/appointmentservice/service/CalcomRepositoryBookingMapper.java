@@ -16,6 +16,7 @@ public class CalcomRepositoryBookingMapper implements RowMapper<CalcomBooking> {
     booking.setEndTime(rs.getString("endTime"));
     booking.setUserId(rs.getInt("userId"));
     booking.setEventTypeId(rs.getInt("eventTypeId"));
+    booking.setUid(rs.getString("uid"));
     return booking;
   }
 }
