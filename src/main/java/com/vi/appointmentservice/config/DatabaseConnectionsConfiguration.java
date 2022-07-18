@@ -25,6 +25,18 @@ public class DatabaseConnectionsConfiguration {
   @Value("${spring.datasource.driver-class-name}")
   private String className;
 
+  @Value("${calcom.database.url}")
+  private String calcomDatabaseUrl;
+
+  @Value("${calcom.database.username}")
+  private String calcomDatabaseUsername;
+
+  @Value("${calcom.database.password}")
+  private String calcomDatabasePassword;
+
+  @Value("${calcom.database.driverClass}")
+  private String calcomDatabaseDriver;
+
   @Bean
   @Primary
   public DataSource dataSource() {
@@ -34,9 +46,8 @@ public class DatabaseConnectionsConfiguration {
 
   @Bean(name = "calcomDBDataSource")
   public DataSource calcomDBDataSource() {
-    //TODO: fetch this from env. variables
-    return DataSourceBuilder.create().url("jdbc:postgresql://185.201.145.213:5432/calendso")
-        .username("calendso").password("Testtest!12").driverClassName("org.postgresql.Driver")
+    return DataSourceBuilder.create().url(calcomDatabaseUrl)
+        .username(calcomDatabaseUsername).password(calcomDatabasePassword).driverClassName(calcomDatabaseDriver)
         .build();
   }
 
