@@ -95,6 +95,14 @@
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
         </dependency>
+
+        <!-- Liquibase -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-maven-plugin</artifactId>
+            <version>4.1.1</version>
+        </dependency>
+
         <!-- log dependencies -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -335,6 +343,15 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- Liquibase Maven plugin -->
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>4.1.1</version>
+                <configuration>
+                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+                </configuration>
             </plugin>
             <!-- Code style check -->
             <plugin>
