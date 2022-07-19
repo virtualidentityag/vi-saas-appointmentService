@@ -1,6 +1,7 @@
 package com.vi.appointmentservice.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
@@ -25,8 +26,7 @@ public class RescheduleHelper {
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
 
-  public CalcomBooking attachRescheduleLink(CalcomBooking calcomBooking)
-      throws JsonProcessingException {
+  public CalcomBooking attachRescheduleLink(CalcomBooking calcomBooking) {
     CalcomUser registeredCalcomUser = this.calComUserService.getUserById(Long.valueOf(calcomBooking.getUserId()));
     if (registeredCalcomUser != null && registeredCalcomUser.getUsername() != null) {
       String userSlug = registeredCalcomUser.getUsername();
@@ -38,13 +38,13 @@ public class RescheduleHelper {
     return calcomBooking;
   }
 
-  public CalcomBooking attachConsultantName(CalcomBooking calcomBooking)
-      throws JsonProcessingException {
+  public CalcomBooking attachConsultantName(CalcomBooking calcomBooking) {
     if (this.calcomUserToConsultantRepository.existsByCalComUserId(
         Long.valueOf(calcomBooking.getUserId()))) {
       String consultantId = this.calcomUserToConsultantRepository.findByCalComUserId(
           Long.valueOf(calcomBooking.getUserId())).getConsultantId();
-      ConsultantDTO consultant = this.adminUserService.getConsultantById(consultantId);
+      ConsultantDTO consultant = null;
+        consultant = this.adminUserService.getConsultantById(consultantId);
       calcomBooking.setConsultantName(consultant.getFirstname() + " " + consultant.getLastname());
     } else {
       calcomBooking.setConsultantName("Unknown Consultant");
@@ -52,12 +52,11 @@ public class RescheduleHelper {
     return calcomBooking;
   }
 
-  public CalcomBooking attachAskerName(CalcomBooking calcomBooking)
-      throws JsonProcessingException {
+  public CalcomBooking attachAskerName(CalcomBooking calcomBooking) {
     if (this.calcomBookingToAskerRepository.existsByCalcomBookingId(
-        Long.valueOf(calcomBooking.getId()))) {
+        calcomBooking.getId())) {
       String askerId = this.calcomBookingToAskerRepository.findByCalcomBookingId(
-          Long.valueOf(calcomBooking.getId())).getAskerId();
+          calcomBooking.getId()).getAskerId();
       AskerResponseDTO asker = this.adminUserService.getAskerById(askerId);
       calcomBooking.setAskerName(asker.getUsername());
     }

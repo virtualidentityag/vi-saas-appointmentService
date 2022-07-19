@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.useradminservice.generated.ApiClient;
@@ -53,13 +54,17 @@ public class AdminUserService {
   @Value("${keycloakService.technical.password}")
   private String keycloakTechnicalPassword;
 
-  public ConsultantDTO getConsultantById(String consultantId) throws JsonProcessingException {
+  public ConsultantDTO getConsultantById(String consultantId) {
     addTechnicalUserHeaders(adminUserControllerApi.getApiClient());
     String consultantResponse = new JSONObject(
         adminUserControllerApi.getConsultant(consultantId)).getJSONObject("embedded").toString();
     ObjectMapper mapper = new ObjectMapper().configure(
         DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    return mapper.readValue(consultantResponse, ConsultantDTO.class);
+    try {
+      return mapper.readValue(consultantResponse, ConsultantDTO.class);
+    } catch (JsonProcessingException e) {
+      throw new InternalServerErrorException("Could not deserialize consultant response from userService");
+    }
   }
 
   public AskerResponseDTO getAskerById(String askerId) {

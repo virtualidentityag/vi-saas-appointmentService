@@ -3,6 +3,7 @@ package com.vi.appointmentservice.api.service.calcom;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
 import com.vi.appointmentservice.api.model.CalcomSchedule;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,25 +25,28 @@ public class CalComScheduleService extends CalComService {
 
   public CalComScheduleService(@NonNull RestTemplate restTemplate,
       @Value("${calcom.apiUrl}") String calcomApiUrl,
-      @Value("${calcom.apiKey}") String calcomApiKey, @NonNull ObjectMapper objectMapper) {
+      @Value("${calcom.apiKey}") String calcomApiKey) {
     super(restTemplate, calcomApiUrl, calcomApiKey);
   }
 
-  public List<CalcomSchedule> getAllSchedules() throws JsonProcessingException {
+  public List<CalcomSchedule> getAllSchedules() {
     String response = this.restTemplate.getForObject(this.buildUri("/v1/schedules"), String.class);
     JSONObject jsonObject = new JSONObject(response);
     response = jsonObject.getJSONArray("schedules").toString();
     ObjectMapper mapper = new ObjectMapper();
-    List<CalcomSchedule> result = mapper.readValue(response,
-        new TypeReference<List<CalcomSchedule>>() {
-        });
+    List<CalcomSchedule> result = null;
+    try {
+      result = mapper.readValue(response, new TypeReference<>() {
+      });
+    } catch (JsonProcessingException e) {
+      throw new CalComApiException("Could not deserialize schedule response from calcom api");
+    }
     return result;
   }
 
-  public List<Integer> deleteAllSchedulesOfUser(Long userId) throws JsonProcessingException {
+  public List<Integer> deleteAllSchedulesOfUser(Long userId) {
     ArrayList<Integer> scheduleList = new ArrayList<>();
-    List<CalcomSchedule> schedulesOfUser = new ArrayList<>(this.getAllSchedules()).stream()
-        .filter(
+    List<CalcomSchedule> schedulesOfUser = new ArrayList<>(this.getAllSchedules()).stream().filter(
             schedule -> schedule.getUserId() != null && schedule.getUserId() == userId.intValue())
         .collect(Collectors.toList());
     for (CalcomSchedule schedule : schedulesOfUser) {
@@ -52,10 +56,9 @@ public class CalComScheduleService extends CalComService {
     return scheduleList;
   }
 
-  public List<CalcomSchedule> getAllSchedulesOfUser(Long userId) throws JsonProcessingException {
+  public List<CalcomSchedule> getAllSchedulesOfUser(Long userId) {
     List<CalcomSchedule> result = this.getAllSchedules();
-    return new ArrayList<>(result).stream()
-        .filter(
+    return new ArrayList<>(result).stream().filter(
             schedule -> schedule.getUserId() != null && schedule.getUserId() == userId.intValue())
         .collect(Collectors.toList());
   }
@@ -78,8 +81,8 @@ public class CalComScheduleService extends CalComService {
   }
 
   public void deleteSchedule(int scheduleId) {
-    restTemplate.exchange(this.buildUri("/v1/schedules/" + scheduleId),
-        HttpMethod.DELETE, null, String.class).getStatusCode();
+    restTemplate.exchange(this.buildUri("/v1/schedules/" + scheduleId), HttpMethod.DELETE, null,
+        String.class).getStatusCode();
   }
 
 }

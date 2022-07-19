@@ -1,13 +1,11 @@
 package com.vi.appointmentservice.api.service.calcom;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
 import com.vi.appointmentservice.api.model.CalcomUser;
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,20 +29,6 @@ public class CalComUserService extends CalComService {
     super(restTemplate, calcomApiUrl, calcomApiKey);
   }
 
-  // Users
-  public List<CalcomUser> getUsers() throws JsonProcessingException {
-    //TODO: not used as i see
-    // ResponseEntity<CalcomUser[]> response = restTemplate.getForEntity(String.format(this.buildUri("/users"), calcomApiUrl, calcomApiKey), CalcomUser[].class);
-    String response = this.restTemplate.getForObject(this.buildUri("/v1/users"), String.class);
-    JSONObject jsonObject = new JSONObject(response);
-    response = jsonObject.getJSONArray("users").toString();
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    CalcomUser[] result = mapper.readValue(response, CalcomUser[].class);
-    return List.of(Objects.requireNonNull(result));
-  }
-
-
   public CalcomUser createUser(JSONObject user) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -59,18 +43,15 @@ public class CalComUserService extends CalComService {
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       return mapper.readValue(body, CalcomUser.class);
     } catch (Exception e) {
-      log.error(ExceptionUtils.getStackTrace(e));
-      //TODO: in case an exception happens during a call to calcom the frontend will get
-      // status 200.
-      return null;
+      throw new CalComApiException("Could not create calcom user");
     }
   }
 
-  public CalcomUser updateUser(JSONObject user) throws JsonProcessingException {
+  public CalcomUser updateUser(JSONObject user) {
     long userId = user.getLong("id");
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    log.info("updating calcom user: {}", user);
+    log.info("Updating calcom user: {}", user);
     user.remove("id");
     user.remove("email");
     HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
@@ -85,11 +66,7 @@ public class CalComUserService extends CalComService {
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       return mapper.readValue(body, CalcomUser.class);
     } catch (Exception e) {
-      log.error(ExceptionUtils.getStackTrace(e));
-        //TODO: same here as on creation. did not check it but i suppose its the same.
-        // in case an exception happens we have to stop the request and throw some RuntimeException
-        // that is going to be transformed either some 50* HTTP ERROR
-      return null;
+      throw new CalComApiException("Could not update calcom user");
     }
   }
 
@@ -100,16 +77,20 @@ public class CalComUserService extends CalComService {
   }
 
 
-  public CalcomUser getUserById(Long userId) throws JsonProcessingException {
+  public CalcomUser getUserById(Long userId) {
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<java.lang.String> response = restTemplate
         .exchange(this.buildUri("/v1/users/" + userId), HttpMethod.GET, null, String.class);
     if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
       JSONObject jsonObject = new JSONObject(response.getBody());
-      if (jsonObject.getJSONObject("user") != null) {
+      try {
         return mapper.readValue(jsonObject.getJSONObject("user").toString(), CalcomUser.class);
+      } catch (Exception e) {
+        throw new CalComApiException("Could not deserialize user response from calcom api");
       }
+    } else {
+      throw new BadRequestException(
+          String.format("No calcom user associated to consultant id '%s'", userId));
     }
-    return null;
   }
 }

@@ -3,6 +3,7 @@ package com.vi.appointmentservice.api.service.calcom;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
 import com.vi.appointmentservice.api.model.CalcomAvailability;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,20 +29,24 @@ public class CalComAvailabilityService extends CalComService {
     super(restTemplate, calcomApiUrl, calcomApiKey);
   }
 
-  public List<CalcomAvailability> getAllAvailabilities() throws JsonProcessingException {
+  public List<CalcomAvailability> getAllAvailabilities() {
     String response = this.restTemplate.getForObject(this.buildUri("/v1/availabilities"),
         String.class);
     JSONObject jsonObject = new JSONObject(response);
     response = jsonObject.getJSONArray("availabilities").toString();
     ObjectMapper mapper = new ObjectMapper();
-    List<CalcomAvailability> result = mapper.readValue(response,
-        new TypeReference<List<CalcomAvailability>>() {
-        });
+    List<CalcomAvailability> result = null;
+    try {
+      result = mapper.readValue(response,
+          new TypeReference<>() {
+          });
+    } catch (JsonProcessingException e) {
+      throw new CalComApiException("Could not deserialize availability response from calcom api");
+    }
     return result;
   }
 
-  public CalcomAvailability getAvailabilityById(Long availabilityId)
-      throws JsonProcessingException {
+  public CalcomAvailability getAvailabilityById(Long availabilityId) {
     List<CalcomAvailability> result = this.getAllAvailabilities();
     return new ArrayList<>(result).stream()
         .filter(availability -> availability.getId() == availabilityId.intValue())

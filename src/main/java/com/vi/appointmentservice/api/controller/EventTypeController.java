@@ -1,6 +1,5 @@
 package com.vi.appointmentservice.api.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.generated.api.controller.EventTypesApi;
@@ -22,35 +21,34 @@ import org.springframework.web.bind.annotation.RestController;
 public class EventTypeController implements EventTypesApi {
 
 
-    CalcomUserToConsultantRepository calcomUserToConsultantRepository;
-    TeamToAgencyRepository teamToAgencyRepository;
-    CalComEventTypeService calComEventTypeService;
+  CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+  TeamToAgencyRepository teamToAgencyRepository;
+  CalComEventTypeService calComEventTypeService;
 
-    @Autowired
-    public EventTypeController(CalComEventTypeService calComEventTypeService, CalcomUserToConsultantRepository calcomUserToConsultantRepository, TeamToAgencyRepository teamToAgencyRepository) {
-        this.calComEventTypeService = calComEventTypeService;
-        this.calcomUserToConsultantRepository = calcomUserToConsultantRepository;
-        this.teamToAgencyRepository = teamToAgencyRepository;
-    }
+  @Autowired
+  public EventTypeController(CalComEventTypeService calComEventTypeService,
+      CalcomUserToConsultantRepository calcomUserToConsultantRepository,
+      TeamToAgencyRepository teamToAgencyRepository) {
+    this.calComEventTypeService = calComEventTypeService;
+    this.calcomUserToConsultantRepository = calcomUserToConsultantRepository;
+    this.teamToAgencyRepository = teamToAgencyRepository;
+  }
 
-    @Override
-    public ResponseEntity<Void> deleteEventType(Long eventTypeId) {
-        return new ResponseEntity<>(calComEventTypeService.deleteEventType(eventTypeId));
-    }
+  @Override
+  public ResponseEntity<Void> deleteEventType(Long eventTypeId) {
+    return new ResponseEntity<>(calComEventTypeService.deleteEventType(eventTypeId));
+  }
 
 
-    @Override
-    public ResponseEntity<CalcomEventType> getEventTypeById(Long eventTypeId) {
-        CalcomEventType result = calComEventTypeService.getEventTypeById(eventTypeId);
-        if (result != null) {
-            return new ResponseEntity<>(calComEventTypeService.getEventTypeById(eventTypeId), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+  @Override
+  public ResponseEntity<CalcomEventType> getEventTypeById(Long eventTypeId) {
+    return new ResponseEntity<>(calComEventTypeService.getEventTypeById(eventTypeId),
+        HttpStatus.OK);
+  }
 
-    @Override
-    public ResponseEntity<CalcomEventType> updateEventType(Long eventTypeId, CalcomEventType calcomEventType) {
-        return EventTypesApi.super.updateEventType(eventTypeId, calcomEventType);
-    }
+  @Override
+  public ResponseEntity<CalcomEventType> updateEventType(Long eventTypeId,
+      CalcomEventType calcomEventType) {
+    return EventTypesApi.super.updateEventType(eventTypeId, calcomEventType);
+  }
 }

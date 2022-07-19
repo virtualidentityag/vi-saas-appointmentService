@@ -295,26 +295,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeetingSlug'
-  /askers/{askerId}/meetingSlug:
-    get:
-      tags:
-        - asker
-      summary: Get meeting booking link for an askers assigned consultant
-      operationId: getAskerMeetingSlug
-      parameters:
-        - name: askerId
-          in: path
-          description: ID of onber asker
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MeetingSlug'
   /askers/{askerId}/bookings:
     get:
       tags:
@@ -335,26 +315,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
-  /askers/bookings/{bookingId}:
-    get:
-      tags:
-        - asker
-      summary: Get booking details
-      operationId: getBookingDetails
-      parameters:
-        - name: bookingId
-          in: path
-          description: ID of calcom booking id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomBooking'
   /eventTypes/{eventTypeId}:
     get:
       tags:

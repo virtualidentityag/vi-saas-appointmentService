@@ -26,53 +26,60 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequiredArgsConstructor
 public class AgencyController implements AgenciesApi {
-    @NonNull private final AgencyFacade agencyFacade;
+
+  @NonNull
+  private final AgencyFacade agencyFacade;
 
 
-    @Override
-    public ResponseEntity<CalcomTeam> createAgency(AgencyResponseDTO agencyResponseDTO) {
-        return AgenciesApi.super.createAgency(agencyResponseDTO);
-    }
+  @Override
+  public ResponseEntity<CalcomTeam> createAgency(AgencyResponseDTO agencyResponseDTO) {
+    return AgenciesApi.super.createAgency(agencyResponseDTO);
+  }
 
-    @Override
-    public ResponseEntity<Void> deleteAgency(Long agencyId) {
-        return AgenciesApi.super.deleteAgency(agencyId);
-    }
+  @Override
+  public ResponseEntity<Void> deleteAgency(Long agencyId) {
+    return AgenciesApi.super.deleteAgency(agencyId);
+  }
 
-    @Override
-    public ResponseEntity<CalcomTeam> updateAgency(Long agencyId, AgencyResponseDTO agencyResponseDTO) {
-        return AgenciesApi.super.updateAgency(agencyId, agencyResponseDTO);
-    }
+  @Override
+  public ResponseEntity<CalcomTeam> updateAgency(Long agencyId,
+      AgencyResponseDTO agencyResponseDTO) {
+    return AgenciesApi.super.updateAgency(agencyId, agencyResponseDTO);
+  }
 
-    @Override
-    public ResponseEntity<CalcomEventType> addEventTypeToAgency(Long agencyId, CalcomEventType teamEventType) {
-        return AgenciesApi.super.addEventTypeToAgency(agencyId, teamEventType);
-    }
+  @Override
+  public ResponseEntity<CalcomEventType> addEventTypeToAgency(Long agencyId,
+      CalcomEventType teamEventType) {
+    return AgenciesApi.super.addEventTypeToAgency(agencyId, teamEventType);
+  }
 
-    @Override
-    public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfAgency(Long agencyId) {
-            List<CalcomEventType> eventTypes;
-            eventTypes = this.agencyFacade.getCalcomEventTypesByAgencyId(agencyId);
-            return new ResponseEntity<>(eventTypes, HttpStatus.OK);
-    }
+  @Override
+  public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfAgency(Long agencyId) {
+    List<CalcomEventType> eventTypes;
+    eventTypes = this.agencyFacade.getCalcomEventTypesByAgencyId(agencyId);
+    return new ResponseEntity<>(eventTypes, HttpStatus.OK);
+  }
 
-    @Override
-    public ResponseEntity<MeetingSlug> getInitialMeetingSlug(Long agencyId) {
-        // TODO: Swap mock method with real method once agencies are associated
-        return new ResponseEntity<>(this.agencyFacade.getMockMeetingSlugByAgencyId(agencyId), HttpStatus.OK);
-    }
+  @Override
+  public ResponseEntity<MeetingSlug> getInitialMeetingSlug(Long agencyId) {
+    // TODO: Swap mock method with real method once agencies are associated
+    return new ResponseEntity<>(this.agencyFacade.getMockMeetingSlugByAgencyId(agencyId),
+        HttpStatus.OK);
+  }
 
 
-
-    // TODO: Remove route once agencies are associated
-    @ApiOperation(value = "Get initial meeting booking link for agency", nickname = "getInitialMeetingSlugReal", response = MeetingSlug.class, tags={ "agency", })
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "successful operation", response = MeetingSlug.class) })
-    @GetMapping(
-        value = "/agencies/{agencyId}/initialMeetingSlugReal",
-        produces = { "application/json" }
-    )
-    public ResponseEntity<MeetingSlug> getInitialMeetingSlugReal(@ApiParam(value = "ID of agency",required=true) @PathVariable("agencyId") Long agencyId) {
-        return new ResponseEntity<>(this.agencyFacade.getMeetingSlugByAgencyId(agencyId), HttpStatus.OK);
-    }
+  // TODO: Remove route once agencies are associated
+  @ApiOperation(value = "Get initial meeting booking link for agency", nickname = "getInitialMeetingSlugReal", response = MeetingSlug.class, tags = {
+      "agency",})
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "successful operation", response = MeetingSlug.class)})
+  @GetMapping(
+      value = "/agencies/{agencyId}/initialMeetingSlugReal",
+      produces = {"application/json"}
+  )
+  public ResponseEntity<MeetingSlug> getInitialMeetingSlugReal(
+      @ApiParam(value = "ID of agency", required = true) @PathVariable("agencyId") Long agencyId) {
+    return new ResponseEntity<>(this.agencyFacade.getMeetingSlugByAgencyId(agencyId),
+        HttpStatus.OK);
+  }
 }

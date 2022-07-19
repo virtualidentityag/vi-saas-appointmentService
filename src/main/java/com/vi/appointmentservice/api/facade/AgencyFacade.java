@@ -1,6 +1,6 @@
 package com.vi.appointmentservice.api.facade;
 
-import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
+import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
@@ -34,7 +34,7 @@ public class AgencyFacade {
       eventTypes = calComEventTypeService.getAllEventTypesOfTeam(0L);
       return eventTypes;
     } else {
-      throw new NotFoundException(
+      throw new BadRequestException(
           String.format("No calcom team associated to agency with id: %s", agencyId));
     }
   }
@@ -50,7 +50,7 @@ public class AgencyFacade {
         meetingSlug.setSlug("team-hamburg");
         break;
       default:
-        throw new NotFoundException(
+        throw new BadRequestException(
             String.format("Mock route not configured for agencyId: %s", agencyId));
     }
     return meetingSlug;
@@ -59,16 +59,18 @@ public class AgencyFacade {
   public MeetingSlug getMeetingSlugByAgencyId(Long agencyId) {
     // TODO: remove "mock" method once agencies are associated
     // TODO: add verification, sanitization and general cleanliness
+    this.checkIfConsultantExists(agencyId);
+    MeetingSlug meetingSlug = new MeetingSlug();
+    meetingSlug.setSlug(calComTeamService.getTeamById(
+        teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid()).getSlug());
+    return meetingSlug;
+  }
+
+  private void checkIfConsultantExists(Long agencyId) {
     if (teamToAgencyRepository.existsByAgencyId(agencyId)) {
-      MeetingSlug meetingSlug = new MeetingSlug();
-      meetingSlug.setSlug(calComTeamService.getTeamById(
-          teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid()).getSlug());
-      return meetingSlug;
-    } else {
-      throw new NotFoundException(
+      throw new BadRequestException(
           String.format("No calcom team associated to agency with id: %s", agencyId));
     }
-
   }
 
 
