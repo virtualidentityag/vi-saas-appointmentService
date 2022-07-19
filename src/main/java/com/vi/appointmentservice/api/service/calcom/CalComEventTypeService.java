@@ -1,8 +1,9 @@
-package com.vi.appointmentservice.service.calcom;
+package com.vi.appointmentservice.api.service.calcom;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
 import com.vi.appointmentservice.api.model.CalcomEventType;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -26,25 +27,26 @@ public class CalComEventTypeService extends CalComService {
         super(restTemplate, calcomApiUrl, calcomApiKey);
     }
 
-    public String generateSlug(String name) {
-        name = name.toLowerCase();
-        String regex = "[^\\w]+"; // Relace everyting but word characters (digits, numbers)
-        String subst = "-";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(name);
-        return matcher.replaceAll(subst);
-    }
-
-    public List<CalcomEventType> getAllEventTypes() throws JsonProcessingException {
+    public List<CalcomEventType> getAllEventTypes() {
         String response = this.restTemplate.getForObject(this.buildUri("/v1/event-types"), String.class);
-        JSONObject jsonObject = new JSONObject(response);
+        JSONObject jsonObject;
+        if (response != null) {
+            jsonObject = new JSONObject(response);
+        } else {
+            throw new CalComApiException("Calcom event-type API response was null");
+        }
         response = jsonObject.getJSONArray("event_types").toString();
         ObjectMapper mapper = new ObjectMapper();
-        List<CalcomEventType> result = mapper.readValue(response, new TypeReference<List<CalcomEventType>>(){});
-        return result;
+        try {
+            return mapper.readValue(response, new TypeReference<>() {
+            });
+        } catch (JsonProcessingException e) {
+            throw new CalComApiException("Could not deserialize event-types response from calcom api");
+        }
+
     }
 
-    public void deleteAllEventTypesOfUser(Long userId) throws JsonProcessingException {
+    public void deleteAllEventTypesOfUser(Long userId) {
         List<CalcomEventType> eventTypesOfUser = new ArrayList<>(this.getAllEventTypes()).stream()
             .filter(eventType -> eventType.getUserId() != null && eventType.getUserId() == userId.intValue())
             .collect(Collectors.toList());
@@ -53,7 +55,7 @@ public class CalComEventTypeService extends CalComService {
         }
     }
 
-    public List<CalcomEventType> getAllEventTypesOfTeam(Long teamId) throws JsonProcessingException {
+    public List<CalcomEventType> getAllEventTypesOfTeam(Long teamId) {
         List<CalcomEventType> result = this.getAllEventTypes();
         // TODO: Add correct filter: .filter(eventType -> eventType.getTeamId() != null && eventType.getTeamId() == teamId.intValue())
         return new ArrayList<>(result).stream()
@@ -61,19 +63,15 @@ public class CalComEventTypeService extends CalComService {
                 .collect(Collectors.toList());
     }
 
-    public List<CalcomEventType> getAllEventTypesOfUser(Long userId) throws JsonProcessingException {
+    public List<CalcomEventType> getAllEventTypesOfUser(Long userId) {
         List<CalcomEventType> result = this.getAllEventTypes();
         return new ArrayList<>(result).stream()
                 .filter(eventType -> eventType.getUserId() != null && eventType.getUserId() == userId.intValue())
                 .collect(Collectors.toList());
     }
 
-    public CalcomEventType getEventTypeById(Long eventTypeId) throws JsonProcessingException {
-        String response = this.restTemplate.getForObject(this.buildUri("/v1/event-types"), String.class);
-        JSONObject jsonObject = new JSONObject(response);
-        response = jsonObject.getJSONArray("event_types").toString();
-        ObjectMapper mapper = new ObjectMapper();
-        List<CalcomEventType> result = mapper.readValue(response, new TypeReference<List<CalcomEventType>>(){});
+    public CalcomEventType getEventTypeById(Long eventTypeId) {
+        List<CalcomEventType> result = this.getAllEventTypes();
         return new ArrayList<>(result).stream()
                 .filter(eventType -> eventType.getId() == eventTypeId.intValue())
                 .collect(Collectors.toList()).get(0);

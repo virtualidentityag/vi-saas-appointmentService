@@ -1,7 +1,10 @@
-package com.vi.appointmentservice.service.calcom;
+package com.vi.appointmentservice.api.service.calcom;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
+import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.api.model.CalcomMembership;
 import com.vi.appointmentservice.api.model.CalcomTeam;
 import lombok.extern.slf4j.Slf4j;
@@ -39,21 +42,40 @@ public class CalComTeamService extends CalComService{
         return matcher.replaceAll(subst);
     }
 
-    public List<CalcomTeam> getAllTeams() throws JsonProcessingException {
+    public List<CalcomTeam> getAllTeams(){
         String response = this.restTemplate.getForObject(this.buildUri("/v1/teams"), String.class);
-        JSONObject jsonObject = new JSONObject(response);
+        JSONObject jsonObject;
+        if (response != null) {
+            jsonObject = new JSONObject(response);
+        } else {
+            throw new CalComApiException("Calcom team API response was null");
+        }
         response = jsonObject.getJSONArray("teams").toString();
         ObjectMapper mapper = new ObjectMapper();
-        CalcomTeam[] result = mapper.readValue(response, CalcomTeam[].class);
-        return List.of(Objects.requireNonNull(result));
+        try {
+            CalcomTeam[] result = mapper.readValue(response, CalcomTeam[].class);
+            return List.of(Objects.requireNonNull(result));
+        } catch (JsonProcessingException e) {
+            throw new CalComApiException("Could not deserialize teams response from calcom api");
+        }
+
     }
 
-    public CalcomTeam getTeamById(Long teamId) throws JsonProcessingException {
+    public CalcomTeam getTeamById(Long teamId) {
         String response = restTemplate.getForObject(this.buildUri("/v1/teams/" + teamId), String.class);
-        JSONObject jsonObject = new JSONObject(response);
+        JSONObject jsonObject;
+        if (response != null) {
+            jsonObject = new JSONObject(response);
+        } else {
+            throw new CalComApiException("Calcom team API response was null");
+        }
         response = jsonObject.getJSONObject("team").toString();
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(response, CalcomTeam.class);
+        try {
+            return mapper.readValue(response, CalcomTeam.class);
+        } catch (JsonProcessingException e) {
+            throw new CalComApiException("Could not deserialize team response from calcom api");
+        }
     }
 
     public CalcomTeam createTeam(CalcomTeam team){

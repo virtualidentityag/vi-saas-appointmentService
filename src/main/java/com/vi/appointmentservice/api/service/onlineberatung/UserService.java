@@ -1,8 +1,8 @@
-package com.vi.appointmentservice.service.onlineberatung;
+package com.vi.appointmentservice.api.service.onlineberatung;
 
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.port.out.IdentityClient;
-import com.vi.appointmentservice.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.userservice.generated.ApiClient;
 import com.vi.appointmentservice.userservice.generated.web.UserControllerApi;
 import com.vi.appointmentservice.userservice.generated.web.model.ConsultantSearchResultDTO;

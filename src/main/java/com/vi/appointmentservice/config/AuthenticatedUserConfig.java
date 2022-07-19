@@ -1,10 +1,9 @@
 package com.vi.appointmentservice.config;
 
-import com.vi.appointmentservice.api.exception.KeycloakException;
+import com.vi.appointmentservice.api.exception.keycloak.KeycloakException;
 import com.vi.appointmentservice.helper.AuthenticatedUser;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;

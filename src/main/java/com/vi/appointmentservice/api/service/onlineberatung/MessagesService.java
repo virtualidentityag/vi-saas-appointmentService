@@ -1,7 +1,8 @@
-package com.vi.appointmentservice.service.onlineberatung;
+package com.vi.appointmentservice.api.service.onlineberatung;
 
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.messageservice.generated.web.MessageControllerApi;
 import com.vi.appointmentservice.messageservice.generated.web.model.AliasMessageDTO;
 import com.vi.appointmentservice.messageservice.generated.web.model.MessageType;
@@ -10,8 +11,7 @@ import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
-import com.vi.appointmentservice.service.calcom.CalComBookingService;
-import com.vi.appointmentservice.service.securityheader.SecurityHeaderSupplier;
+import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;

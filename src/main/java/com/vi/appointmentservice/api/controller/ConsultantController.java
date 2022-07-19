@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.controller;
+package com.vi.appointmentservice.api.controller;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,18 +10,18 @@ import com.vi.appointmentservice.api.model.CalcomEventTypeLocationsInner;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
+import com.vi.appointmentservice.api.service.calcom.CalComAvailabilityService;
+import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
+import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
+import com.vi.appointmentservice.api.service.calcom.CalComMembershipService;
+import com.vi.appointmentservice.api.service.calcom.CalComScheduleService;
+import com.vi.appointmentservice.api.service.calcom.CalComTeamService;
+import com.vi.appointmentservice.api.service.calcom.CalComUserService;
+import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
-import com.vi.appointmentservice.service.calcom.CalComAvailabilityService;
-import com.vi.appointmentservice.service.calcom.CalComBookingService;
-import com.vi.appointmentservice.service.calcom.CalComEventTypeService;
-import com.vi.appointmentservice.service.calcom.CalComMembershipService;
-import com.vi.appointmentservice.service.calcom.CalComScheduleService;
-import com.vi.appointmentservice.service.calcom.CalComTeamService;
-import com.vi.appointmentservice.service.calcom.CalComUserService;
-import com.vi.appointmentservice.service.onlineberatung.UserService;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
@@ -374,12 +374,8 @@ public class ConsultantController implements ConsultantsApi {
     // INTERNAL_SERVER_ERROR are also catched via an advice
     if (calcomUserToConsultantRepository.existsByConsultantId(userId)) {
       List<CalcomEventType> eventTypes;
-      try {
         eventTypes = calComEventTypeService.getAllEventTypesOfUser(
             calcomUserToConsultantRepository.findByConsultantId(userId).getCalComUserId());
-      } catch (JsonProcessingException e) {
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-      }
       return new ResponseEntity<>(eventTypes, HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);

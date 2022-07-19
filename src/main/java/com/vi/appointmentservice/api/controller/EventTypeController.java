@@ -1,11 +1,11 @@
-package com.vi.appointmentservice.controller;
+package com.vi.appointmentservice.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.generated.api.controller.EventTypesApi;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
-import com.vi.appointmentservice.service.calcom.CalComEventTypeService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,15 +41,11 @@ public class EventTypeController implements EventTypesApi {
 
     @Override
     public ResponseEntity<CalcomEventType> getEventTypeById(Long eventTypeId) {
-        try {
-            CalcomEventType result = calComEventTypeService.getEventTypeById(eventTypeId);
-            if (result != null) {
-                return new ResponseEntity<>(calComEventTypeService.getEventTypeById(eventTypeId), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (JsonProcessingException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        CalcomEventType result = calComEventTypeService.getEventTypeById(eventTypeId);
+        if (result != null) {
+            return new ResponseEntity<>(calComEventTypeService.getEventTypeById(eventTypeId), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

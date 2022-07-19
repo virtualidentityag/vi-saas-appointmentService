@@ -1,15 +1,15 @@
-package com.vi.appointmentservice.controller;
+package com.vi.appointmentservice.api.controller;
 
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.MeetingSlug;
+import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.generated.api.controller.AskersApi;
 import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.repository.CalcomRepository;
-import com.vi.appointmentservice.service.CalcomWebhookHandlerService;
+import com.vi.appointmentservice.api.service.CalcomWebhookHandlerService;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;

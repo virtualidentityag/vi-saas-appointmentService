@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.service.calcom;
+package com.vi.appointmentservice.api.service.calcom;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;

@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.api.exception;
+package com.vi.appointmentservice.api.exception.keycloak;
 
 public class KeycloakException extends RuntimeException {
 

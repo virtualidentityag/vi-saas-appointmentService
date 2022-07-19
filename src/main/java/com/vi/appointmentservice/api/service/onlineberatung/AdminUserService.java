@@ -1,11 +1,11 @@
-package com.vi.appointmentservice.service.onlineberatung;
+package com.vi.appointmentservice.api.service.onlineberatung;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import com.vi.appointmentservice.port.out.IdentityClient;
-import com.vi.appointmentservice.service.securityheader.SecurityHeaderSupplier;
+import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.useradminservice.generated.ApiClient;
 import com.vi.appointmentservice.useradminservice.generated.web.AdminUserControllerApi;
 import com.vi.appointmentservice.useradminservice.generated.web.model.AskerResponseDTO;

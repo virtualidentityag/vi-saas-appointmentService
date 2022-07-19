@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.service.securityheader;
+package com.vi.appointmentservice.api.service.securityheader;
 
 import com.vi.appointmentservice.helper.AuthenticatedUser;
 import lombok.NonNull;

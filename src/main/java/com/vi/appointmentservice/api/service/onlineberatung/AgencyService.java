@@ -1,15 +1,12 @@
-package com.vi.appointmentservice.service.onlineberatung;
+package com.vi.appointmentservice.api.service.onlineberatung;
 
 import com.vi.appointmentservice.agencyservice.generated.web.AgencyControllerApi;
-import com.vi.appointmentservice.service.securityheader.SecurityHeaderSupplier;
+import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.agencyservice.generated.ApiClient;
-import com.vi.appointmentservice.userservice.generated.web.model.AgencyDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @Slf4j

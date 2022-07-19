@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import javax.ws.rs.BadRequestException;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 
 /**
@@ -13,6 +14,10 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 public class LogService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LogService.class);
+  public static final String DB_ERROR_TEXT = "Database error: ";
+  public static final String FORBIDDEN_WARNING_TEXT = "Forbidden: ";
+
+  private static final String APPOINTMENTSERVICE_API = "AppointmentService API: {}";
 
   private LogService() {
   }
@@ -20,74 +25,78 @@ public class LogService {
   /**
    * Logs a database error.
    *
-   * @param exception the exception to be logged
+   * @param exception the exception
    */
   public static void logDatabaseError(Exception exception) {
-    LOGGER.error("Database error: {}", getStackTrace(exception));
+    LOGGER.error("{}{}", DB_ERROR_TEXT, getStackTrace(exception));
   }
 
   /**
-   * javax Bad Request Exception.
+   * Forbidden warning.
    *
-   * @param exception the exception to be logged
+   * @param message the message
    */
-  public static void logBadRequestException(BadRequestException exception) {
-    LOGGER.warn("Bad Request: {}", getStackTrace(exception));
+  public static void logForbidden(String message) {
+    LOGGER.warn("{}{}", FORBIDDEN_WARNING_TEXT, message);
   }
 
   /**
-   * Logs a {@link NumberFormatException}.
+   * Forbidden warning.
    *
-   * @param exception the exception to be logged
+   * @param exception the exception
    */
-  public static void logNumberFormatException(Exception exception) {
-    LOGGER.error("Error while formatting number: {}", getStackTrace(exception));
+  public static void logForbidden(Exception exception) {
+    LOGGER.warn("{}", getStackTrace(exception));
   }
 
   /**
-   * Logs a info message.
+   * Log internal server error.
    *
-   * @param message the message to be logged
-   */
-  public static void logInfo(String message) {
-    LOGGER.info(message);
-  }
-
-  /**
-   * Logs a warning.
-   *
-   * @param exception the exception to be logged
-   */
-  public static void logWarning(Exception exception) {
-    LOGGER.warn("AgencyService API: {}", getStackTrace(exception));
-  }
-
-  /**
-   * Logs a warning.
-   *
-   * @param httpStatus status to be logged
-   * @param exception  the exception to be logged
-   */
-  public static void logWarning(HttpStatus httpStatus, Exception exception) {
-    LOGGER.warn("AgencyService API: {}: {}", httpStatus.getReasonPhrase(),
-        getStackTrace(exception));
-  }
-
-  /**
-   * Logs a internal server error.
-   *
-   * @param exception the exception to be logged
+   * @param exception the exception
    */
   public static void logInternalServerError(Exception exception) {
-    LOGGER.error("AgencyService API: 500 Internal Server Error: {}", getStackTrace(exception));
+    LOGGER.error(
+        "AppointmentService Api: {}, {}, {}",
+        getStackTrace(exception),
+        exception.getMessage(),
+        nonNull(exception.getCause()) ? getStackTrace(exception.getCause()) : "No Cause");
   }
 
   /**
-   * Logs a error.
+   * Logs an info message.
    *
-   * @param exception  the exception to be logged
+   * @param msg The message
    */
-  public static void logError(Exception exception) {
-    LOGGER.error("AgencyService API: {}", getStackTrace(exception));
+  public static void logInfo(String msg) {
+    LOGGER.info(msg);
   }
+
+  /**
+   * Logs an info exception.
+   *
+   * @param exception the exception
+   */
+  public static void logInfo(Exception exception) {
+    LOGGER.info(getStackTrace(exception));
+  }
+
+  /**
+   * Logs an warning message.
+   *
+   * @param exception The exception
+   */
+  public static void logWarn(Exception exception) {
+    LOGGER.warn(getStackTrace(exception));
+  }
+
+  /**
+   * Logs a warning.
+   *
+   * @param status the http status to be logged
+   * @param ex the exception to be logged
+   */
+  public static void logWarn(final HttpStatus status, final Exception ex) {
+    LOGGER.warn(APPOINTMENTSERVICE_API + ": {}", status.getReasonPhrase(), getStackTrace(ex));
+  }
+
 }

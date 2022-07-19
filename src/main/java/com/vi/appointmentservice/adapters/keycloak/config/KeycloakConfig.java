@@ -1,6 +1,6 @@
 package com.vi.appointmentservice.adapters.keycloak.config;
 
-import com.vi.appointmentservice.api.exception.KeycloakException;
+import com.vi.appointmentservice.api.exception.keycloak.KeycloakException;
 import com.vi.appointmentservice.helper.AuthenticatedUser;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
