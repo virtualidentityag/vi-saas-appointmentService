@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.service;
+package com.vi.appointmentservice.repository;
 
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import java.util.List;
@@ -21,6 +21,7 @@ public class CalcomRepository {
   NamedParameterJdbcTemplate calcomDBNamedParamterTemplate;
 
   public List<CalcomBooking> getAllBookingsByStatus(Long userId) {
+    //TODO: replace this with named query
     return calcomDBTemplate.query(
         "select * from \"Booking\" as booking where booking.status != 'cancelled' and booking.\"userId\" = '"
             + userId + "'",
@@ -29,8 +30,9 @@ public class CalcomRepository {
 
   public List<CalcomBooking> getByIds(List<Long> bookingIds) {
     SqlParameterSource parameters = new MapSqlParameterSource("ids", bookingIds);
-    return calcomDBNamedParamterTemplate.query("select * from \"Booking\" where id in (:ids)", parameters,
-        new CalcomRepositoryBookingMapper());
+    return calcomDBNamedParamterTemplate
+        .query("select * from \"Booking\" where id in (:ids)", parameters,
+            new CalcomRepositoryBookingMapper());
   }
 
 

@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.service;
+package com.vi.appointmentservice.service.onlineberatung;
 
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import com.vi.appointmentservice.port.out.IdentityClient;

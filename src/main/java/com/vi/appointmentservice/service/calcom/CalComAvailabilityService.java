@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.service;
+package com.vi.appointmentservice.service.calcom;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.service;
+package com.vi.appointmentservice.service.calcom;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,6 +6,7 @@ import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
+import com.vi.appointmentservice.repository.CalcomRepository;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -102,6 +103,7 @@ public class CalComBookingService extends CalComService {
     ObjectMapper mapper = new ObjectMapper();
     try {
       CalcomBooking calcomBooking = mapper.readValue(response, CalcomBooking.class);
+      //TODO: change this to use zones properly
       calcomBooking.setStartTime(
           ZonedDateTime.parse(
               jsonObject.getJSONObject("booking").get("startTime").toString()).plusHours(2)

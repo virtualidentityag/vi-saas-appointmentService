@@ -14,14 +14,14 @@ import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
-import com.vi.appointmentservice.service.CalComAvailabilityService;
-import com.vi.appointmentservice.service.CalComBookingService;
-import com.vi.appointmentservice.service.CalComEventTypeService;
-import com.vi.appointmentservice.service.CalComMembershipService;
-import com.vi.appointmentservice.service.CalComScheduleService;
-import com.vi.appointmentservice.service.CalComTeamService;
-import com.vi.appointmentservice.service.CalComUserService;
-import com.vi.appointmentservice.service.UserService;
+import com.vi.appointmentservice.service.calcom.CalComAvailabilityService;
+import com.vi.appointmentservice.service.calcom.CalComBookingService;
+import com.vi.appointmentservice.service.calcom.CalComEventTypeService;
+import com.vi.appointmentservice.service.calcom.CalComMembershipService;
+import com.vi.appointmentservice.service.calcom.CalComScheduleService;
+import com.vi.appointmentservice.service.calcom.CalComTeamService;
+import com.vi.appointmentservice.service.calcom.CalComUserService;
+import com.vi.appointmentservice.service.onlineberatung.UserService;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,6 +178,7 @@ public class ConsultantController implements ConsultantsApi {
       ObjectMapper objectMapper = new ObjectMapper();
       // Ignore null values
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+      //TODO: bad naming createJson
       JSONObject createJson = new JSONObject(objectMapper.writeValueAsString(creationUser));
       // Create association
       return calComUserService.createUser(createJson);
@@ -214,6 +215,7 @@ public class ConsultantController implements ConsultantsApi {
   }
 
   private CalcomEventType getDefaultCalcomEventType(CalcomUser createdUser) {
+    //TODO: move to service layer
     CalcomEventType eventType = new CalcomEventType();
     eventType.setUserId(Math.toIntExact(createdUser.getId()));
     eventType.setTitle("Beratung mit Counsellor Name von Name of the agency");
@@ -239,6 +241,7 @@ public class ConsultantController implements ConsultantsApi {
   }
 
   private CalcomUser updateCalcomUser(ConsultantDTO consultant) throws JsonProcessingException {
+    //TODO: move to service layer
     if (calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())) {
       // Exists, update the user
       Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultant.getId())
@@ -270,10 +273,16 @@ public class ConsultantController implements ConsultantsApi {
 
   @Override
   public ResponseEntity<Void> deleteConsultant(String consultantId) {
-    return new ResponseEntity<>(this.delteConsultantHandler(consultantId));
+    return new ResponseEntity<>(this.deleteConsultantHandler(consultantId));
   }
 
-  private HttpStatus delteConsultantHandler(String consultantId) {
+
+  private HttpStatus deleteConsultantHandler(String consultantId) {
+
+    //TODO: in other microservices usually you would have this logic in the service layer. in
+    // case the entry doesn't exist in DB you would throw a runtime exception BadRequestException
+    // an advice would catch it and return a 400 error instead of 404.
+    // INTERNAL_SERVER_ERROR are also catched via an advice
     try {
       if (calcomUserToConsultantRepository.existsByConsultantId(consultantId)) {
         // Find associated user
@@ -310,6 +319,11 @@ public class ConsultantController implements ConsultantsApi {
   @Override
   public ResponseEntity<CalcomUser> updateConsultant(String consultantId,
       ConsultantDTO consultant) {
+    //TODO: in other microservices usually you would have this logic in the service layer. in
+    // case the entry doesn't exist in DB you would throw a runtime exception BadRequestException
+    // an advice would catch it and return a 400 error instead of 404.
+    // INTERNAL_SERVER_ERROR are also catched via an advice
+
     if (Objects.equals(consultantId, consultant.getId())) {
       try {
         CalcomUser createdUser = createOrUpdateCalcomUserHandler(consultant);
@@ -326,11 +340,16 @@ public class ConsultantController implements ConsultantsApi {
   public ResponseEntity<CalcomEventType> addEventTypeToConsultant(String userId,
       CalcomEventType calcomEventType) {
     return ConsultantsApi.super.addEventTypeToConsultant(userId, calcomEventType);
+    //TODO: remove unused method
   }
 
 
   @Override
   public ResponseEntity<List<CalcomBooking>> getAllBookingsOfConsultant(String userId) {
+    //TODO: in other microservices usually you would have this logic in the service layer. in
+    // case the entry doesn't exist in DB you would throw a runtime exception BadRequestException
+    // an advice would catch it and return a 400 error instead of 404.
+    // INTERNAL_SERVER_ERROR are also catched via an advice
     try {
       if (calcomUserToConsultantRepository.existsByConsultantId(userId)) {
         Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(userId)
@@ -349,6 +368,10 @@ public class ConsultantController implements ConsultantsApi {
 
   @Override
   public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfConsultant(String userId) {
+    //TODO: in other microservices usually you would have this logic in the service layer. in
+    // case the entry doesn't exist in DB you would throw a runtime exception BadRequestException
+    // an advice would catch it and return a 400 error instead of 404.
+    // INTERNAL_SERVER_ERROR are also catched via an advice
     if (calcomUserToConsultantRepository.existsByConsultantId(userId)) {
       List<CalcomEventType> eventTypes;
       try {
@@ -365,6 +388,10 @@ public class ConsultantController implements ConsultantsApi {
 
   @Override
   public ResponseEntity<MeetingSlug> getConsultantMeetingSlug(String userId) {
+    //TODO: in other microservices usually you would have this logic in the service layer. in
+    // case the entry doesn't exist in DB you would throw a runtime exception BadRequestException
+    // an advice would catch it and return a 400 error instead of 404.
+    // INTERNAL_SERVER_ERROR are also catched via an advice
     if (calcomUserToConsultantRepository.existsByConsultantId(userId)) {
       MeetingSlug meetingSlug = new MeetingSlug();
       try {

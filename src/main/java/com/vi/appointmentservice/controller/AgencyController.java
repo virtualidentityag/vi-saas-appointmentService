@@ -5,14 +5,13 @@ import com.vi.appointmentservice.api.model.*;
 import com.vi.appointmentservice.generated.api.controller.AgenciesApi;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
-import com.vi.appointmentservice.service.CalComEventTypeService;
-import com.vi.appointmentservice.service.CalComTeamService;
+import com.vi.appointmentservice.service.calcom.CalComEventTypeService;
+import com.vi.appointmentservice.service.calcom.CalComTeamService;
 import io.swagger.annotations.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +25,6 @@ import java.util.List;
 public class AgencyController implements AgenciesApi {
 
     @NonNull private final CalComTeamService calComTeamService;
-
     @NonNull private final CalComEventTypeService calComEventTypeService;
     @NonNull private final TeamToAgencyRepository teamToAgencyRepository;
 
@@ -39,9 +37,9 @@ public class AgencyController implements AgenciesApi {
      * @return
      */
     @PostMapping(
-            value = "appointments/agencies/{agencyId}/associateTeam",
-            produces = {"application/json"},
-            consumes = {"application/json"}
+        value = "appointments/agencies/{agencyId}/associateTeam",
+        produces = {"application/json"},
+        consumes = {"application/json"}
     )
     ResponseEntity<TeamToAgency> associateAgency(@ApiParam(value = "ID of onber agency", required = true) @PathVariable("agencyId") Long agencyId, @RequestBody String requestBodyString) {
         try {
@@ -56,10 +54,6 @@ public class AgencyController implements AgenciesApi {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
-
-
 
     @Override
     public ResponseEntity<CalcomTeam> createAgency(AgencyResponseDTO agencyResponseDTO) {
@@ -88,6 +82,8 @@ public class AgencyController implements AgenciesApi {
     @Override
     public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfAgency(Long agencyId) {
         // TODO: remove "true" once team are associated to agencies
+        // TODO: exception handling should be done in service layer
+        // TODO: INTERNAL_SERVER_ERROR responses are handled via and advice. search for @ControllerAdvice in other projects
         if(true || teamToAgencyRepository.existsByAgencyId(agencyId)){
             List<CalcomEventType> eventTypes;
             try {
@@ -121,13 +117,15 @@ public class AgencyController implements AgenciesApi {
 
     @ApiOperation(value = "Get initial meeting booking link for agency", nickname = "getInitialMeetingSlugReal", notes = "", response = MeetingSlug.class, tags={ "agency", })
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "successful operation", response = MeetingSlug.class) })
+        @ApiResponse(code = 200, message = "successful operation", response = MeetingSlug.class) })
     @GetMapping(
-            value = "/agencies/{agencyId}/initialMeetingSlugReal",
-            produces = { "application/json" }
+        value = "/agencies/{agencyId}/initialMeetingSlugReal",
+        produces = { "application/json" }
     )
     public ResponseEntity<MeetingSlug> getInitialMeetingSlugReal(@ApiParam(value = "ID of agency",required=true) @PathVariable("agencyId") Long agencyId) {
+        // TODO: remove "real" endpoint and move logic to getInitialMeetingSlug
         // TODO: add verification, sanitization and general cleanliness
+        //TODO: do the try catch handling inside a service
         MeetingSlug meetingSlug = new MeetingSlug();
         Long teamId;
         try {

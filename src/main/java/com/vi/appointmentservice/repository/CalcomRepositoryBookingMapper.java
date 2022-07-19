@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.service;
+package com.vi.appointmentservice.repository;
 
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import java.sql.ResultSet;

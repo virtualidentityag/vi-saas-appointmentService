@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.service;
+package com.vi.appointmentservice.service.onlineberatung;
 
 import com.vi.appointmentservice.agencyservice.generated.web.AgencyControllerApi;
 import com.vi.appointmentservice.service.securityheader.SecurityHeaderSupplier;

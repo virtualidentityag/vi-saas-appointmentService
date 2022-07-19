@@ -5,7 +5,7 @@ import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.generated.api.controller.EventTypesApi;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
-import com.vi.appointmentservice.service.CalComEventTypeService;
+import com.vi.appointmentservice.service.calcom.CalComEventTypeService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
