@@ -1,6 +1,6 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.13.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <changeSet author="PhilippFruh (generated)" id="1658142835977-1">
+    <changeSet author="PhilippFruh (generated)" id="1658217564520-1">
         <createTable tableName="calcom_booking_to_asker">
             <column name="asker_id" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -10,7 +10,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="PhilippFruh (generated)" id="1658142835977-2">
+    <changeSet author="PhilippFruh (generated)" id="1658217564520-2">
         <createTable tableName="calcom_user_to_consultant">
             <column name="consultantid" type="VARCHAR(255)">
                 <constraints nullable="false" primaryKey="true"/>
@@ -20,7 +20,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="PhilippFruh (generated)" id="1658142835977-3">
+    <changeSet author="PhilippFruh (generated)" id="1658217564520-3">
         <createTable tableName="team_to_agency">
             <column name="teamid" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
