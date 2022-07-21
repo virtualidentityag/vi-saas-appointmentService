@@ -36,7 +36,7 @@ public class RescheduleHelper {
     String slug = null;
     if (teamId != null) {
       CalcomTeam team = calComTeamService.getTeamById(Long.valueOf(teamId));
-      slug = "team/" + team.getName();
+      slug = "team/" + team.getSlug();
     } else {
       slug = registeredCalcomUser.getUsername();
     }
