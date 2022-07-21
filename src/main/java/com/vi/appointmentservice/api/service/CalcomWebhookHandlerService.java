@@ -1,8 +1,11 @@
 package com.vi.appointmentservice.api.service;
 
+import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
+import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
@@ -21,6 +24,7 @@ public class CalcomWebhookHandlerService {
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull MessagesService messagesService;
   private final @NonNull CalComBookingService calComBookingService;
+  private final @NonNull CalComEventTypeService calComEventTypeService;
 
   @Transactional
   public void handlePayload(CalcomWebhookInput input) {
@@ -42,10 +46,17 @@ public class CalcomWebhookHandlerService {
 
   private void handleCreateEvent(CalcomWebhookInputPayload payload) {
     createBookingAskerRelation(payload);
-    Boolean isInitialAppointment = payload.getMetadata().getIsInitialAppointment();
-    if (isInitialAppointment == null || isInitialAppointment.equals(false)) {
+    if (!isTeamEvent(payload)) {
       messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
     }
+  }
+
+  private boolean isTeamEvent(CalcomWebhookInputPayload payload) {
+    CalcomBooking booking = calComBookingService
+        .getBookingById(Long.valueOf(payload.getBookingId()));
+    CalcomEventType eventType = calComEventTypeService
+        .getEventTypeById(Long.valueOf(booking.getEventTypeId()));
+    return eventType.getTeamId() != null;
   }
 
   private void handleRescheduleEvent(CalcomWebhookInputPayload payload) {
