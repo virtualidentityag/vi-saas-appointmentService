@@ -59,15 +59,15 @@ public class AgencyFacade {
   public MeetingSlug getMeetingSlugByAgencyId(Long agencyId) {
     // TODO: remove "mock" method once agencies are associated
     // TODO: add verification, sanitization and general cleanliness
-    this.checkIfConsultantExists(agencyId);
+    this.checkIfAgencyTeamExists(agencyId);
     MeetingSlug meetingSlug = new MeetingSlug();
     meetingSlug.setSlug(calComTeamService.getTeamById(
         teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid()).getSlug());
     return meetingSlug;
   }
 
-  private void checkIfConsultantExists(Long agencyId) {
-    if (teamToAgencyRepository.existsByAgencyId(agencyId)) {
+  private void checkIfAgencyTeamExists(Long agencyId) {
+    if (!teamToAgencyRepository.existsByAgencyId(agencyId)) {
       throw new BadRequestException(
           String.format("No calcom team associated to agency with id: %s", agencyId));
     }
