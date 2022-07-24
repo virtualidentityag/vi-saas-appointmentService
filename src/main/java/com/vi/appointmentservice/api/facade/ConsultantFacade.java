@@ -18,7 +18,7 @@ import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.CalComMembershipService;
 import com.vi.appointmentservice.api.service.calcom.CalComScheduleService;
-import com.vi.appointmentservice.api.service.calcom.CalComTeamService;
+import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
@@ -176,7 +176,7 @@ public class ConsultantFacade {
     for (AgencyAdminResponseDTO agency : agencies) {
       Long teamId;
       if (teamToAgencyRepository.existsByAgencyId(agency.getId())) {
-        teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get(0).getTeamid();
+        teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get().getTeamid();
       } else {
         // TODO: Create team for agency
         // teamId = newlyCreatedTeam.getId();

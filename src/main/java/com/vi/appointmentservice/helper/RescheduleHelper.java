@@ -5,7 +5,7 @@ import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.api.model.CalcomTeam;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
-import com.vi.appointmentservice.api.service.calcom.CalComTeamService;
+import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;

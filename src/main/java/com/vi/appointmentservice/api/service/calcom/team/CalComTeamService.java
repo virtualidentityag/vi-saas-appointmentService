@@ -1,10 +1,11 @@
-package com.vi.appointmentservice.api.service.calcom;
+package com.vi.appointmentservice.api.service.calcom.team;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
 import com.vi.appointmentservice.api.model.CalcomMembership;
 import com.vi.appointmentservice.api.model.CalcomTeam;
+import com.vi.appointmentservice.api.service.calcom.CalComService;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -83,12 +84,9 @@ public class CalComTeamService extends CalComService {
     JSONObject teamObject = new JSONObject();
     teamObject.put("name", team.getName());
     teamObject.put("slug", generateSlug(team.getName()));
-    teamObject.put("bio", team.getBio());
-    teamObject.put("logo", team.getLogo());
-    teamObject.put("hideBranding", String.valueOf(team.getHideBranding()));
     HttpEntity<String> request = new HttpEntity<>(teamObject.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri("/v1/teams"), request, CalcomTeam.class)
-        .getBody();
+    return restTemplate.postForEntity(this.buildUri("/v1/teams"), request, TeamUpdateResponse.class)
+        .getBody().getTeam();
   }
 
   public CalcomTeam editTeam(CalcomTeam team) {
@@ -100,18 +98,9 @@ public class CalComTeamService extends CalComService {
       teamObject.put("name", team.getName());
       teamObject.put("slug", generateSlug(team.getName()));
     }
-    if (team.getBio() != null) {
-      teamObject.put("bio", team.getBio());
-    }
-    if (team.getLogo() != null) {
-      teamObject.put("logo", team.getLogo());
-    }
-    if (team.getHideBranding() != null) {
-      teamObject.put("hideBranding", String.valueOf(team.getHideBranding()));
-    }
     HttpEntity<String> request = new HttpEntity<>(teamObject.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri("/v1/teams/" + team.getId()), request,
-        CalcomTeam.class).getBody();
+    return restTemplate.patchForObject(this.buildUri("/v1/teams/" + team.getId()), request,
+        TeamUpdateResponse.class).getTeam();
   }
 
   public CalcomMembership addUserToTeam(Long calComUserId, Long calComTeamid) {
