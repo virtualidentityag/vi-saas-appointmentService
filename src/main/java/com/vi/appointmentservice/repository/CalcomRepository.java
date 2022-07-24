@@ -20,12 +20,31 @@ public class CalcomRepository {
   private @Autowired
   NamedParameterJdbcTemplate calcomDBNamedParamterTemplate;
 
-  public List<CalcomBooking> getAllBookingsByStatus(Long userId) {
-    //TODO: replace this with named query
-    return calcomDBTemplate.query(
-        "select * from \"Booking\" as booking where booking.status != 'cancelled' and booking.\"userId\" = '"
-            + userId + "'",
-        new CalcomRepositoryBookingMapper());
+  public List<CalcomBooking> getConsultantActiveBookings(Long userId) {
+    String QUERY = "SELECT * FROM \"Booking\" AS booking WHERE booking.status != 'cancelled' AND "
+        + "booking.\"userId\" = :userId AND now() < \"startTime\" order by \"startTime\" ASC";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("userId", userId);
+    return calcomDBNamedParamterTemplate
+        .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
+  }
+
+  public List<CalcomBooking> getConsultantExpiredBookings(Long userId) {
+    String QUERY = "SELECT * FROM \"Booking\" AS booking WHERE booking.status != 'cancelled' AND "
+        + "booking.\"userId\" = :userId AND now() > \"startTime\" order by \"startTime\" DESC";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("userId", userId);
+    return calcomDBNamedParamterTemplate
+        .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
+  }
+
+  public List<CalcomBooking> getConsultantCancelledBookings(Long userId) {
+    String QUERY = "SELECT * FROM \"Booking\" AS booking WHERE booking.status = 'cancelled' AND "
+        + "booking.\"userId\" = :userId order by \"startTime\" DESC";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("userId", userId);
+    return calcomDBNamedParamterTemplate
+        .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
   }
 
   public List<CalcomBooking> getByIds(List<Long> bookingIds) {

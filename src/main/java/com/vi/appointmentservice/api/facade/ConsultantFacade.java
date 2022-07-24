@@ -276,11 +276,25 @@ public class ConsultantFacade {
 
   }
 
-  public List<CalcomBooking> getAllBookingsOfConsultantHandler(String consultantId) {
+  public List<CalcomBooking> getConsultantActiveBookings(String consultantId) {
     checkIfConsultantExists(consultantId);
     Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
         .getCalComUserId();
-    return calComBookingService.getAllBookingsForConsultant(calcomUserId);
+    return calComBookingService.getConsultantActiveBookings(calcomUserId);
+  }
+
+  public List<CalcomBooking> getConsultantCancelledBookings(String consultantId) {
+    checkIfConsultantExists(consultantId);
+    Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
+        .getCalComUserId();
+    return calComBookingService.getConsultantCancelledBookings(calcomUserId);
+  }
+
+  public List<CalcomBooking> getConsultantExpiredBookings(String consultantId) {
+    checkIfConsultantExists(consultantId);
+    Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
+        .getCalComUserId();
+    return calComBookingService.getConsultantExpiredBookings(calcomUserId);
   }
 
   public List<CalcomEventType> getAllEventTypesOfConsultantHandler(String consultantId) {
@@ -293,7 +307,7 @@ public class ConsultantFacade {
     checkIfConsultantExists(consultantId);
     MeetingSlug meetingSlug = new MeetingSlug();
     meetingSlug.setSlug(calComUserService.getUserById(
-            calcomUserToConsultantRepository.findByConsultantId(consultantId).getCalComUserId())
+        calcomUserToConsultantRepository.findByConsultantId(consultantId).getCalComUserId())
         .getUsername());
     return meetingSlug;
   }
