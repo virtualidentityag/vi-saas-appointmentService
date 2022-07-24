@@ -103,6 +103,10 @@ public class CalComTeamService extends CalComService {
         TeamUpdateResponse.class).getTeam();
   }
 
+  public void deleteTeam(Long teamId) {
+    restTemplate.delete(this.buildUri("/v1/teams/" + teamId));
+  }
+
   public CalcomMembership addUserToTeam(Long calComUserId, Long calComTeamid) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);

@@ -115,6 +115,9 @@ public class AgencyFacade {
     }
   }
 
-
-
+  public void deleteAgency(Long agencyId) {
+    TeamToAgency teamToAgency = teamToAgencyRepository.getOne(agencyId);
+    Long teamId = teamToAgency.getTeamid();
+    calComTeamService.deleteTeam(teamId);
+  }
 }

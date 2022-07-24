@@ -40,7 +40,8 @@ public class AgencyController implements AgenciesApi {
 
   @Override
   public ResponseEntity<Void> deleteAgency(Long agencyId) {
-    return AgenciesApi.super.deleteAgency(agencyId);
+    agencyFacade.deleteAgency(agencyId);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
