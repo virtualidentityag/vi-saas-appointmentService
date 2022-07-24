@@ -104,6 +104,7 @@ public class CalComTeamService extends CalComService {
   }
 
   public void deleteTeam(Long teamId) {
+    //TODO: the api is not working
     restTemplate.delete(this.buildUri("/v1/teams/" + teamId));
   }
 

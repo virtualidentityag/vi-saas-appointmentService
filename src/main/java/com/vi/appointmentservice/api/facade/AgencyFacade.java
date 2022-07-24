@@ -11,6 +11,7 @@ import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.MembershipsRepository;
+import com.vi.appointmentservice.repository.TeamRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,8 @@ public class AgencyFacade {
   private final CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   @NonNull
   private final MembershipsRepository membershipsRepository;
+  @NonNull
+  private final TeamRepository teamRepository;
 
 
   public List<CalcomEventType> getCalcomEventTypesByAgencyId(Long agencyId) {
@@ -116,8 +119,8 @@ public class AgencyFacade {
   }
 
   public void deleteAgency(Long agencyId) {
-    TeamToAgency teamToAgency = teamToAgencyRepository.getOne(agencyId);
-    Long teamId = teamToAgency.getTeamid();
-    calComTeamService.deleteTeam(teamId);
+    Optional<TeamToAgency> teamToAgency = teamToAgencyRepository.findByAgencyId(agencyId);
+    Long teamId = teamToAgency.get().getTeamid();
+    teamRepository.deleteTeam(teamId);
   }
 }
