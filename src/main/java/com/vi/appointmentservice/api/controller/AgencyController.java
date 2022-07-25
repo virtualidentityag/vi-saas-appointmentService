@@ -1,6 +1,8 @@
 package com.vi.appointmentservice.api.controller;
 
 import com.vi.appointmentservice.api.facade.AgencyFacade;
+import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
+import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyResponseDTO;
 import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.api.model.CalcomTeam;
@@ -12,6 +14,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
+import javax.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +33,6 @@ public class AgencyController implements AgenciesApi {
   @NonNull
   private final AgencyFacade agencyFacade;
 
-
   @Override
   public ResponseEntity<CalcomTeam> createAgency(AgencyResponseDTO agencyResponseDTO) {
     return AgenciesApi.super.createAgency(agencyResponseDTO);
@@ -38,7 +40,8 @@ public class AgencyController implements AgenciesApi {
 
   @Override
   public ResponseEntity<Void> deleteAgency(Long agencyId) {
-    return AgenciesApi.super.deleteAgency(agencyId);
+    agencyFacade.deleteAgency(agencyId);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
@@ -67,7 +70,6 @@ public class AgencyController implements AgenciesApi {
         HttpStatus.OK);
   }
 
-
   // TODO: Remove route once agencies are associated
   @ApiOperation(value = "Get initial meeting booking link for agency", nickname = "getInitialMeetingSlugReal", response = MeetingSlug.class, tags = {
       "agency",})
@@ -81,5 +83,19 @@ public class AgencyController implements AgenciesApi {
       @ApiParam(value = "ID of agency", required = true) @PathVariable("agencyId") Long agencyId) {
     return new ResponseEntity<>(this.agencyFacade.getMeetingSlugByAgencyId(agencyId),
         HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> agencyConsultantsSync(
+      @Valid AgencyConsultantSyncRequestDTO agencyConsultantSyncRequestDTO) {
+    agencyFacade.agencyConsultantsSync(agencyConsultantSyncRequestDTO);
+    return new ResponseEntity<Void>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> agencyMasterDataSync(
+      @Valid AgencyMasterDataSyncRequestDTO agencyMasterDataSyncRequestDTO) {
+    agencyFacade.agencyMasterDataSync(agencyMasterDataSyncRequestDTO);
+    return new ResponseEntity<Void>(HttpStatus.OK);
   }
 }

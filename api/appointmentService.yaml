@@ -135,6 +135,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: status
+          in: query
+          description: status of booking
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: successful operation
@@ -162,6 +168,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeetingSlug'
+  /agencies/agencyConsultantsSync:
+    post:
+      tags:
+        - agency
+      summary: Sycronise consultant and agency data with calcom
+      operationId: agencyConsultantsSync
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com with consultants
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyConsultantSyncRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+  /agencies/agencyMasterDataSync:
+    post:
+      tags:
+        - agency
+      summary: Sycronise agency master data with team data. For example name of agency ...
+      operationId: agencyMasterDataSync
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyMasterDataSyncRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
   /agencies:
     post:
       tags:
@@ -780,3 +818,19 @@ components:
         scheduleId:
           type: integer
           format: int32
+    AgencyConsultantSyncRequestDTO:
+      type: object
+      properties:
+        consultantId:
+          type: string
+        agencies:
+          type: array
+          items:
+            type: long
+    AgencyMasterDataSyncRequestDTO:
+      type: object
+      properties:
+        id:
+          type: long
+        name:
+          type: string

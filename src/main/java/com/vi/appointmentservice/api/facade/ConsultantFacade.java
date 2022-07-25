@@ -18,7 +18,7 @@ import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.CalComMembershipService;
 import com.vi.appointmentservice.api.service.calcom.CalComScheduleService;
-import com.vi.appointmentservice.api.service.calcom.CalComTeamService;
+import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
@@ -176,7 +176,7 @@ public class ConsultantFacade {
     for (AgencyAdminResponseDTO agency : agencies) {
       Long teamId;
       if (teamToAgencyRepository.existsByAgencyId(agency.getId())) {
-        teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get(0).getTeamid();
+        teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get().getTeamid();
       } else {
         // TODO: Create team for agency
         // teamId = newlyCreatedTeam.getId();
@@ -276,11 +276,25 @@ public class ConsultantFacade {
 
   }
 
-  public List<CalcomBooking> getAllBookingsOfConsultantHandler(String consultantId) {
+  public List<CalcomBooking> getConsultantActiveBookings(String consultantId) {
     checkIfConsultantExists(consultantId);
     Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
         .getCalComUserId();
-    return calComBookingService.getAllBookingsForConsultant(calcomUserId);
+    return calComBookingService.getConsultantActiveBookings(calcomUserId);
+  }
+
+  public List<CalcomBooking> getConsultantCancelledBookings(String consultantId) {
+    checkIfConsultantExists(consultantId);
+    Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
+        .getCalComUserId();
+    return calComBookingService.getConsultantCancelledBookings(calcomUserId);
+  }
+
+  public List<CalcomBooking> getConsultantExpiredBookings(String consultantId) {
+    checkIfConsultantExists(consultantId);
+    Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
+        .getCalComUserId();
+    return calComBookingService.getConsultantExpiredBookings(calcomUserId);
   }
 
   public List<CalcomEventType> getAllEventTypesOfConsultantHandler(String consultantId) {
@@ -293,7 +307,7 @@ public class ConsultantFacade {
     checkIfConsultantExists(consultantId);
     MeetingSlug meetingSlug = new MeetingSlug();
     meetingSlug.setSlug(calComUserService.getUserById(
-            calcomUserToConsultantRepository.findByConsultantId(consultantId).getCalComUserId())
+        calcomUserToConsultantRepository.findByConsultantId(consultantId).getCalComUserId())
         .getUsername());
     return meetingSlug;
   }

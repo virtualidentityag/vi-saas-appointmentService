@@ -6,7 +6,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 public abstract class CalComService {
 
-  RestTemplate restTemplate;
+  public RestTemplate restTemplate;
   String calcomApiUrl;
   String calcomApiKey;
 
@@ -16,7 +16,7 @@ public abstract class CalComService {
     this.calcomApiKey = calcomApiKey;
   }
 
-  String buildUri(String path) {
+  public String buildUri(String path) {
     return UriComponentsBuilder.newInstance().scheme("https").host(calcomApiUrl).path(path)
         .queryParam("apiKey", calcomApiKey).build().toUriString();
   }

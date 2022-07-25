@@ -67,8 +67,19 @@ public class ConsultantController implements ConsultantsApi {
   }
 
   @Override
-  public ResponseEntity<List<CalcomBooking>> getAllBookingsOfConsultant(String consultantId) {
-    return new ResponseEntity<>(consultantFacade.getAllBookingsOfConsultantHandler(consultantId),
+  public ResponseEntity<List<CalcomBooking>> getAllBookingsOfConsultant(String consultantId,
+      String status) {
+    List<CalcomBooking> bookings;
+    if ("ACTIVE".equals(status)) {
+      bookings = consultantFacade.getConsultantActiveBookings(consultantId);
+    } else if ("EXPIRED".equals(status)) {
+      bookings = consultantFacade.getConsultantExpiredBookings(consultantId);
+    } else if ("CANCELLED".equals(status)) {
+      bookings = consultantFacade.getConsultantCancelledBookings(consultantId);
+    }else{
+      throw new BadRequestException("Given status must be ACTIVE, EXPIRED or CANCELLED");
+    }
+    return new ResponseEntity<>(bookings,
         HttpStatus.OK);
   }
 

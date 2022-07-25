@@ -58,16 +58,32 @@ public class CalComBookingService extends CalComService {
     return result;
   }
 
-  public List<CalcomBooking> getAllBookingsForConsultant(Long consultantId) {
-    List<CalcomBooking> consultantBooking = calcomRepository.getAllBookingsByStatus(consultantId);
-    for (CalcomBooking booking : consultantBooking) {
-      CalcomBookingToAsker calcomBookingAsker = calcomBookingToAskerRepository.findByCalcomBookingId(
-          booking.getId());
+  public List<CalcomBooking> getConsultantActiveBookings(Long consultantId) {
+    return enrichResultSet(calcomRepository.getConsultantActiveBookings(consultantId));
+  }
+
+  public List<CalcomBooking> getConsultantExpiredBookings(Long consultantId) {
+    return enrichResultSet(calcomRepository.getConsultantExpiredBookings(consultantId));
+  }
+
+  public List<CalcomBooking> getConsultantCancelledBookings(Long consultantId) {
+    return enrichResultSet(calcomRepository.getConsultantCancelledBookings(consultantId));
+  }
+
+  private List<CalcomBooking> enrichResultSet(List<CalcomBooking> bookings) {
+    for (CalcomBooking booking : bookings) {
+      CalcomBookingToAsker calcomBookingAsker = calcomBookingToAskerRepository
+          .findByCalcomBookingId(
+              booking.getId());
+      if(calcomBookingAsker == null){
+        log.error("Inconsistent data. Asker not found for booking.");
+        continue;
+      }
       booking.setAskerId(calcomBookingAsker.getAskerId());
       rescheduleHelper.attachRescheduleLink(booking);
       rescheduleHelper.attachAskerName(booking);
     }
-    return consultantBooking;
+    return bookings;
   }
 
   public CalcomBooking createBooking(CalcomBooking booking) {
