@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomEventType;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ public class CalComEventTypeService extends CalComService {
     if (response != null) {
       jsonObject = new JSONObject(response);
     } else {
-      throw new CalComApiException("Calcom event-type API response was null");
+      throw new CalComApiErrorException("Calcom event-type API response was null");
     }
     response = jsonObject.getJSONArray("event_types").toString();
     ObjectMapper mapper = new ObjectMapper();
@@ -46,7 +46,7 @@ public class CalComEventTypeService extends CalComService {
       return mapper.readValue(response, new TypeReference<>() {
       });
     } catch (JsonProcessingException e) {
-      throw new CalComApiException("Could not deserialize event-types response from calcom api");
+      throw new CalComApiErrorException("Could not deserialize event-types response from calcom api");
     }
 
   }

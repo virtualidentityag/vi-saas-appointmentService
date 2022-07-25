@@ -2,7 +2,7 @@ package com.vi.appointmentservice.api.service.calcom;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
@@ -53,7 +53,7 @@ public class CalComBookingService extends CalComService {
     try {
       result = List.of(Objects.requireNonNull(mapper.readValue(response, CalcomBooking[].class)));
     } catch (JsonProcessingException e) {
-      throw new CalComApiException("Could not deserialize bookings response from calcom api");
+      throw new CalComApiErrorException("Could not deserialize bookings response from calcom api");
     }
     return result;
   }
