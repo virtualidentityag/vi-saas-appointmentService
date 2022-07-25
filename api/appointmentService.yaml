@@ -135,6 +135,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: status
+          in: query
+          description: status of booking
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: successful operation
