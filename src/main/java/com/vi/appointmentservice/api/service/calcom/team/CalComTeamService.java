@@ -2,7 +2,7 @@ package com.vi.appointmentservice.api.service.calcom.team;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomMembership;
 import com.vi.appointmentservice.api.model.CalcomTeam;
 import com.vi.appointmentservice.api.service.calcom.CalComService;
@@ -48,7 +48,7 @@ public class CalComTeamService extends CalComService {
     if (response != null) {
       jsonObject = new JSONObject(response);
     } else {
-      throw new CalComApiException("Calcom team API response was null");
+      throw new CalComApiErrorException("Calcom team API response was null");
     }
     response = jsonObject.getJSONArray("teams").toString();
     ObjectMapper mapper = new ObjectMapper();
@@ -56,7 +56,7 @@ public class CalComTeamService extends CalComService {
       CalcomTeam[] result = mapper.readValue(response, CalcomTeam[].class);
       return List.of(Objects.requireNonNull(result));
     } catch (JsonProcessingException e) {
-      throw new CalComApiException("Could not deserialize teams response from calcom api");
+      throw new CalComApiErrorException("Could not deserialize teams response from calcom api");
     }
 
   }
@@ -67,14 +67,14 @@ public class CalComTeamService extends CalComService {
     if (response != null) {
       jsonObject = new JSONObject(response);
     } else {
-      throw new CalComApiException("Calcom team API response was null");
+      throw new CalComApiErrorException("Calcom team API response was null");
     }
     response = jsonObject.getJSONObject("team").toString();
     ObjectMapper mapper = new ObjectMapper();
     try {
       return mapper.readValue(response, CalcomTeam.class);
     } catch (JsonProcessingException e) {
-      throw new CalComApiException("Could not deserialize team response from calcom api");
+      throw new CalComApiErrorException("Could not deserialize team response from calcom api");
     }
   }
 

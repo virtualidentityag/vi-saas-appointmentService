@@ -3,7 +3,7 @@ package com.vi.appointmentservice.api.service.calcom;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomAvailability;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class CalComAvailabilityService extends CalComService {
           new TypeReference<>() {
           });
     } catch (JsonProcessingException e) {
-      throw new CalComApiException("Could not deserialize availability response from calcom api");
+      throw new CalComApiErrorException("Could not deserialize availability response from calcom api");
     }
     return result;
   }

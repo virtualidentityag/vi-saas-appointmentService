@@ -3,7 +3,8 @@ package com.vi.appointmentservice.api.service.calcom;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiConflictException;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -42,8 +44,11 @@ public class CalComUserService extends CalComService {
       ObjectMapper mapper = new ObjectMapper();
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       return mapper.readValue(body, CalcomUser.class);
+    } catch (HttpClientErrorException e){
+      log.warn("Calcom user creation field conflic (possibly email)");
+      return null;
     } catch (Exception e) {
-      throw new CalComApiException("Could not create calcom user");
+      throw new CalComApiErrorException("Could not create calcom user");
     }
   }
 
@@ -66,7 +71,7 @@ public class CalComUserService extends CalComService {
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       return mapper.readValue(body, CalcomUser.class);
     } catch (Exception e) {
-      throw new CalComApiException("Could not update calcom user");
+      throw new CalComApiErrorException("Could not update calcom user");
     }
   }
 
@@ -86,7 +91,7 @@ public class CalComUserService extends CalComService {
       try {
         return mapper.readValue(jsonObject.getJSONObject("user").toString(), CalcomUser.class);
       } catch (Exception e) {
-        throw new CalComApiException("Could not deserialize user response from calcom api");
+        throw new CalComApiErrorException("Could not deserialize user response from calcom api");
       }
     } else {
       throw new BadRequestException(

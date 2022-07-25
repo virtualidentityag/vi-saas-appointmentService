@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.AgencyAdminResponseDTO;
 import com.vi.appointmentservice.api.model.CalcomBooking;
@@ -61,10 +61,13 @@ public class ConsultantFacade {
         consultant = objectMapper.readValue(consultantsArray.getJSONObject(i).toString(),
             ConsultantDTO.class);
       } catch (JsonProcessingException e) {
-        throw new CalComApiException(
+        throw new CalComApiErrorException(
             "Could not deserialize ConsultantDTO response from userService");
       }
-      createdOrUpdatedUsers.add(this.createOrUpdateCalcomUserHandler(consultant));
+      CalcomUser createdUser = this.createOrUpdateCalcomUserHandler(consultant);
+      if(createdUser != null){
+        createdOrUpdatedUsers.add(createdUser);
+      }
     }
     log.info("Consultants created or updated in sync: {}", createdOrUpdatedUsers);
     return createdOrUpdatedUsers;
@@ -165,7 +168,7 @@ public class ConsultantFacade {
     try {
       eventTypeJson = new JSONObject(objectMapper.writeValueAsString(eventType));
     } catch (JsonProcessingException e) {
-      throw new CalComApiException("Could not serialize default event-type");
+      throw new CalComApiErrorException("Could not serialize default event-type");
     }
     calComEventTypeService.createEventType(eventTypeJson);
   }
@@ -239,7 +242,7 @@ public class ConsultantFacade {
       try {
         updateJson = new JSONObject(objectMapper.writeValueAsString(updateUser));
       } catch (JsonProcessingException e) {
-        throw new CalComApiException("Could not serialize createCalcomUser payload");
+        throw new CalComApiErrorException("Could not serialize createCalcomUser payload");
       }
       return calComUserService.updateUser(updateJson);
     } else {

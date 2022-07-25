@@ -1,8 +1,7 @@
 package com.vi.appointmentservice.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiException;
+import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.service.LogService;
@@ -147,9 +146,9 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * @param ex      the exception to be handled
    * @param request web request
    */
-  @ExceptionHandler({CalComApiException.class})
+  @ExceptionHandler({CalComApiErrorException.class})
   public ResponseEntity<Object> handleInternal(
-      final CalComApiException ex, final WebRequest request) {
+      final CalComApiErrorException ex, final WebRequest request) {
     ex.executeLogging();
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
