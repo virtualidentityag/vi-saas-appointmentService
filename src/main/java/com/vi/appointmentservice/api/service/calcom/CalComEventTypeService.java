@@ -95,16 +95,37 @@ public class CalComEventTypeService extends CalComService {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri("/v1/event-types"), request,
-        CalcomEventType.class).getBody();
+    try {
+      CalcomEventType createdEventType = restTemplate.postForEntity(
+          this.buildUri("/v1/event-types"), request,
+          CalcomEventType.class).getBody();
+      if (createdEventType == null) {
+        throw new CalComApiErrorException("Calcom create event-type API response was null");
+      }
+      return createdEventType;
+    } catch (Exception e) {
+      log.error("Calcom create event-type API response exception", e);
+      throw new CalComApiErrorException("Calcom create event-type API response exception");
+    }
+
   }
 
-  public CalcomEventType editEventType(JSONObject eventType) {
+  public CalcomEventType editEventType(Long eventTypeId, JSONObject eventType) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri("/v1/event-types/" + eventType.get("id")),
-        request, CalcomEventType.class).getBody();
+    try {
+      CalcomEventType createdEventType = restTemplate.postForEntity(
+          this.buildUri("/v1/event-types" + eventTypeId), request,
+          CalcomEventType.class).getBody();
+      if (createdEventType == null) {
+        throw new CalComApiErrorException("Calcom update event-type API response was null");
+      }
+      return createdEventType;
+    } catch (Exception e) {
+      log.error("Calcom update event-type API response exception", e);
+      throw new CalComApiErrorException("Calcom update event-type API response exception");
+    }
   }
 
   public HttpStatus deleteEventType(Long eventTypeId) {

@@ -113,7 +113,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CalcomEventType'
+              $ref: '#/components/schemas/CreateUpdateCalcomEventTypeDTO'
         required: true
       responses:
         '200':
@@ -303,7 +303,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CalcomEventType'
+              $ref: '#/components/schemas/CreateUpdateCalcomEventTypeDTO'
         required: true
       responses:
         '200':
@@ -312,6 +312,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomEventType'
+  /agencies/{agencyId}/consultants:
+    get:
+      tags:
+        - agency
+      summary: Get all available consultants of agency
+      operationId: getAllConsultantsOfAgency
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfTeamEventTypeConsultants'
   /agencies/{agencyId}/initialMeetingSlug:
     get:
       tags:
@@ -392,7 +413,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CalcomEventType'
+              $ref: '#/components/schemas/CreateUpdateCalcomEventTypeDTO'
         required: true
       responses:
         '200':
@@ -643,14 +664,46 @@ components:
           type: object
         type:
           type: string
-        consultantIds:
+        consultants:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/TeamEventTypeConsultant'
     ArrayOfCalcomEventTypes:
       type: array
       items:
         $ref: '#/components/schemas/CalcomEventType'
+    CreateUpdateCalcomEventTypeDTO:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 30 Min Meeting
+        slug:
+          type: string
+          example: 30minMeet
+        length:
+          type: integer
+          format: int32
+          example: 30
+        minimumBookingNotice:
+          type: integer
+          format: int32
+          example: 120
+        beforeEventBuffer:
+          type: integer
+          format: int32
+          example: 0
+        afterEventBuffer:
+          type: integer
+          format: int32
+          example: 0
+        description:
+          type: string
+          format: nullable
+        consultants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamEventTypeConsultant'
     MeetingSlug:
       type: object
       properties:
@@ -834,3 +887,14 @@ components:
           type: long
         name:
           type: string
+    TeamEventTypeConsultant:
+      type: object
+      properties:
+        consultantId:
+          type: string
+        consultantName:
+          type: string
+    ArrayOfTeamEventTypeConsultants:
+      type: array
+      items:
+        $ref: '#/components/schemas/TeamEventTypeConsultant'
