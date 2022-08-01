@@ -24,6 +24,7 @@ import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
+import com.vi.appointmentservice.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -50,6 +51,7 @@ public class ConsultantFacade {
   private final @NonNull UserService userService;
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
+  private final @NonNull UserRepository userRepository;
 
   public List<CalcomUser> initializeConsultantsHandler() {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -92,7 +94,7 @@ public class ConsultantFacade {
       creationUser.setLocale("de");
       creationUser.setTimeFormat(24);
       creationUser.setAllowDynamicBooking(false);
-      creationUser.setAway(false);
+      creationUser.setAway(consultant.getAbsent());
       // TODO: Any more default values?
       ObjectMapper objectMapper = new ObjectMapper();
       // Ignore null values
@@ -110,7 +112,7 @@ public class ConsultantFacade {
 
   public CalcomUser createOrUpdateCalcomUserHandler(ConsultantDTO consultant) {
     //TODO: remove inline comments
-    CalcomUser createdUser = null;
+    CalcomUser createdOrUpdatedUser = null;
     log.info("Creating or updating consultant: {}", consultant);
     if (calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())) {
       // Found user association
@@ -121,42 +123,41 @@ public class ConsultantFacade {
       if (foundUser == null) {
         // TODO: Check calcom for email match?
         // User missing, create
-        createdUser = this.createCalcomUser(consultant);
-        if (createdUser != null) {
+        createdOrUpdatedUser = this.createCalcomUser(consultant);
+        if (createdOrUpdatedUser != null) {
           // Add default event-type to user
-          if (calComEventTypeService.getAllEventTypesOfUser(createdUser.getId()).isEmpty()) {
-            addDefaultEventTypeToUser(createdUser);
+          if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
+            addDefaultEventTypeToUser(createdOrUpdatedUser);
           }
           // Add user to teams of agencies and event-types of teams
-          this.addUserToTeamsAndEventTypes(consultant);
+          // this.addUserToTeamsAndEventTypes(consultant);
         }
       } else {
         // User exists, update
-        // TODO: User PATCH API of calcom currently buggy and only updates the user that created the API Key
-        // createdUser = this.updateCalcomUser(consultant);
-        if (createdUser != null) {
-          if (calComEventTypeService.getAllEventTypesOfUser(createdUser.getId()).isEmpty()) {
-            addDefaultEventTypeToUser(createdUser);
+        createdOrUpdatedUser = this.updateCalcomUser(consultant);
+        if (createdOrUpdatedUser != null) {
+          if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
+            addDefaultEventTypeToUser(createdOrUpdatedUser);
           }
           // Add user to teams of agencies and event-types of teams
-          this.addUserToTeamsAndEventTypes(consultant);
+          // this.addUserToTeamsAndEventTypes(consultant);
         }
       }
     } else {
       // TODO: Check calcom for email match?
-      createdUser = this.createCalcomUser(consultant);
-      if (createdUser != null) {
+      createdOrUpdatedUser = this.createCalcomUser(consultant);
+      if (createdOrUpdatedUser != null) {
         // Add association to dataLayer
-        this.createUserIdAssociation(createdUser, consultant);
+        this.createUserIdAssociation(createdOrUpdatedUser, consultant);
         // Add default eventTypes
-        if (calComEventTypeService.getAllEventTypesOfUser(createdUser.getId()).isEmpty()) {
-          addDefaultEventTypeToUser(createdUser);
+        if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
+          addDefaultEventTypeToUser(createdOrUpdatedUser);
         }
         // Add user to teams of agencies and event-types of teams
-        this.addUserToTeamsAndEventTypes(consultant);
+        // this.addUserToTeamsAndEventTypes(consultant);
       }
     }
-    return createdUser;
+    return createdOrUpdatedUser;
   }
 
   private void addDefaultEventTypeToUser(CalcomUser createdUser) {
@@ -233,18 +234,10 @@ public class ConsultantFacade {
       updateUser.setLocale("de");
       updateUser.setTimeFormat(24);
       updateUser.setAllowDynamicBooking(false);
-      updateUser.setAway(false);
+      updateUser.setAway(consultant.getAbsent());
       // TODO: Any more default values?
-      ObjectMapper objectMapper = new ObjectMapper();
-      // Ignore null values
-      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-      JSONObject updateJson = null;
-      try {
-        updateJson = new JSONObject(objectMapper.writeValueAsString(updateUser));
-      } catch (JsonProcessingException e) {
-        throw new CalComApiErrorException("Could not serialize createCalcomUser payload");
-      }
-      return calComUserService.updateUser(updateJson);
+      userRepository.updateUser(updateUser);
+      return calComUserService.getUserById(updateUser.getId());
     } else {
       // Doesn't exist, create the user
       return this.createCalcomUser(consultant);
