@@ -93,6 +93,7 @@ public class AgencyFacade {
     Long calComUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
         .getCalComUserId();
     List<Long> teamIds = request.getAgencies().stream()
+        .filter(teamToAgencyRepository::existsByAgencyId)
         .map(agencyId -> teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid())
         .collect(Collectors.toList());
     membershipsRepository.updateMemberShipsOfUser(calComUserId, teamIds);
@@ -100,7 +101,7 @@ public class AgencyFacade {
 
   public void agencyMasterDataSync(AgencyMasterDataSyncRequestDTO request) {
     Optional<TeamToAgency> teamToAgency = teamToAgencyRepository.findByAgencyId(request.getId());
-    if (!teamToAgency.isPresent()) {
+    if (teamToAgency.isEmpty()) {
       CalcomTeam team = new CalcomTeam();
       team.setName(request.getName());
       team.setHideBranding(true);
@@ -120,7 +121,9 @@ public class AgencyFacade {
 
   public void deleteAgency(Long agencyId) {
     Optional<TeamToAgency> teamToAgency = teamToAgencyRepository.findByAgencyId(agencyId);
-    Long teamId = teamToAgency.get().getTeamid();
-    teamRepository.deleteTeam(teamId);
+    if(teamToAgency.isPresent()){
+      Long teamId = teamToAgency.get().getTeamid();
+      teamRepository.deleteTeam(teamId);
+    }
   }
 }
