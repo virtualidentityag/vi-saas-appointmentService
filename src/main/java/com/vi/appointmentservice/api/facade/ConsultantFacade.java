@@ -91,7 +91,6 @@ public class ConsultantFacade {
     } else {
       CalcomUser creationUser = new CalcomUser();
       creationUser.setName(consultant.getFirstname() + " " + consultant.getLastname());
-      creationUser.setUsername(UUID.randomUUID().toString());
       creationUser.setEmail(consultant.getEmail());
       // Default values
       creationUser.setTimeZone("Europe/Berlin");
@@ -100,9 +99,6 @@ public class ConsultantFacade {
       creationUser.setTimeFormat(24);
       creationUser.setAllowDynamicBooking(false);
       creationUser.setAway(consultant.getAbsent());
-      creationUser.setVerified(true);
-      creationUser.setPlan("PRO");
-      creationUser.setCompletedOnboarding(true);
       ObjectMapper objectMapper = new ObjectMapper();
       // Ignore null values
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -113,7 +109,9 @@ public class ConsultantFacade {
         throw new InternalServerErrorException("Could not serialize createCalcomUser payload");
       }
       // Create association
-      return calComUserService.createUser(userPayloadJson);
+      CalcomUser createdUser = calComUserService.createUser(userPayloadJson);
+      userRepository.initUserAddExtraData(createdUser.getId());
+      return calComUserService.getUserById(createdUser.getId());
     }
   }
 
