@@ -1,10 +1,16 @@
 package com.vi.appointmentservice.api.facade;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
+import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
 import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.CalcomEventTypeLocationsInner;
 import com.vi.appointmentservice.api.model.CalcomTeam;
+import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
@@ -13,11 +19,15 @@ import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.MembershipsRepository;
 import com.vi.appointmentservice.repository.TeamRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /*
@@ -40,6 +50,9 @@ public class AgencyFacade {
   @NonNull
   private final TeamRepository teamRepository;
 
+  @Value("${app.base.url}")
+  private String appBaseUrl;
+
 
   public List<CalcomEventType> getCalcomEventTypesByAgencyId(Long agencyId) {
     List<CalcomEventType> eventTypes;
@@ -58,6 +71,27 @@ public class AgencyFacade {
     meetingSlug.setSlug(calComTeamService.getTeamById(
         teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid()).getSlug());
     return meetingSlug;
+  }
+
+  private CalcomEventType getDefaultCalcomInitialMeetingEventType(CalcomTeam team) {
+    CalcomEventType eventType = new CalcomEventType();
+    eventType.setTeamId(Math.toIntExact(team.getId()));
+    eventType.setTitle("Erstberatung " + team.getName());
+    eventType.setSlug(UUID.randomUUID().toString());
+    eventType.setLength(60);
+    eventType.setHidden(false);
+    eventType.setEventName("Erstberatung {ATTENDEE} mit {HOST}");
+    eventType.setRequiresConfirmation(false);
+    eventType.setDisableGuests(true);
+    eventType.setHideCalendarNotes(true);
+    eventType.setMinimumBookingNotice(120);
+    eventType.setBeforeEventBuffer(0);
+    eventType.setAfterEventBuffer(0);
+    eventType.setSuccessRedirectUrl(
+        appBaseUrl + "/sessions/user/view/");
+    eventType.setDescription("");
+    eventType.setSchedulingType("roundRobin");
+    return eventType;
   }
 
   private void checkIfAgencyTeamExists(Long agencyId) {
@@ -80,12 +114,13 @@ public class AgencyFacade {
 
   public void agencyMasterDataSync(AgencyMasterDataSyncRequestDTO request) {
     Optional<TeamToAgency> teamToAgency = teamToAgencyRepository.findByAgencyId(request.getId());
+    CalcomTeam createdOrUpdateTeam;
     if (teamToAgency.isEmpty()) {
       CalcomTeam team = new CalcomTeam();
       team.setName(request.getName());
       team.setHideBranding(true);
-      CalcomTeam createdTeam = calComTeamService.createTeam(team);
-      Long teamId = createdTeam.getId();
+      createdOrUpdateTeam = calComTeamService.createTeam(team);
+      Long teamId = createdOrUpdateTeam.getId();
       TeamToAgency entity = new TeamToAgency();
       entity.setTeamid(teamId);
       entity.setAgencyId(request.getId());
@@ -94,8 +129,21 @@ public class AgencyFacade {
       CalcomTeam team = new CalcomTeam();
       team.setName(request.getName());
       team.setId(teamToAgency.get().getTeamid());
-      calComTeamService.editTeam(team);
+      createdOrUpdateTeam = calComTeamService.editTeam(team);
     }
+    if(createdOrUpdateTeam != null && calComEventTypeService.getAllEventTypesOfTeam(createdOrUpdateTeam.getId()).isEmpty()){
+      ObjectMapper objectMapper = new ObjectMapper();
+      // Ignore null values
+      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+      JSONObject eventTypePayloadJson = null;
+      try {
+        eventTypePayloadJson = new JSONObject(objectMapper.writeValueAsString(getDefaultCalcomInitialMeetingEventType(createdOrUpdateTeam)));
+      } catch (JsonProcessingException e) {
+        throw new InternalServerErrorException("Could not serialize createCalcomUser payload");
+      }
+      calComEventTypeService.createEventType(eventTypePayloadJson);
+    }
+
   }
 
   public void deleteAgency(Long agencyId) {
