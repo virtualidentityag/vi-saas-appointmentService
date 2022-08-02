@@ -90,7 +90,7 @@ public class AgencyFacade {
     eventType.setSuccessRedirectUrl(
         appBaseUrl + "/sessions/user/view/");
     eventType.setDescription("");
-    eventType.setSchedulingType("roundRobin");
+    eventType.setSchedulingType("ROUND_ROBIN");
     return eventType;
   }
 
