@@ -16,6 +16,7 @@ import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import com.vi.appointmentservice.repository.EventTypeRepository;
 import com.vi.appointmentservice.repository.MembershipsRepository;
 import com.vi.appointmentservice.repository.TeamRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
@@ -49,6 +50,8 @@ public class AgencyFacade {
   private final MembershipsRepository membershipsRepository;
   @NonNull
   private final TeamRepository teamRepository;
+  @NonNull
+  private final EventTypeRepository eventTypeRepository;
 
   @Value("${app.base.url}")
   private String appBaseUrl;
@@ -110,6 +113,14 @@ public class AgencyFacade {
         .map(agencyId -> teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid())
         .collect(Collectors.toList());
     membershipsRepository.updateMemberShipsOfUser(calComUserId, teamIds);
+    // Reset user teamEventTypeMemberships
+    eventTypeRepository.removeTeamEventTypeMemberships(calComUserId);
+    // Add consultant to team eventTypes
+    for(Long teamId: teamIds){
+      for(CalcomEventType eventType: calComEventTypeService.getAllEventTypesOfTeam(teamId)){
+        eventTypeRepository.addTeamEventTypeMemberships(Long.valueOf(eventType.getId()), calComUserId);
+      }
+    }
   }
 
   public void agencyMasterDataSync(AgencyMasterDataSyncRequestDTO request) {
@@ -131,6 +142,7 @@ public class AgencyFacade {
       team.setId(teamToAgency.get().getTeamid());
       createdOrUpdateTeam = calComTeamService.editTeam(team);
     }
+    // Create default team eventType if none exists
     if(createdOrUpdateTeam != null && calComEventTypeService.getAllEventTypesOfTeam(createdOrUpdateTeam.getId()).isEmpty()){
       ObjectMapper objectMapper = new ObjectMapper();
       // Ignore null values
@@ -143,7 +155,6 @@ public class AgencyFacade {
       }
       calComEventTypeService.createEventType(eventTypePayloadJson);
     }
-
   }
 
   public void deleteAgency(Long agencyId) {
