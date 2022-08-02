@@ -20,6 +20,7 @@ import com.vi.appointmentservice.repository.EventTypeRepository;
 import com.vi.appointmentservice.repository.MembershipsRepository;
 import com.vi.appointmentservice.repository.TeamRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
+import com.vi.appointmentservice.repository.WebhookRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,6 +53,9 @@ public class AgencyFacade {
   private final TeamRepository teamRepository;
   @NonNull
   private final EventTypeRepository eventTypeRepository;
+  @NonNull
+  private final WebhookRepository webhookRepository;
+
 
   @Value("${app.base.url}")
   private String appBaseUrl;
@@ -121,6 +125,7 @@ public class AgencyFacade {
         eventTypeRepository.addTeamEventTypeMemberships(Long.valueOf(eventType.getId()), calComUserId);
       }
     }
+    webhookRepository.updateUserWebhook(calComUserId);
   }
 
   public void agencyMasterDataSync(AgencyMasterDataSyncRequestDTO request) {
