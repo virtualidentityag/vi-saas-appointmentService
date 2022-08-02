@@ -23,9 +23,9 @@ public class MembershipsRepository {
     });
   }
 
-  public void deleteTeamMemeberships(Long teamIds) {
-    String DELETE_QUERY = "delete from \"Membership\" where \"teamId\"=" + teamIds;
-    jdbcTemplate.update(DELETE_QUERY);
+  public void deleteTeamMemeberships(Long teamId) {
+    String DELETE_MEMBERSHIP_QUERY = "delete from \"Membership\" where \"teamId\"=" + teamId;
+    jdbcTemplate.update(DELETE_MEMBERSHIP_QUERY);
   }
 
 }
