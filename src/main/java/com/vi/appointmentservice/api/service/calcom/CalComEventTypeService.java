@@ -63,9 +63,8 @@ public class CalComEventTypeService extends CalComService {
 
   public List<CalcomEventType> getAllEventTypesOfTeam(Long teamId) {
     List<CalcomEventType> result = this.getAllEventTypes();
-    // TODO: Add correct filter: .filter(eventType -> eventType.getTeamId() != null && eventType.getTeamId() == teamId.intValue())
     return new ArrayList<>(result).stream()
-        .filter(eventType -> eventType.getTeamId() != null)
+        .filter(eventType -> eventType.getTeamId() != null && eventType.getTeamId() == teamId.intValue())
         .collect(Collectors.toList());
   }
 

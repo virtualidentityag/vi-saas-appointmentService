@@ -43,10 +43,8 @@ public class AgencyFacade {
 
   public List<CalcomEventType> getCalcomEventTypesByAgencyId(Long agencyId) {
     List<CalcomEventType> eventTypes;
-    // TODO: remove "true" once team are associated to agencies and comment in correct line
-    if (true || teamToAgencyRepository.existsByAgencyId(Long.valueOf(agencyId))) {
-      //eventTypes = calComEventTypeService.getAllEventTypesOfTeam(teamToAgencyRepository.findByAgencyId(agencyId).get(0).getTeamid());
-      eventTypes = calComEventTypeService.getAllEventTypesOfTeam(0L);
+    if (teamToAgencyRepository.existsByAgencyId(agencyId)) {
+      eventTypes = calComEventTypeService.getAllEventTypesOfTeam(teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid());
       return eventTypes;
     } else {
       throw new BadRequestException(
@@ -54,26 +52,7 @@ public class AgencyFacade {
     }
   }
 
-  // TODO: remove method once agencies are associated
-  public MeetingSlug getMockMeetingSlugByAgencyId(Long agencyId) {
-    MeetingSlug meetingSlug = new MeetingSlug();
-    switch (agencyId.intValue()) {
-      case 1:
-        meetingSlug.setSlug("team-munich");
-        break;
-      case 2:
-        meetingSlug.setSlug("team-hamburg");
-        break;
-      default:
-        throw new BadRequestException(
-            String.format("Mock route not configured for agencyId: %s", agencyId));
-    }
-    return meetingSlug;
-  }
-
   public MeetingSlug getMeetingSlugByAgencyId(Long agencyId) {
-    // TODO: remove "mock" method once agencies are associated
-    // TODO: add verification, sanitization and general cleanliness
     this.checkIfAgencyTeamExists(agencyId);
     MeetingSlug meetingSlug = new MeetingSlug();
     meetingSlug.setSlug(calComTeamService.getTeamById(
@@ -123,7 +102,10 @@ public class AgencyFacade {
     Optional<TeamToAgency> teamToAgency = teamToAgencyRepository.findByAgencyId(agencyId);
     if(teamToAgency.isPresent()){
       Long teamId = teamToAgency.get().getTeamid();
+      membershipsRepository.deleteTeamMemeberships(teamId);
       teamRepository.deleteTeam(teamId);
+      // TODO: Delete event-types?
+      // TODO: Cancel Bookings?
     }
   }
 }

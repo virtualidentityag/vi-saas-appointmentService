@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +53,9 @@ public class ConsultantFacade {
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
   private final @NonNull UserRepository userRepository;
+
+  @Value("${app.base.url}")
+  private String appBaseUrl;
 
   public List<CalcomUser> initializeConsultantsHandler() {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -87,6 +91,7 @@ public class ConsultantFacade {
     } else {
       CalcomUser creationUser = new CalcomUser();
       creationUser.setName(consultant.getFirstname() + " " + consultant.getLastname());
+      creationUser.setUsername(UUID.randomUUID().toString());
       creationUser.setEmail(consultant.getEmail());
       // Default values
       creationUser.setTimeZone("Europe/Berlin");
@@ -95,7 +100,9 @@ public class ConsultantFacade {
       creationUser.setTimeFormat(24);
       creationUser.setAllowDynamicBooking(false);
       creationUser.setAway(consultant.getAbsent());
-      // TODO: Any more default values?
+      creationUser.setVerified(true);
+      creationUser.setPlan("PRO");
+      creationUser.setCompletedOnboarding(true);
       ObjectMapper objectMapper = new ObjectMapper();
       // Ignore null values
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -197,7 +204,7 @@ public class ConsultantFacade {
   private CalcomEventType getDefaultCalcomEventType(CalcomUser createdUser) {
     CalcomEventType eventType = new CalcomEventType();
     eventType.setUserId(Math.toIntExact(createdUser.getId()));
-    eventType.setTitle("Beratung mit Counsellor Name von Name of the agency");
+    eventType.setTitle("Beratung mit " + createdUser.getName());
     eventType.setSlug(UUID.randomUUID().toString());
     eventType.setLength(60);
     eventType.setHidden(false);
@@ -209,7 +216,7 @@ public class ConsultantFacade {
     eventType.setBeforeEventBuffer(0);
     eventType.setAfterEventBuffer(0);
     eventType.setSuccessRedirectUrl(
-        "https://app-develop.suchtberatung.digital/sessions/user/view/");
+        appBaseUrl + "/sessions/user/view/");
     eventType.setDescription("");
     List<CalcomEventTypeLocationsInner> locations = new ArrayList<>();
     CalcomEventTypeLocationsInner location = new CalcomEventTypeLocationsInner();
@@ -251,7 +258,6 @@ public class ConsultantFacade {
         .getCalComUserId();
     // Delete team memberships
     calComMembershipService.deleteAllMembershipsOfUser(calcomUserId);
-    // TODO: DELETE TEAM EVENT TYPE MEMBERSHIPS HOW?
     // Delete personal event-types
     calComEventTypeService.deleteAllEventTypesOfUser(calcomUserId);
     // Delete schedules
@@ -260,7 +266,6 @@ public class ConsultantFacade {
     for (Integer scheduleId : deletedSchedules) {
       calComAvailabilityService.deleteAvailability(scheduleId);
     }
-    // TODO: CANCEL BOOKINGS
     // Delete user
     HttpStatus deleteResponseCode = calComUserService.deleteUser(calcomUserId);
     // Remove association

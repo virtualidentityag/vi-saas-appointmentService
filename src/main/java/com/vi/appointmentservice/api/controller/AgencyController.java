@@ -65,22 +65,6 @@ public class AgencyController implements AgenciesApi {
 
   @Override
   public ResponseEntity<MeetingSlug> getInitialMeetingSlug(Long agencyId) {
-    // TODO: Swap mock method with real method once agencies are associated
-    return new ResponseEntity<>(this.agencyFacade.getMockMeetingSlugByAgencyId(agencyId),
-        HttpStatus.OK);
-  }
-
-  // TODO: Remove route once agencies are associated
-  @ApiOperation(value = "Get initial meeting booking link for agency", nickname = "getInitialMeetingSlugReal", response = MeetingSlug.class, tags = {
-      "agency",})
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "successful operation", response = MeetingSlug.class)})
-  @GetMapping(
-      value = "/agencies/{agencyId}/initialMeetingSlugReal",
-      produces = {"application/json"}
-  )
-  public ResponseEntity<MeetingSlug> getInitialMeetingSlugReal(
-      @ApiParam(value = "ID of agency", required = true) @PathVariable("agencyId") Long agencyId) {
     return new ResponseEntity<>(this.agencyFacade.getMeetingSlugByAgencyId(agencyId),
         HttpStatus.OK);
   }
