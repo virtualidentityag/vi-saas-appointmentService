@@ -2,6 +2,7 @@ package com.vi.appointmentservice.repository;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,12 +25,15 @@ public class MembershipsRepository {
     });
   }
 
+  public void deleteTeamMemeberships(Long teamId) {
+    String DELETE_MEMBERSHIP_QUERY = "delete from \"Membership\" where \"teamId\"=" + teamId;
+    jdbcTemplate.update(DELETE_MEMBERSHIP_QUERY);
+  }
+
   public List<Long> getUsersOfTeam(Long calcomTeamId) {
     String query = "select userId from \"Membership\" where \"teamId\"=" + calcomTeamId;
     return jdbcTemplate.queryForList(query, Integer.class).stream()
         .map(Integer::longValue)
         .collect(Collectors.toList());
   }
-
-
 }

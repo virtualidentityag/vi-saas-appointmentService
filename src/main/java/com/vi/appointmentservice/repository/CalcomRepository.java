@@ -54,5 +54,9 @@ public class CalcomRepository {
             new CalcomRepositoryBookingMapper());
   }
 
+  public void cancelBookingById(Long bookingId){
+    // TODO: Implement
+  }
+
 
 }

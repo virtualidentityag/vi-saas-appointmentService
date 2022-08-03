@@ -8,6 +8,7 @@ import com.vi.appointmentservice.api.model.CalcomTeam;
 import com.vi.appointmentservice.api.service.calcom.CalComService;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
@@ -33,34 +34,6 @@ public class CalComTeamService extends CalComService {
     super(restTemplate, calcomApiUrl, calcomApiKey);
   }
 
-  private String generateSlug(String name) {
-    name = name.toLowerCase();
-    String regex = "[^\\w]+"; // Relace everyting but word characters (digits, numbers)
-    String subst = "-";
-    Pattern pattern = Pattern.compile(regex);
-    Matcher matcher = pattern.matcher(name);
-    return matcher.replaceAll(subst);
-  }
-
-  public List<CalcomTeam> getAllTeams() {
-    String response = this.restTemplate.getForObject(this.buildUri("/v1/teams"), String.class);
-    JSONObject jsonObject;
-    if (response != null) {
-      jsonObject = new JSONObject(response);
-    } else {
-      throw new CalComApiErrorException("Calcom team API response was null");
-    }
-    response = jsonObject.getJSONArray("teams").toString();
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      CalcomTeam[] result = mapper.readValue(response, CalcomTeam[].class);
-      return List.of(Objects.requireNonNull(result));
-    } catch (JsonProcessingException e) {
-      throw new CalComApiErrorException("Could not deserialize teams response from calcom api");
-    }
-
-  }
-
   public CalcomTeam getTeamById(Long teamId) {
     String response = restTemplate.getForObject(this.buildUri("/v1/teams/" + teamId), String.class);
     JSONObject jsonObject;
@@ -83,7 +56,8 @@ public class CalComTeamService extends CalComService {
     headers.setContentType(MediaType.APPLICATION_JSON);
     JSONObject teamObject = new JSONObject();
     teamObject.put("name", team.getName());
-    teamObject.put("slug", generateSlug(team.getName()));
+    teamObject.put("slug", UUID.randomUUID().toString());
+    teamObject.put("hideBranding", team.getHideBranding());
     HttpEntity<String> request = new HttpEntity<>(teamObject.toString(), headers);
     return restTemplate.postForEntity(this.buildUri("/v1/teams"), request, TeamUpdateResponse.class)
         .getBody().getTeam();
@@ -96,30 +70,10 @@ public class CalComTeamService extends CalComService {
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     if (team.getName() != null) {
       teamObject.put("name", team.getName());
-      teamObject.put("slug", generateSlug(team.getName()));
     }
     HttpEntity<String> request = new HttpEntity<>(teamObject.toString(), headers);
     return restTemplate.patchForObject(this.buildUri("/v1/teams/" + team.getId()), request,
         TeamUpdateResponse.class).getTeam();
   }
-
-  public void deleteTeam(Long teamId) {
-    //TODO: the api is not working
-    restTemplate.delete(this.buildUri("/v1/teams/" + teamId));
-  }
-
-  public CalcomMembership addUserToTeam(Long calComUserId, Long calComTeamid) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    JSONObject membership = new JSONObject();
-    membership.put("teamId", calComTeamid);
-    membership.put("userId", calComUserId);
-    membership.put("accepted", true);
-    membership.put("userId", "MEMBER");
-    HttpEntity<String> request = new HttpEntity<>(membership.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri("/v1/memberships"), request,
-        CalcomMembership.class).getBody();
-  }
-
 
 }

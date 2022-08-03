@@ -13,9 +13,6 @@ public class TeamRepository {
   private final @NotNull JdbcTemplate jdbcTemplate;
 
   public void deleteTeam(Long teamId) {
-    String DELETE_MEMBERSHIP_QUERY = "delete from \"Membership\" where \"teamId\"=" + teamId;
-    jdbcTemplate.update(DELETE_MEMBERSHIP_QUERY);
-
     String DELETE_TEAM_QUERY = "delete from \"Team\" where \"id\"=" + teamId;
     jdbcTemplate.update(DELETE_TEAM_QUERY);
   }
