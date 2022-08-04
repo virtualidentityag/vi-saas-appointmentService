@@ -31,7 +31,7 @@ public class MembershipsRepository {
   }
 
   public List<Long> getUsersOfTeam(Long calcomTeamId) {
-    String query = "select userId from \"Membership\" where \"teamId\"=" + calcomTeamId;
+    String query = "select \"userId\" from \"Membership\" where \"teamId\"=" + calcomTeamId;
     return jdbcTemplate.queryForList(query, Integer.class).stream()
         .map(Integer::longValue)
         .collect(Collectors.toList());
