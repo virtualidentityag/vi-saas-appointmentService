@@ -1,7 +1,6 @@
 package com.vi.appointmentservice.api.controller;
 
 import com.vi.appointmentservice.api.facade.AgencyFacade;
-import com.vi.appointmentservice.api.facade.EventTypeFacade;
 import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyResponseDTO;
@@ -36,9 +35,6 @@ public class AgencyController implements AgenciesApi {
   @NonNull
   private final AgencyFacade agencyFacade;
 
-  @NonNull
-  private final EventTypeFacade eventTypeFacade;
-
   // Agency CRUD
   @Override
   public ResponseEntity<CalcomTeam> createAgency(AgencyResponseDTO agencyResponseDTO) {
@@ -61,20 +57,20 @@ public class AgencyController implements AgenciesApi {
   @Override
   public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfAgency(Long agencyId) {
     List<CalcomEventType> eventTypes;
-    eventTypes = this.eventTypeFacade.getAgencyEventTypes(agencyId);
+    eventTypes = this.agencyFacade.getAgencyEventTypes(agencyId);
     return new ResponseEntity<>(eventTypes, HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<CalcomEventType> getAgencyEventTypeById(Long agencyId, Long eventTypeId) {
-    return new ResponseEntity<>(this.eventTypeFacade.getAgencyEventTypeById(eventTypeId),
+    return new ResponseEntity<>(this.agencyFacade.getAgencyEventTypeById(eventTypeId),
         HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<CalcomEventType> addEventTypeToAgency(Long agencyId,
       CreateUpdateCalcomEventTypeDTO teamEventType) {
-    return new ResponseEntity<>(this.eventTypeFacade.addAgencyEventType(agencyId, teamEventType),
+    return new ResponseEntity<>(this.agencyFacade.addAgencyEventType(agencyId, teamEventType),
         HttpStatus.OK);
   }
 
@@ -82,13 +78,13 @@ public class AgencyController implements AgenciesApi {
   public ResponseEntity<CalcomEventType> updateAgencyEventType(Long agencyId, Long eventTypeId,
       CreateUpdateCalcomEventTypeDTO createUpdateCalcomEventTypeDTO) {
     return new ResponseEntity<>(
-        this.eventTypeFacade.updateAgencyEventType(eventTypeId, createUpdateCalcomEventTypeDTO),
+        this.agencyFacade.updateAgencyEventType(eventTypeId, createUpdateCalcomEventTypeDTO),
         HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> deleteAgencyEventType(Long agencyId, Long eventTypeId) {
-    this.eventTypeFacade.deleteAgencyEventType(eventTypeId);
+    this.agencyFacade.deleteAgencyEventType(eventTypeId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
