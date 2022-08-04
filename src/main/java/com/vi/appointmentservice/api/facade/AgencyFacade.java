@@ -11,6 +11,7 @@ import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
 import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomTeam;
 import com.vi.appointmentservice.api.model.CreateUpdateCalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
@@ -131,7 +132,7 @@ public class AgencyFacade {
     eventTypeRepository.removeTeamEventTypeMembershipsForUser(calComUserId);
     // Add consultant to team eventTypes
     for(Long teamId: teamIds){
-      for(CalcomEventType eventType: calComEventTypeService.getAllEventTypesOfTeam(teamId)){
+      for(CalcomEventTypeDTO eventType: calComEventTypeService.getAllEventTypesOfTeam(teamId)){
         eventTypeRepository.addTeamEventTypeMemberships(Long.valueOf(eventType.getId()), calComUserId);
       }
     }
@@ -172,8 +173,8 @@ public class AgencyFacade {
     }
   }
 
-  private CalcomEventType getDefaultCalcomInitialMeetingEventType(CalcomTeam team) {
-    CalcomEventType eventType = new CalcomEventType();
+  private CalcomEventTypeDTO getDefaultCalcomInitialMeetingEventType(CalcomTeam team) {
+    CalcomEventTypeDTO eventType = new CalcomEventTypeDTO();
     eventType.setTeamId(Math.toIntExact(team.getId()));
     eventType.setTitle("Erstberatung " + team.getName());
     eventType.setSlug(UUID.randomUUID().toString());
@@ -204,8 +205,8 @@ public class AgencyFacade {
     }
   }
 
-  public List<CalcomEventType> getAgencyEventTypes(Long agencyId) {
-    List<CalcomEventType> eventTypes;
+  public List<CalcomEventTypeDTO> getAgencyEventTypes(Long agencyId) {
+    List<CalcomEventTypeDTO> eventTypes;
     if (teamToAgencyRepository.existsByAgencyId(agencyId)) {
       eventTypes = calComEventTypeService.getAllEventTypesOfTeam(teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid());
       return eventTypes;
@@ -230,8 +231,8 @@ public class AgencyFacade {
     return consultants;
   }
 
-  public CalcomEventType getAgencyEventTypeById(Long eventTypeId){
-    CalcomEventType eventType = calComEventTypeService.getEventTypeById(eventTypeId);
+  public CalcomEventTypeDTO getAgencyEventTypeById(Long eventTypeId){
+    CalcomEventTypeDTO eventType = calComEventTypeService.getEventTypeById(eventTypeId);
     eventType.setConsultants(this.getConsultantsOfAgencyEventType(Long.valueOf(eventType.getId())));
     String eventTypeSlug = eventType.getSlug();
     String teamSlug = calComTeamService.getTeamById(Long.valueOf(eventType.getTeamId())).getSlug();
@@ -239,7 +240,7 @@ public class AgencyFacade {
     return eventType;
   }
 
-  public CalcomEventType addAgencyEventType(Long agencyId, CreateUpdateCalcomEventTypeDTO eventType){
+  public CalcomEventTypeDTO addAgencyEventType(Long agencyId, CreateUpdateCalcomEventTypeDTO eventType){
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -272,7 +273,7 @@ public class AgencyFacade {
     } catch (JsonProcessingException e) {
       throw new InternalServerErrorException("Could not serialize eventTypePayload");
     }
-    CalcomEventType createdEventType = calComEventTypeService.createEventType(eventTypePayloadJson);
+    CalcomEventTypeDTO createdEventType = calComEventTypeService.createEventType(eventTypePayloadJson);
 
     // Add consultants to eventType
     List<TeamEventTypeConsultant> consultants = eventType.getConsultants();
@@ -280,7 +281,7 @@ public class AgencyFacade {
     return createdEventType;
   }
 
-  public CalcomEventType updateAgencyEventType(Long eventTypeId, CreateUpdateCalcomEventTypeDTO eventType){
+  public CalcomEventTypeDTO updateAgencyEventType(Long eventTypeId, CreateUpdateCalcomEventTypeDTO eventType){
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -297,7 +298,7 @@ public class AgencyFacade {
     } catch (JsonProcessingException e) {
       throw new InternalServerErrorException("Could not serialize eventTypePayload");
     }
-    CalcomEventType updatedEventType = calComEventTypeService.editEventType(eventTypeId, eventTypePayloadJson);
+    CalcomEventTypeDTO updatedEventType = calComEventTypeService.editEventType(eventTypeId, eventTypePayloadJson);
 
     // Add consultants to eventType
     List<TeamEventTypeConsultant> consultants = eventType.getConsultants();

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
-import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +31,7 @@ public class CalComEventTypeService extends CalComService {
     super(restTemplate, calcomApiUrl, calcomApiKey);
   }
 
-  public List<CalcomEventType> getAllEventTypes() {
+  public List<CalcomEventTypeDTO> getAllEventTypes() {
     String response = this.restTemplate.getForObject(this.buildUri("/v1/event-types"),
         String.class);
     JSONObject jsonObject;
@@ -52,33 +52,33 @@ public class CalComEventTypeService extends CalComService {
   }
 
   public void deleteAllEventTypesOfUser(Long userId) {
-    List<CalcomEventType> eventTypesOfUser = new ArrayList<>(this.getAllEventTypes()).stream()
+    List<CalcomEventTypeDTO> eventTypesOfUser = new ArrayList<>(this.getAllEventTypes()).stream()
         .filter(eventType -> eventType.getUserId() != null
             && eventType.getUserId() == userId.intValue())
         .collect(Collectors.toList());
-    for (CalcomEventType eventType : eventTypesOfUser) {
+    for (CalcomEventTypeDTO eventType : eventTypesOfUser) {
       this.deleteEventType(Long.valueOf(eventType.getId()));
     }
   }
 
-  public List<CalcomEventType> getAllEventTypesOfTeam(Long teamId) {
-    List<CalcomEventType> result = this.getAllEventTypes();
+  public List<CalcomEventTypeDTO> getAllEventTypesOfTeam(Long teamId) {
+    List<CalcomEventTypeDTO> result = this.getAllEventTypes();
     return new ArrayList<>(result).stream()
         .filter(eventType -> eventType.getTeamId() != null && eventType.getTeamId() == teamId.intValue())
         .collect(Collectors.toList());
   }
 
-  public List<CalcomEventType> getAllEventTypesOfUser(Long userId) {
-    List<CalcomEventType> result = this.getAllEventTypes();
+  public List<CalcomEventTypeDTO> getAllEventTypesOfUser(Long userId) {
+    List<CalcomEventTypeDTO> result = this.getAllEventTypes();
     return new ArrayList<>(result).stream()
         .filter(eventType -> eventType.getUserId() != null
             && eventType.getUserId() == userId.intValue())
         .collect(Collectors.toList());
   }
 
-  public CalcomEventType getEventTypeById(Long eventTypeId) {
-    List<CalcomEventType> result = this.getAllEventTypes();
-    CalcomEventType found = new ArrayList<>(result).stream()
+  public CalcomEventTypeDTO getEventTypeById(Long eventTypeId) {
+    List<CalcomEventTypeDTO> result = this.getAllEventTypes();
+    CalcomEventTypeDTO found = new ArrayList<>(result).stream()
         .filter(eventType -> eventType.getId() == eventTypeId.intValue())
         .collect(Collectors.toList()).get(0);
     if (found != null) {
@@ -90,14 +90,14 @@ public class CalComEventTypeService extends CalComService {
 
   }
 
-  public CalcomEventType createEventType(JSONObject eventType) {
+  public CalcomEventTypeDTO createEventType(JSONObject eventType) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
     try {
-      CalcomEventType createdEventType = restTemplate.postForEntity(
+      CalcomEventTypeDTO createdEventType = restTemplate.postForEntity(
           this.buildUri("/v1/event-types"), request,
-          CalcomEventType.class).getBody();
+          CalcomEventTypeDTO.class).getBody();
       if (createdEventType == null) {
         throw new CalComApiErrorException("Calcom create event-type API response was null");
       }
@@ -109,14 +109,14 @@ public class CalComEventTypeService extends CalComService {
 
   }
 
-  public CalcomEventType editEventType(Long eventTypeId, JSONObject eventType) {
+  public CalcomEventTypeDTO editEventType(Long eventTypeId, JSONObject eventType) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
     try {
-      CalcomEventType createdEventType = restTemplate.postForEntity(
+      CalcomEventTypeDTO createdEventType = restTemplate.patchForObject(
           this.buildUri("/v1/event-types" + eventTypeId), request,
-          CalcomEventType.class).getBody();
+          CalcomEventTypeDTO.class);
       if (createdEventType == null) {
         throw new CalComApiErrorException("Calcom update event-type API response was null");
       }
