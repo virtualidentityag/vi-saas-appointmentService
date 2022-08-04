@@ -115,7 +115,7 @@ public class CalComEventTypeService extends CalComService {
     HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
     try {
       CalcomEventTypeDTO createdEventType = restTemplate.patchForObject(
-          this.buildUri("/v1/event-types" + eventTypeId), request,
+          this.buildUri("/v1/event-types/" + eventTypeId), request,
           CalcomEventTypeDTO.class);
       if (createdEventType == null) {
         throw new CalComApiErrorException("Calcom update event-type API response was null");
