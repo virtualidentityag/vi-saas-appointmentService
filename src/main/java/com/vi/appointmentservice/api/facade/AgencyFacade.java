@@ -285,9 +285,15 @@ public class AgencyFacade {
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     // Create event-type
+    CalcomEventType eventTypePayload;
+    try {
+      eventTypePayload = objectMapper.readValue(new JSONObject(eventType).toString(), CalcomEventType.class);
+    } catch (JsonProcessingException e) {
+      throw new CalComApiErrorException("Could not deserialize CreateUpdateCalcomEventTypeDTO to CalcomEventType while adding eventType to team");
+    }
     JSONObject eventTypePayloadJson;
     try {
-      eventTypePayloadJson = new JSONObject(objectMapper.writeValueAsString(eventType));
+      eventTypePayloadJson = new JSONObject(objectMapper.writeValueAsString(eventTypePayload));
     } catch (JsonProcessingException e) {
       throw new InternalServerErrorException("Could not serialize eventTypePayload");
     }
