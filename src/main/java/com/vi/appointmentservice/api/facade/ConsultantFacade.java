@@ -41,9 +41,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 public class ConsultantFacade {
-
   private final @NonNull CalComUserService calComUserService;
-  private final @NonNull CalComTeamService calComTeamService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull CalComScheduleService calComScheduleService;
   private final @NonNull CalComAvailabilityService calComAvailabilityService;

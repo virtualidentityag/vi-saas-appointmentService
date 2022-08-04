@@ -62,12 +62,6 @@ public class ConsultantController implements ConsultantsApi {
   }
 
   @Override
-  public ResponseEntity<CalcomEventType> addEventTypeToConsultant(String consultantId,
-      CreateUpdateCalcomEventTypeDTO calcomEventType) {
-    return ConsultantsApi.super.addEventTypeToConsultant(consultantId, calcomEventType);
-  }
-
-  @Override
   public ResponseEntity<List<CalcomBooking>> getAllBookingsOfConsultant(String consultantId,
       String status) {
     List<CalcomBooking> bookings;
@@ -84,7 +78,6 @@ public class ConsultantController implements ConsultantsApi {
         HttpStatus.OK);
   }
 
-
   @Override
   public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfConsultant(String consultantId) {
     return new ResponseEntity<>(consultantFacade.getAllEventTypesOfConsultantHandler(consultantId),
@@ -96,6 +89,4 @@ public class ConsultantController implements ConsultantsApi {
     return new ResponseEntity<>(consultantFacade.getConsultantMeetingSlugHandler(consultantId),
         HttpStatus.OK);
   }
-
-
 }
