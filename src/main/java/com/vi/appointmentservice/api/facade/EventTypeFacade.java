@@ -8,12 +8,10 @@ import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.CalcomEventType;
-import com.vi.appointmentservice.api.model.CalcomTeam;
 import com.vi.appointmentservice.api.model.CreateUpdateCalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
-import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
@@ -142,25 +140,6 @@ public class EventTypeFacade {
     eventTypeRepository.removeTeamEventTypeMembershipsForEventType(eventTypeId);
   }
 
-  CalcomEventType getDefaultCalcomInitialMeetingEventType(CalcomTeam team) {
-    CalcomEventType eventType = new CalcomEventType();
-    eventType.setTeamId(Math.toIntExact(team.getId()));
-    eventType.setTitle("Erstberatung " + team.getName());
-    eventType.setSlug(UUID.randomUUID().toString());
-    eventType.setLength(60);
-    eventType.setHidden(false);
-    eventType.setEventName("Erstberatung {ATTENDEE} mit {HOST}");
-    eventType.setRequiresConfirmation(false);
-    eventType.setDisableGuests(true);
-    eventType.setHideCalendarNotes(true);
-    eventType.setMinimumBookingNotice(120);
-    eventType.setBeforeEventBuffer(0);
-    eventType.setAfterEventBuffer(0);
-    eventType.setSuccessRedirectUrl(
-        appBaseUrl + "/sessions/user/view/");
-    eventType.setDescription("");
-    eventType.setSchedulingType("ROUND_ROBIN");
-    return eventType;
-  }
+
 
 }

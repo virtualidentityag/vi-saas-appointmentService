@@ -15,7 +15,6 @@ import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
-import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
@@ -26,10 +25,12 @@ import com.vi.appointmentservice.repository.WebhookRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /*
@@ -56,11 +57,10 @@ public class AgencyFacade {
   @NonNull
   private final WebhookRepository webhookRepository;
   @NonNull
-  private final AdminUserService adminUserService;
-  @NonNull
-  private final EventTypeFacade eventTypeFacade;
-  @NonNull
   private final CalComUserService calComUserService;
+
+  @Value("${app.base.url}")
+  private String appBaseUrl;
 
   public List<Long> getAllConsultantIdsOfAgency(Long agencyId){
     Optional<TeamToAgency> teamToAgency = teamToAgencyRepository.findByAgencyId(agencyId);
@@ -161,12 +161,33 @@ public class AgencyFacade {
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
       JSONObject eventTypePayloadJson = null;
       try {
-        eventTypePayloadJson = new JSONObject(objectMapper.writeValueAsString(eventTypeFacade.getDefaultCalcomInitialMeetingEventType(createdOrUpdateTeam)));
+        eventTypePayloadJson = new JSONObject(objectMapper.writeValueAsString(getDefaultCalcomInitialMeetingEventType(createdOrUpdateTeam)));
       } catch (JsonProcessingException e) {
         throw new InternalServerErrorException("Could not serialize createCalcomUser payload");
       }
       calComEventTypeService.createEventType(eventTypePayloadJson);
     }
+  }
+
+  private CalcomEventType getDefaultCalcomInitialMeetingEventType(CalcomTeam team) {
+    CalcomEventType eventType = new CalcomEventType();
+    eventType.setTeamId(Math.toIntExact(team.getId()));
+    eventType.setTitle("Erstberatung " + team.getName());
+    eventType.setSlug(UUID.randomUUID().toString());
+    eventType.setLength(60);
+    eventType.setHidden(false);
+    eventType.setEventName("Erstberatung {ATTENDEE} mit {HOST}");
+    eventType.setRequiresConfirmation(false);
+    eventType.setDisableGuests(true);
+    eventType.setHideCalendarNotes(true);
+    eventType.setMinimumBookingNotice(120);
+    eventType.setBeforeEventBuffer(0);
+    eventType.setAfterEventBuffer(0);
+    eventType.setSuccessRedirectUrl(
+        appBaseUrl + "/sessions/user/view/");
+    eventType.setDescription("");
+    eventType.setSchedulingType("ROUND_ROBIN");
+    return eventType;
   }
 
   public void deleteAgency(Long agencyId) {
