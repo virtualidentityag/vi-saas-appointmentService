@@ -3,6 +3,7 @@ package com.vi.appointmentservice.repository;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Repository;
 public class EventTypeRepository {
 
   private final @NotNull JdbcTemplate jdbcTemplate;
-
+  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   /**
    * A = eventTypeId
    * B = userId
@@ -39,9 +40,10 @@ public class EventTypeRepository {
     String DELETE_QUERY = "delete from \"_user_eventtype\" where \"A\"=" + eventTypeId;
     jdbcTemplate.update(DELETE_QUERY);
     eventTypeConsultants.forEach(eventTypeConsultant -> {
+      Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(eventTypeConsultant.getConsultantId()).getCalComUserId();
       String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
       INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
-          .replace("$userIdParam", eventTypeConsultant.getConsultantId());
+          .replace("$userIdParam", calcomUserId.toString());
       jdbcTemplate.update(INSERT_QUERY);
     });
   }
