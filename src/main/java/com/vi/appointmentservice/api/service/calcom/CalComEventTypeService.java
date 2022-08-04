@@ -2,10 +2,12 @@ package com.vi.appointmentservice.api.service.calcom;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
+import com.vi.appointmentservice.api.model.CalcomUser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -87,7 +90,6 @@ public class CalComEventTypeService extends CalComService {
       throw new BadRequestException(
           String.format("No calcom event-type found for id '%s'", eventTypeId));
     }
-
   }
 
   public CalcomEventTypeDTO createEventType(JSONObject eventType) {
@@ -95,18 +97,22 @@ public class CalComEventTypeService extends CalComService {
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
     try {
-      CalcomEventTypeDTO createdEventType = restTemplate.postForEntity(
-          this.buildUri("/v1/event-types"), request,
-          CalcomEventTypeDTO.class).getBody();
-      if (createdEventType == null) {
-        throw new CalComApiErrorException("Calcom create event-type API response was null");
+      ResponseEntity<String> response = restTemplate
+          .exchange(this.buildUri("/v1/event-types"), HttpMethod.POST, request,
+              String.class);
+      String body = response.getBody();
+      if (body == null) {
+        throw new CalComApiErrorException("Calcom create event-type API response body was null");
       }
-      return createdEventType;
+      JSONObject jsonObject = new JSONObject(body);
+      body = jsonObject.getJSONObject("event_type").toString();
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      return mapper.readValue(body, CalcomEventTypeDTO.class);
     } catch (Exception e) {
       log.error("Calcom create event-type API response exception", e);
       throw new CalComApiErrorException("Calcom create event-type API response exception");
     }
-
   }
 
   public CalcomEventTypeDTO editEventType(Long eventTypeId, JSONObject eventType) {
@@ -114,13 +120,18 @@ public class CalComEventTypeService extends CalComService {
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<String> request = new HttpEntity<>(eventType.toString(), headers);
     try {
-      CalcomEventTypeDTO createdEventType = restTemplate.patchForObject(
-          this.buildUri("/v1/event-types/" + eventTypeId), request,
-          CalcomEventTypeDTO.class);
-      if (createdEventType == null) {
-        throw new CalComApiErrorException("Calcom update event-type API response was null");
+      ResponseEntity<String> response = restTemplate
+          .exchange(this.buildUri("/v1/event-types/" + eventTypeId), HttpMethod.PATCH, request,
+              String.class);
+      String body = response.getBody();
+      if (body == null) {
+        throw new CalComApiErrorException("Calcom update event-type API response body was null");
       }
-      return createdEventType;
+      JSONObject jsonObject = new JSONObject(body);
+      body = jsonObject.getJSONObject("event_type").toString();
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      return mapper.readValue(body, CalcomEventTypeDTO.class);
     } catch (Exception e) {
       log.error("Calcom update event-type API response exception", e);
       throw new CalComApiErrorException("Calcom update event-type API response exception");
