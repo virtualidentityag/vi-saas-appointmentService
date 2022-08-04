@@ -233,11 +233,20 @@ public class AgencyFacade {
 
   public CalcomEventTypeDTO getAgencyEventTypeById(Long eventTypeId){
     CalcomEventTypeDTO eventType = calComEventTypeService.getEventTypeById(eventTypeId);
-    eventType.setConsultants(this.getConsultantsOfAgencyEventType(Long.valueOf(eventType.getId())));
-    String eventTypeSlug = eventType.getSlug();
-    String teamSlug = calComTeamService.getTeamById(Long.valueOf(eventType.getTeamId())).getSlug();
-    eventType.setSlug(teamSlug + "/" + eventTypeSlug);
+    attachConsultantsInformationToEventType(eventType);
+    attachFullSlugToEventType(eventType);
     return eventType;
+  }
+  public CalcomEventTypeDTO attachConsultantsInformationToEventType(CalcomEventTypeDTO eventType){
+    eventType.setConsultants(this.getConsultantsOfAgencyEventType(Long.valueOf(eventType.getId())));
+    return eventType;
+  }
+
+  public CalcomEventTypeDTO attachFullSlugToEventType(CalcomEventTypeDTO calcomEventType){
+    String eventTypeSlug = calcomEventType.getSlug();
+    String teamSlug = calComTeamService.getTeamById(Long.valueOf(calcomEventType.getTeamId())).getSlug();
+    calcomEventType.setSlug(teamSlug + "/" + eventTypeSlug);
+    return calcomEventType;
   }
 
   public CalcomEventTypeDTO addAgencyEventType(Long agencyId, CreateUpdateCalcomEventTypeDTO eventType){
@@ -278,6 +287,8 @@ public class AgencyFacade {
     // Add consultants to eventType
     List<TeamEventTypeConsultant> consultants = eventType.getConsultants();
     eventTypeRepository.updateUsersOfEventType(Long.valueOf(createdEventType.getId()), consultants);
+    attachConsultantsInformationToEventType(createdEventType);
+    attachFullSlugToEventType(createdEventType);
     return createdEventType;
   }
 
@@ -303,6 +314,8 @@ public class AgencyFacade {
     // Add consultants to eventType
     List<TeamEventTypeConsultant> consultants = eventType.getConsultants();
     eventTypeRepository.updateUsersOfEventType(Long.valueOf(updatedEventType.getId()), consultants);
+    attachConsultantsInformationToEventType(updatedEventType);
+    attachFullSlugToEventType(updatedEventType);
     return updatedEventType;
   }
 
