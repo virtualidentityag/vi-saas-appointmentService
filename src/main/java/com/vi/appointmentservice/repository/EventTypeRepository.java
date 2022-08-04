@@ -1,5 +1,6 @@
 package com.vi.appointmentservice.repository;
 
+import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -51,6 +52,12 @@ public class EventTypeRepository {
   public List<Long> getUserIdsOfEventTypeMembers(Long eventTypeId){
     String QUERY = "SELECT \"B\" FROM \"_user_eventtype\" WHERE \"A\" = " + eventTypeId;
     return jdbcTemplate.queryForList(QUERY, Long.class);
+  }
+
+  public void updateEventTypeDescription(Long eventTypeId, String description) {
+    String UPDATE_QUERY = "update \"EventType\" set \"description\" = $descriptionParam where \"id\" = " + eventTypeId;
+    UPDATE_QUERY = UPDATE_QUERY.replace("$descriptionParam", "'" + description + "'");
+    jdbcTemplate.update(UPDATE_QUERY);
   }
 
 

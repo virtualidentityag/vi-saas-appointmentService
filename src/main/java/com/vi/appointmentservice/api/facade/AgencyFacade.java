@@ -91,17 +91,6 @@ public class AgencyFacade {
     return availableConsultants;
   }
 
-  protected Long getTeamIdByAgencyId(Long agencyId) {
-    Optional<TeamToAgency> teamToAgency = teamToAgencyRepository.findByAgencyId(agencyId);
-    Long teamid;
-    if(teamToAgency.isPresent()){
-      teamid = getTeamIdByAgencyId(agencyId);
-    } else {
-      throw new NotFoundException("No team for agency with the id '" + agencyId +  "'");
-    }
-    return teamid;
-  }
-
   public MeetingSlug getMeetingSlugByAgencyId(Long agencyId) {
     this.checkIfAgencyTeamExists(agencyId);
     MeetingSlug meetingSlug = new MeetingSlug();
@@ -261,7 +250,13 @@ public class AgencyFacade {
     } catch (JsonProcessingException e) {
       throw new CalComApiErrorException("Could not deserialize CreateUpdateCalcomEventTypeDTO to CalcomEventType while adding eventType to team");
     }
-    Long teamid = this.getTeamIdByAgencyId(agencyId);
+    Optional<TeamToAgency> teamToAgency = teamToAgencyRepository.findByAgencyId(agencyId);
+    Long teamid;
+    if(teamToAgency.isPresent()){
+      teamid = teamToAgency.get().getTeamid();
+    } else {
+      throw new NotFoundException("No team for agency with the id '" + agencyId +  "'");
+    }
     eventTypePayload.setTeamId(Math.toIntExact(teamid));
     if(eventTypePayload.getSlug() == null){
       eventTypePayload.setSlug(UUID.randomUUID().toString());
@@ -309,8 +304,9 @@ public class AgencyFacade {
     } catch (JsonProcessingException e) {
       throw new InternalServerErrorException("Could not serialize eventTypePayload");
     }
+    eventTypePayloadJson.remove("description");
     CalcomEventTypeDTO updatedEventType = calComEventTypeService.editEventType(eventTypeId, eventTypePayloadJson);
-
+    eventTypeRepository.updateEventTypeDescription(Long.valueOf(updatedEventType.getId()), eventType.getDescription());
     // Add consultants to eventType
     List<TeamEventTypeConsultant> consultants = eventType.getConsultants();
     eventTypeRepository.updateUsersOfEventType(Long.valueOf(updatedEventType.getId()), consultants);
