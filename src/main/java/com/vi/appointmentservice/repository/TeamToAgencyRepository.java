@@ -9,7 +9,11 @@ import java.util.List;
 public interface TeamToAgencyRepository extends JpaRepository<TeamToAgency, Long> {
     Optional<TeamToAgency> findByAgencyId(Long agencyId);
 
+    Optional<TeamToAgency> findByTeamid(Long teamid);
+
     boolean existsByAgencyId(Long agencyId);
+
+
 
 
 }

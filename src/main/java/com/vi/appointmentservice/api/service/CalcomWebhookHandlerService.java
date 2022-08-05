@@ -1,7 +1,7 @@
 package com.vi.appointmentservice.api.service;
 
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
@@ -56,7 +56,7 @@ public class CalcomWebhookHandlerService {
   private boolean isTeamEvent(CalcomWebhookInputPayload payload) {
     CalcomBooking booking = calComBookingService
         .getBookingById(Long.valueOf(payload.getBookingId()));
-    CalcomEventType eventType = calComEventTypeService
+    CalcomEventTypeDTO eventType = calComEventTypeService
         .getEventTypeById(Long.valueOf(booking.getEventTypeId()));
     return eventType.getTeamId() != null;
   }
@@ -74,9 +74,9 @@ public class CalcomWebhookHandlerService {
   private void handleCancelEvent(CalcomWebhookInputPayload payload) {
     //TODO: replace with call to DB, and try catch will also disappear
     try {
-      var bookingId = Long.valueOf(calComBookingService.getAllBookings().stream()
+      var bookingId = calComBookingService.getAllBookings().stream()
           .filter(el -> el.getUid().equals(payload.getUid())).collect(
-              Collectors.toList()).get(0).getId());
+              Collectors.toList()).get(0).getId();
       messagesService.publishCancellationMessage(bookingId);
       calcomBookingToAskerRepository.deleteByCalcomBookingId(bookingId);
       calcomRepository.cancelBookingById(bookingId);

@@ -8,8 +8,8 @@ import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorExcep
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.AgencyAdminResponseDTO;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.model.CalcomEventType;
-import com.vi.appointmentservice.api.model.CalcomEventTypeLocationsInner;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTOLocationsInner;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
@@ -41,9 +41,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 public class ConsultantFacade {
-
   private final @NonNull CalComUserService calComUserService;
-  private final @NonNull CalComTeamService calComTeamService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull CalComScheduleService calComScheduleService;
   private final @NonNull CalComAvailabilityService calComAvailabilityService;
@@ -169,7 +167,7 @@ public class ConsultantFacade {
     ObjectMapper objectMapper = new ObjectMapper();
     // Ignore null values
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    CalcomEventType eventType = this.getDefaultCalcomEventType(createdUser);
+    CalcomEventTypeDTO eventType = this.getDefaultCalcomEventType(createdUser);
     JSONObject eventTypeJson;
     try {
       eventTypeJson = new JSONObject(objectMapper.writeValueAsString(eventType));
@@ -199,8 +197,8 @@ public class ConsultantFacade {
     }
   }
 
-  private CalcomEventType getDefaultCalcomEventType(CalcomUser createdUser) {
-    CalcomEventType eventType = new CalcomEventType();
+  private CalcomEventTypeDTO getDefaultCalcomEventType(CalcomUser createdUser) {
+    CalcomEventTypeDTO eventType = new CalcomEventTypeDTO();
     eventType.setUserId(Math.toIntExact(createdUser.getId()));
     eventType.setTitle("Beratung mit " + createdUser.getName());
     eventType.setSlug(UUID.randomUUID().toString());
@@ -216,8 +214,8 @@ public class ConsultantFacade {
     eventType.setSuccessRedirectUrl(
         appBaseUrl + "/sessions/user/view/");
     eventType.setDescription("");
-    List<CalcomEventTypeLocationsInner> locations = new ArrayList<>();
-    CalcomEventTypeLocationsInner location = new CalcomEventTypeLocationsInner();
+    List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
+    CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
     location.setType("integrations:daily");
     locations.add(location);
     eventType.setLocations(locations);
@@ -296,7 +294,7 @@ public class ConsultantFacade {
     return calComBookingService.getConsultantExpiredBookings(calcomUserId);
   }
 
-  public List<CalcomEventType> getAllEventTypesOfConsultantHandler(String consultantId) {
+  public List<CalcomEventTypeDTO> getAllEventTypesOfConsultantHandler(String consultantId) {
     checkIfConsultantExists(consultantId);
     return calComEventTypeService.getAllEventTypesOfUser(
         calcomUserToConsultantRepository.findByConsultantId(consultantId).getCalComUserId());

@@ -3,7 +3,7 @@ package com.vi.appointmentservice.api.controller;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.facade.ConsultantFacade;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
@@ -61,12 +61,6 @@ public class ConsultantController implements ConsultantsApi {
   }
 
   @Override
-  public ResponseEntity<CalcomEventType> addEventTypeToConsultant(String consultantId,
-      CalcomEventType calcomEventType) {
-    return ConsultantsApi.super.addEventTypeToConsultant(consultantId, calcomEventType);
-  }
-
-  @Override
   public ResponseEntity<List<CalcomBooking>> getAllBookingsOfConsultant(String consultantId,
       String status) {
     List<CalcomBooking> bookings;
@@ -76,16 +70,15 @@ public class ConsultantController implements ConsultantsApi {
       bookings = consultantFacade.getConsultantExpiredBookings(consultantId);
     } else if ("CANCELLED".equals(status)) {
       bookings = consultantFacade.getConsultantCancelledBookings(consultantId);
-    }else{
+    } else {
       throw new BadRequestException("Given status must be ACTIVE, EXPIRED or CANCELLED");
     }
     return new ResponseEntity<>(bookings,
         HttpStatus.OK);
   }
 
-
   @Override
-  public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfConsultant(String consultantId) {
+  public ResponseEntity<List<CalcomEventTypeDTO>> getAllEventTypesOfConsultant(String consultantId) {
     return new ResponseEntity<>(consultantFacade.getAllEventTypesOfConsultantHandler(consultantId),
         HttpStatus.OK);
   }
@@ -95,6 +88,4 @@ public class ConsultantController implements ConsultantsApi {
     return new ResponseEntity<>(consultantFacade.getConsultantMeetingSlugHandler(consultantId),
         HttpStatus.OK);
   }
-
-
 }

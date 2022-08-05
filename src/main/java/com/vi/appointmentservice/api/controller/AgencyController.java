@@ -4,9 +4,11 @@ import com.vi.appointmentservice.api.facade.AgencyFacade;
 import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyResponseDTO;
-import com.vi.appointmentservice.api.model.CalcomEventType;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomTeam;
+import com.vi.appointmentservice.api.model.CreateUpdateCalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
+import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import com.vi.appointmentservice.generated.api.controller.AgenciesApi;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +35,7 @@ public class AgencyController implements AgenciesApi {
   @NonNull
   private final AgencyFacade agencyFacade;
 
+  // Agency CRUD
   @Override
   public ResponseEntity<CalcomTeam> createAgency(AgencyResponseDTO agencyResponseDTO) {
     return AgenciesApi.super.createAgency(agencyResponseDTO);
@@ -50,17 +53,48 @@ public class AgencyController implements AgenciesApi {
     return AgenciesApi.super.updateAgency(agencyId, agencyResponseDTO);
   }
 
+  // Event Types
   @Override
-  public ResponseEntity<CalcomEventType> addEventTypeToAgency(Long agencyId,
-      CalcomEventType teamEventType) {
-    return AgenciesApi.super.addEventTypeToAgency(agencyId, teamEventType);
+  public ResponseEntity<List<CalcomEventTypeDTO>> getAllEventTypesOfAgency(Long agencyId) {
+    List<CalcomEventTypeDTO> eventTypes;
+    eventTypes = this.agencyFacade.getAgencyEventTypes(agencyId);
+    return new ResponseEntity<>(eventTypes, HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<List<CalcomEventType>> getAllEventTypesOfAgency(Long agencyId) {
-    List<CalcomEventType> eventTypes;
-    eventTypes = this.agencyFacade.getCalcomEventTypesByAgencyId(agencyId);
-    return new ResponseEntity<>(eventTypes, HttpStatus.OK);
+  public ResponseEntity<CalcomEventTypeDTO> getAgencyEventTypeById(Long agencyId, Long eventTypeId) {
+    return new ResponseEntity<>(this.agencyFacade.getAgencyEventTypeById(eventTypeId),
+        HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<CalcomEventTypeDTO> addEventTypeToAgency(Long agencyId,
+      CreateUpdateCalcomEventTypeDTO teamEventType) {
+    return new ResponseEntity<>(this.agencyFacade.addAgencyEventType(agencyId, teamEventType),
+        HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<CalcomEventTypeDTO> updateAgencyEventType(Long agencyId, Long eventTypeId,
+      CreateUpdateCalcomEventTypeDTO createUpdateCalcomEventTypeDTO) {
+    return new ResponseEntity<>(
+        this.agencyFacade.updateAgencyEventType(eventTypeId, createUpdateCalcomEventTypeDTO),
+        HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteAgencyEventType(Long agencyId, Long eventTypeId) {
+    this.agencyFacade.deleteAgencyEventType(eventTypeId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+
+  // Consultants
+  @Override
+  public ResponseEntity<List<TeamEventTypeConsultant>> getAllConsultantsOfAgency(Long agencyId) {
+    List<TeamEventTypeConsultant> availableConsultants;
+    availableConsultants = this.agencyFacade.getAllConsultantsOfAgency(agencyId);
+    return new ResponseEntity<>(availableConsultants, HttpStatus.OK);
   }
 
   @Override
