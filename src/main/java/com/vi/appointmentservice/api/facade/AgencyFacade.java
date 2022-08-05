@@ -198,6 +198,10 @@ public class AgencyFacade {
     List<CalcomEventTypeDTO> eventTypes;
     if (teamToAgencyRepository.existsByAgencyId(agencyId)) {
       eventTypes = calComEventTypeService.getAllEventTypesOfTeam(teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid());
+      for (CalcomEventTypeDTO eventTypeDTO : eventTypes){
+        attachConsultantsInformationToEventType(eventTypeDTO);
+        attachFullSlugToEventType(eventTypeDTO);
+      }
       return eventTypes;
     } else {
       throw new BadRequestException(
@@ -305,8 +309,8 @@ public class AgencyFacade {
       throw new InternalServerErrorException("Could not serialize eventTypePayload");
     }
     eventTypePayloadJson.remove("description");
+    eventTypeRepository.updateEventTypeDescription(eventTypeId, eventType.getDescription());
     CalcomEventTypeDTO updatedEventType = calComEventTypeService.editEventType(eventTypeId, eventTypePayloadJson);
-    eventTypeRepository.updateEventTypeDescription(Long.valueOf(updatedEventType.getId()), eventType.getDescription());
     // Add consultants to eventType
     List<TeamEventTypeConsultant> consultants = eventType.getConsultants();
     eventTypeRepository.updateUsersOfEventType(Long.valueOf(updatedEventType.getId()), consultants);
