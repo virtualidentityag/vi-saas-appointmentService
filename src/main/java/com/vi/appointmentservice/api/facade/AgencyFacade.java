@@ -23,6 +23,7 @@ import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
 import com.vi.appointmentservice.repository.MembershipsRepository;
+import com.vi.appointmentservice.repository.ScheduleRepository;
 import com.vi.appointmentservice.repository.TeamRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.repository.WebhookRepository;
@@ -62,6 +63,8 @@ public class AgencyFacade {
   private final WebhookRepository webhookRepository;
   @NonNull
   private final CalComUserService calComUserService;
+  @NonNull
+  private final ScheduleRepository scheduleRepository;
 
   @Value("${app.base.url}")
   private String appBaseUrl;
@@ -126,6 +129,7 @@ public class AgencyFacade {
       }
     }
     webhookRepository.updateUserWebhook(calComUserId);
+    scheduleRepository.createDefaultScheduleIfNoneExists(calComUserId);
   }
 
   public void agencyMasterDataSync(AgencyMasterDataSyncRequestDTO request) {

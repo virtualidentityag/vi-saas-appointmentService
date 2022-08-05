@@ -9,21 +9,18 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class ScheduleRepository {
-
   private final @NotNull JdbcTemplate jdbcTemplate;
 
-  // Delete
-
-  public void updateSchedulesOfUser(Long calcomUserId) {
-    // Get schedules
-
-    // Delete availabilities
-
-    // Delete schedule
-
+  public void createDefaultScheduleIfNoneExists(Long calcomUserId) {
+    // Check if a schedule with name MAIN_SCHEDULE already exists
+    String QUERY = "SELECT COUNT(\"id\") FROM \"Schedule\" WHERE \"name\" = 'DEFAULT_SCHEDULE' AND \"userId\" = " + calcomUserId;
+    Integer defaultScheduleFound = jdbcTemplate.queryForObject(QUERY, Integer.class);
+    if(defaultScheduleFound != null && defaultScheduleFound >= 1){
+      return;
+    }
     // Create Schedule
-
-    // Create availabilities
-
+    String INSERT_QUERY = "insert into \"Schedule\" (\"userId\", \"name\", \"timeZone\") values ($userIdParam, 'DEFAULT_SCHEDULE', 'Europe/Berlin')";
+    INSERT_QUERY = INSERT_QUERY.replace("$userIdParam", calcomUserId.toString());
+    jdbcTemplate.update(INSERT_QUERY);
   }
 }

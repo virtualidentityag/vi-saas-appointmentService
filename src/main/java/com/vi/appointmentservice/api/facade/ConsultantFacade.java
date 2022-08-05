@@ -23,6 +23,7 @@ import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import com.vi.appointmentservice.repository.ScheduleRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.repository.UserRepository;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class ConsultantFacade {
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
   private final @NonNull UserRepository userRepository;
+  private final @NonNull ScheduleRepository scheduleRepository;
 
   @Value("${app.base.url}")
   private String appBaseUrl;
@@ -132,6 +134,7 @@ public class ConsultantFacade {
           if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
             addDefaultEventTypeToUser(createdOrUpdatedUser);
           }
+          scheduleRepository.createDefaultScheduleIfNoneExists(createdOrUpdatedUser.getId());
           // Add user to teams of agencies and event-types of teams
           // this.addUserToTeamsAndEventTypes(consultant);
         }
@@ -142,6 +145,7 @@ public class ConsultantFacade {
           if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
             addDefaultEventTypeToUser(createdOrUpdatedUser);
           }
+          scheduleRepository.createDefaultScheduleIfNoneExists(createdOrUpdatedUser.getId());
           // Add user to teams of agencies and event-types of teams
           // this.addUserToTeamsAndEventTypes(consultant);
         }
@@ -156,6 +160,7 @@ public class ConsultantFacade {
         if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
           addDefaultEventTypeToUser(createdOrUpdatedUser);
         }
+        scheduleRepository.createDefaultScheduleIfNoneExists(createdOrUpdatedUser.getId());
         // Add user to teams of agencies and event-types of teams
         // this.addUserToTeamsAndEventTypes(consultant);
       }
