@@ -60,5 +60,11 @@ public class EventTypeRepository {
     jdbcTemplate.update(UPDATE_QUERY);
   }
 
+  public void updateEventTypeScheduleId(Long eventTypeId, Long scheduleId) {
+    String UPDATE_QUERY = "update \"EventType\" set \"scheduleId\" = $scheduleIdParam where \"id\" = " + eventTypeId;
+    UPDATE_QUERY = UPDATE_QUERY.replace("$scheduleIdParam", scheduleId.toString());
+    jdbcTemplate.update(UPDATE_QUERY);
+  }
+
 
 }

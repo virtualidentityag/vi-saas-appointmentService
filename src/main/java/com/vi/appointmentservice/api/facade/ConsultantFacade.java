@@ -23,12 +23,15 @@ import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import com.vi.appointmentservice.repository.EventTypeRepository;
 import com.vi.appointmentservice.repository.ScheduleRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.repository.UserRepository;
+import com.vi.appointmentservice.repository.WebhookRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import jdk.jfr.EventType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +56,8 @@ public class ConsultantFacade {
   private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
   private final @NonNull UserRepository userRepository;
   private final @NonNull ScheduleRepository scheduleRepository;
+  private final @NonNull EventTypeRepository eventTypeRepository;
+  private final @NonNull WebhookRepository webhookRepository;
 
   @Value("${app.base.url}")
   private String appBaseUrl;
@@ -127,48 +132,44 @@ public class ConsultantFacade {
       CalcomUser foundUser = calComUserService.getUserById(calComUserId);
       if (foundUser == null) {
         // TODO: Check calcom for email match?
-        // User missing, create
+        // Association exists, user missing, create
         createdOrUpdatedUser = this.createCalcomUser(consultant);
         if (createdOrUpdatedUser != null) {
-          // Add default event-type to user
-          if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
-            addDefaultEventTypeToUser(createdOrUpdatedUser);
-          }
-          scheduleRepository.createDefaultScheduleIfNoneExists(createdOrUpdatedUser.getId());
-          // Add user to teams of agencies and event-types of teams
-          // this.addUserToTeamsAndEventTypes(consultant);
+          updateUserDefaultEntities(createdOrUpdatedUser);
         }
       } else {
         // User exists, update
         createdOrUpdatedUser = this.updateCalcomUser(consultant);
         if (createdOrUpdatedUser != null) {
-          if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
-            addDefaultEventTypeToUser(createdOrUpdatedUser);
-          }
-          scheduleRepository.createDefaultScheduleIfNoneExists(createdOrUpdatedUser.getId());
-          // Add user to teams of agencies and event-types of teams
-          // this.addUserToTeamsAndEventTypes(consultant);
+          updateUserDefaultEntities(createdOrUpdatedUser);
         }
       }
     } else {
+      // NO association exists, create it and user
       // TODO: Check calcom for email match?
       createdOrUpdatedUser = this.createCalcomUser(consultant);
       if (createdOrUpdatedUser != null) {
-        // Add association to dataLayer
         this.createUserIdAssociation(createdOrUpdatedUser, consultant);
-        // Add default eventTypes
-        if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
-          addDefaultEventTypeToUser(createdOrUpdatedUser);
-        }
-        scheduleRepository.createDefaultScheduleIfNoneExists(createdOrUpdatedUser.getId());
-        // Add user to teams of agencies and event-types of teams
-        // this.addUserToTeamsAndEventTypes(consultant);
+        updateUserDefaultEntities(createdOrUpdatedUser);
       }
     }
     return createdOrUpdatedUser;
   }
 
-  private void addDefaultEventTypeToUser(CalcomUser createdUser) {
+  void updateUserDefaultEntities(CalcomUser createdOrUpdatedUser) {
+      webhookRepository.updateUserWebhook(createdOrUpdatedUser.getId());
+      Long defaultScheduleId = scheduleRepository.createDefaultScheduleIfNoneExists(
+          createdOrUpdatedUser.getId());
+      // Add default eventTypes
+      if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
+        Long newDefaultEventTypeId = addDefaultEventTypeToUser(createdOrUpdatedUser);
+        eventTypeRepository.updateEventTypeScheduleId(newDefaultEventTypeId, defaultScheduleId);
+      }
+      // Add user to teams of agencies and event-types of teams
+      // this.addUserToTeamsAndEventTypes(consultant);
+  }
+
+  private Long addDefaultEventTypeToUser(CalcomUser createdUser) {
     ObjectMapper objectMapper = new ObjectMapper();
     // Ignore null values
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -179,7 +180,8 @@ public class ConsultantFacade {
     } catch (JsonProcessingException e) {
       throw new CalComApiErrorException("Could not serialize default event-type");
     }
-    calComEventTypeService.createEventType(eventTypeJson);
+    return Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
+
   }
 
   private void addUserToTeamsAndEventTypes(ConsultantDTO consultant) {
