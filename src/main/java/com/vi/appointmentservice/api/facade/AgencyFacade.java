@@ -60,11 +60,10 @@ public class AgencyFacade {
   @NonNull
   private final EventTypeRepository eventTypeRepository;
   @NonNull
-  private final WebhookRepository webhookRepository;
-  @NonNull
   private final CalComUserService calComUserService;
   @NonNull
-  private final ScheduleRepository scheduleRepository;
+  private final ConsultantFacade consultantFacade;
+
 
   @Value("${app.base.url}")
   private String appBaseUrl;
@@ -115,6 +114,7 @@ public class AgencyFacade {
     String consultantId = request.getConsultantId();
     Long calComUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
         .getCalComUserId();
+    consultantFacade.updateUserDefaultEntities(calComUserService.getUserById(calComUserId));
     List<Long> teamIds = request.getAgencies().stream()
         .filter(teamToAgencyRepository::existsByAgencyId)
         .map(agencyId -> teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid())
@@ -128,8 +128,6 @@ public class AgencyFacade {
         eventTypeRepository.addTeamEventTypeMemberships(Long.valueOf(eventType.getId()), calComUserId);
       }
     }
-    webhookRepository.updateUserWebhook(calComUserId);
-    scheduleRepository.createDefaultScheduleIfNoneExists(calComUserId);
   }
 
   public void agencyMasterDataSync(AgencyMasterDataSyncRequestDTO request) {
