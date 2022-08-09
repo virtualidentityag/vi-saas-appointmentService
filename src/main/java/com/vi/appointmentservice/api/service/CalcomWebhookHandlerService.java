@@ -78,7 +78,6 @@ public class CalcomWebhookHandlerService {
           .filter(el -> el.getUid().equals(payload.getUid())).collect(
               Collectors.toList()).get(0).getId();
       messagesService.publishCancellationMessage(bookingId);
-      calcomBookingToAskerRepository.deleteByCalcomBookingId(bookingId);
       calcomRepository.cancelBookingById(bookingId);
     } catch (Exception e) {
       log.error(String.valueOf(e));
