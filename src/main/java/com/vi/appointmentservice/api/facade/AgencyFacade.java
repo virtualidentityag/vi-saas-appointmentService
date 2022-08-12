@@ -178,8 +178,7 @@ public class AgencyFacade {
     eventType.setMinimumBookingNotice(120);
     eventType.setBeforeEventBuffer(0);
     eventType.setAfterEventBuffer(0);
-    eventType.setSuccessRedirectUrl(
-        appBaseUrl + "/sessions/user/view/");
+    // eventType.setSuccessRedirectUrl(appBaseUrl + "/sessions/user/view/");
     eventType.setDescription("");
     eventType.setSchedulingType("ROUND_ROBIN");
     return eventType;
@@ -274,9 +273,7 @@ public class AgencyFacade {
     eventTypePayload.setRequiresConfirmation(false);
     eventTypePayload.setDisableGuests(true);
     eventTypePayload.setHideCalendarNotes(true);
-    eventTypePayload.setSuccessRedirectUrl(
-        appBaseUrl + "/sessions/user/view/");
-
+    // eventTypePayload.setSuccessRedirectUrl( appBaseUrl + "/sessions/user/view/");
     JSONObject eventTypePayloadJson;
     try {
       eventTypePayloadJson = new JSONObject(objectMapper.writeValueAsString(eventTypePayload));

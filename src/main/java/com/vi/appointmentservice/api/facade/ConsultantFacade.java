@@ -218,8 +218,7 @@ public class ConsultantFacade {
     eventType.setMinimumBookingNotice(120);
     eventType.setBeforeEventBuffer(0);
     eventType.setAfterEventBuffer(0);
-    eventType.setSuccessRedirectUrl(
-        appBaseUrl + "/sessions/user/view/");
+    // eventType.setSuccessRedirectUrl(appBaseUrl + "/sessions/user/view/");
     eventType.setDescription("");
     List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
     CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
