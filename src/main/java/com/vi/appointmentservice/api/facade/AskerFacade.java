@@ -1,10 +1,9 @@
 package com.vi.appointmentservice.api.facade;
 
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.helper.RescheduleHelper;
+import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,25 +14,56 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AskerFacade {
-
-  private final @NonNull RescheduleHelper rescheduleHelper;
-  private final @NonNull CalcomRepository calcomRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
+  private final @NonNull CalComBookingService calComBookingService;
+
 
   public List<CalcomBooking> getAllBookingsOfAskerHandler(String askerId) {
     if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
       List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
           .findByAskerId(askerId);
-      List<CalcomBooking> bookings = calcomRepository
-          .getByIds(bookingIds.stream().map(el -> el.getCalcomBookingId()).collect(
-              Collectors.toList()));
-      for (CalcomBooking booking : bookings) {
-        rescheduleHelper.attachRescheduleLink(booking);
-        rescheduleHelper.attachConsultantName(booking);
-      }
+      List<CalcomBooking> bookings = calComBookingService.getAskerBookings(bookingIds.stream().map(CalcomBookingToAsker::getCalcomBookingId).collect(
+          Collectors.toList()));
       return bookings;
     } else {
       return new ArrayList<>();
     }
   }
+
+  public List<CalcomBooking> getAskerActiveBookings(String askerId) {
+    if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
+      List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
+          .findByAskerId(askerId);
+      List<CalcomBooking> bookings = calComBookingService.getAskerActiveBookings(bookingIds.stream().map(CalcomBookingToAsker::getCalcomBookingId).collect(
+              Collectors.toList()));
+      return bookings;
+    } else {
+      return new ArrayList<>();
+    }
+  }
+
+  public List<CalcomBooking> getAskerCancelledBookings(String askerId) {
+    if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
+      List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
+          .findByAskerId(askerId);
+      List<CalcomBooking> bookings = calComBookingService.getAskerCancelledBookings(bookingIds.stream().map(CalcomBookingToAsker::getCalcomBookingId).collect(
+          Collectors.toList()));
+      return bookings;
+    } else {
+      return new ArrayList<>();
+    }
+  }
+
+  public List<CalcomBooking> getAskerExpiredBookings(String askerId) {
+    if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
+      List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
+          .findByAskerId(askerId);
+      List<CalcomBooking> bookings = calComBookingService.getAskerExpiredBookings(bookingIds.stream().map(CalcomBookingToAsker::getCalcomBookingId).collect(
+          Collectors.toList()));
+      return bookings;
+    } else {
+      return new ArrayList<>();
+    }
+  }
+
 }

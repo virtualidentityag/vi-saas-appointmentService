@@ -1,5 +1,6 @@
 package com.vi.appointmentservice.api.controller;
 
+import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.facade.AskerFacade;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
@@ -24,8 +25,21 @@ public class AskerController implements AskersApi {
   private final @NonNull AskerFacade askerFacade;
 
   @Override
-  public ResponseEntity<List<CalcomBooking>> getAllBookingsOfAsker(String askerId) {
-    return new ResponseEntity<>(askerFacade.getAllBookingsOfAskerHandler(askerId), HttpStatus.OK);
+  public ResponseEntity<List<CalcomBooking>> getAllBookingsOfAsker(String askerId, String status) {
+    List<CalcomBooking> bookings;
+    if(status == null){
+      return new ResponseEntity<>(askerFacade.getAllBookingsOfAskerHandler(askerId), HttpStatus.OK);
+    } else if ("ACTIVE".equals(status)) {
+      bookings = askerFacade.getAskerActiveBookings(askerId);
+    } else if ("EXPIRED".equals(status)) {
+      bookings = askerFacade.getAskerExpiredBookings(askerId);
+    } else if ("CANCELLED".equals(status)) {
+      bookings = askerFacade.getAskerCancelledBookings(askerId);
+    } else {
+      throw new BadRequestException("Given status must be ACTIVE, EXPIRED or CANCELLED");
+    }
+    return new ResponseEntity<>(bookings,
+        HttpStatus.OK);
   }
 
   @Override
