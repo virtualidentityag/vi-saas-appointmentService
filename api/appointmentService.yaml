@@ -112,7 +112,6 @@ paths:
         - name: status
           in: query
           description: status of booking
-          required: true
           schema:
             type: string
       responses:

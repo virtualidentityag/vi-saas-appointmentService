@@ -1,10 +1,9 @@
 package com.vi.appointmentservice.api.facade;
 
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.helper.RescheduleHelper;
+import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,25 +14,19 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AskerFacade {
-
-  private final @NonNull RescheduleHelper rescheduleHelper;
-  private final @NonNull CalcomRepository calcomRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
+  private final @NonNull CalComBookingService calComBookingService;
 
-  public List<CalcomBooking> getAllBookingsOfAskerHandler(String askerId) {
+  public List<CalcomBooking> getAskerActiveBookings(String askerId) {
     if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
       List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
           .findByAskerId(askerId);
-      List<CalcomBooking> bookings = calcomRepository
-          .getByIds(bookingIds.stream().map(el -> el.getCalcomBookingId()).collect(
+      List<CalcomBooking> bookings = calComBookingService.getAskerActiveBookings(bookingIds.stream().map(CalcomBookingToAsker::getCalcomBookingId).collect(
               Collectors.toList()));
-      for (CalcomBooking booking : bookings) {
-        rescheduleHelper.attachRescheduleLink(booking);
-        rescheduleHelper.attachConsultantName(booking);
-      }
       return bookings;
     } else {
       return new ArrayList<>();
     }
   }
+
 }
