@@ -56,18 +56,18 @@ public class CalComBookingService extends CalComService {
   }
 
   public List<CalcomBooking> getConsultantActiveBookings(Long consultantId) {
-    return enrichResultSet(calcomRepository.getConsultantActiveBookings(consultantId));
+    return enrichConsultantResultSet(calcomRepository.getConsultantActiveBookings(consultantId));
   }
 
   public List<CalcomBooking> getConsultantExpiredBookings(Long consultantId) {
-    return enrichResultSet(calcomRepository.getConsultantExpiredBookings(consultantId));
+    return enrichConsultantResultSet(calcomRepository.getConsultantExpiredBookings(consultantId));
   }
 
   public List<CalcomBooking> getConsultantCancelledBookings(Long consultantId) {
-    return enrichResultSet(calcomRepository.getConsultantCancelledBookings(consultantId));
+    return enrichConsultantResultSet(calcomRepository.getConsultantCancelledBookings(consultantId));
   }
 
-  private List<CalcomBooking> enrichResultSet(List<CalcomBooking> bookings) {
+  private List<CalcomBooking> enrichConsultantResultSet(List<CalcomBooking> bookings) {
     for (CalcomBooking booking : bookings) {
       CalcomBookingToAsker calcomBookingAsker = calcomBookingToAskerRepository
           .findByCalcomBookingId(
@@ -79,6 +79,26 @@ public class CalComBookingService extends CalComService {
       booking.setAskerId(calcomBookingAsker.getAskerId());
       rescheduleHelper.attachRescheduleLink(booking);
       rescheduleHelper.attachAskerName(booking);
+    }
+    return bookings;
+  }
+
+  public List<CalcomBooking> getAskerActiveBookings(List<Long> bookingIds) {
+    return enrichAskerResultSet(calcomRepository.getAskerActiveBookings(bookingIds));
+  }
+
+  List<CalcomBooking> enrichAskerResultSet(List<CalcomBooking> bookings) {
+    for (CalcomBooking booking : bookings) {
+      CalcomBookingToAsker calcomBookingAsker = calcomBookingToAskerRepository
+          .findByCalcomBookingId(
+              booking.getId());
+      if(calcomBookingAsker == null){
+        log.error("Inconsistent data. Asker not found for booking.");
+        continue;
+      }
+      booking.setAskerId(calcomBookingAsker.getAskerId());
+      rescheduleHelper.attachRescheduleLink(booking);
+      rescheduleHelper.attachConsultantName(booking);
     }
     return bookings;
   }

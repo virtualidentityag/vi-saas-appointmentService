@@ -34,6 +34,7 @@ public class EventTypeRepository {
     INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
         .replace("$userIdParam", calcomUserId.toString());
     jdbcTemplate.update(INSERT_QUERY);
+    jdbcTemplate.update(INSERT_QUERY);
   }
 
   public void updateUsersOfEventType(Long eventTypeId, List<TeamEventTypeConsultant> eventTypeConsultants) {

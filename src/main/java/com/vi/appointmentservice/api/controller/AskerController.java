@@ -1,5 +1,6 @@
 package com.vi.appointmentservice.api.controller;
 
+import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.facade.AskerFacade;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
@@ -25,7 +26,9 @@ public class AskerController implements AskersApi {
 
   @Override
   public ResponseEntity<List<CalcomBooking>> getAllBookingsOfAsker(String askerId) {
-    return new ResponseEntity<>(askerFacade.getAllBookingsOfAskerHandler(askerId), HttpStatus.OK);
+    List<CalcomBooking> bookings;
+    bookings = askerFacade.getAskerActiveBookings(askerId);
+    return new ResponseEntity<>(bookings, HttpStatus.OK);
   }
 
   @Override
