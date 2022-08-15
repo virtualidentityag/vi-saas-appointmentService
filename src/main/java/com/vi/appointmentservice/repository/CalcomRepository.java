@@ -49,36 +49,9 @@ public class CalcomRepository {
             new CalcomRepositoryBookingMapper());
   }
 
-  public List<CalcomBooking> getAskerBookings(List<Long> bookingIds) {
-    String QUERY = "SELECT * FROM \"Booking\" AS booking WHERE "
-        + "booking.\"id\" in (:ids) order by \"startTime\" ASC";
-    SqlParameterSource parameters = new MapSqlParameterSource()
-        .addValue("ids", bookingIds);
-    return calcomDBNamedParamterTemplate
-        .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
-  }
-
   public List<CalcomBooking> getAskerActiveBookings(List<Long> bookingIds) {
     String QUERY = "SELECT * FROM \"Booking\" AS booking WHERE booking.status != 'cancelled' AND "
         + "booking.\"id\" in (:ids) AND now() < \"startTime\" order by \"startTime\" ASC";
-    SqlParameterSource parameters = new MapSqlParameterSource()
-        .addValue("ids", bookingIds);
-    return calcomDBNamedParamterTemplate
-        .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
-  }
-
-  public List<CalcomBooking> getAskerExpiredBookings(List<Long> bookingIds) {
-    String QUERY = "SELECT * FROM \"Booking\" AS booking WHERE booking.status != 'cancelled' AND "
-        + "booking.\"id\" in (:ids) AND now() > \"startTime\" order by \"startTime\" DESC";
-    SqlParameterSource parameters = new MapSqlParameterSource()
-        .addValue("ids", bookingIds);
-    return calcomDBNamedParamterTemplate
-        .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
-  }
-
-  public List<CalcomBooking> getAskerCancelledBookings(List<Long> bookingIds) {
-    String QUERY = "SELECT * FROM \"Booking\" AS booking WHERE booking.status = 'cancelled' AND "
-        + "booking.\"id\" in (:ids) order by \"startTime\" DESC";
     SqlParameterSource parameters = new MapSqlParameterSource()
         .addValue("ids", bookingIds);
     return calcomDBNamedParamterTemplate

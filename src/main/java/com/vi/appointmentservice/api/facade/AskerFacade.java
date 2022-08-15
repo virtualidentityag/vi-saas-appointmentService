@@ -17,49 +17,12 @@ public class AskerFacade {
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull CalComBookingService calComBookingService;
 
-
-  public List<CalcomBooking> getAllBookingsOfAskerHandler(String askerId) {
-    if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
-      List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
-          .findByAskerId(askerId);
-      List<CalcomBooking> bookings = calComBookingService.getAskerBookings(bookingIds.stream().map(CalcomBookingToAsker::getCalcomBookingId).collect(
-          Collectors.toList()));
-      return bookings;
-    } else {
-      return new ArrayList<>();
-    }
-  }
-
   public List<CalcomBooking> getAskerActiveBookings(String askerId) {
     if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
       List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
           .findByAskerId(askerId);
       List<CalcomBooking> bookings = calComBookingService.getAskerActiveBookings(bookingIds.stream().map(CalcomBookingToAsker::getCalcomBookingId).collect(
               Collectors.toList()));
-      return bookings;
-    } else {
-      return new ArrayList<>();
-    }
-  }
-
-  public List<CalcomBooking> getAskerCancelledBookings(String askerId) {
-    if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
-      List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
-          .findByAskerId(askerId);
-      List<CalcomBooking> bookings = calComBookingService.getAskerCancelledBookings(bookingIds.stream().map(CalcomBookingToAsker::getCalcomBookingId).collect(
-          Collectors.toList()));
-      return bookings;
-    } else {
-      return new ArrayList<>();
-    }
-  }
-
-  public List<CalcomBooking> getAskerExpiredBookings(String askerId) {
-    if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
-      List<CalcomBookingToAsker> bookingIds = calcomBookingToAskerRepository
-          .findByAskerId(askerId);
-      List<CalcomBooking> bookings = calComBookingService.getAskerExpiredBookings(bookingIds.stream().map(CalcomBookingToAsker::getCalcomBookingId).collect(
-          Collectors.toList()));
       return bookings;
     } else {
       return new ArrayList<>();

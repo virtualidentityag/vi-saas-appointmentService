@@ -86,20 +86,8 @@ public class CalComBookingService extends CalComService {
     return bookings;
   }
 
-  public List<CalcomBooking> getAskerBookings(List<Long> bookingIds) {
-    return enrichAskerResultSet(calcomRepository.getAskerBookings(bookingIds));
-  }
-
   public List<CalcomBooking> getAskerActiveBookings(List<Long> bookingIds) {
     return enrichAskerResultSet(calcomRepository.getAskerActiveBookings(bookingIds));
-  }
-
-  public List<CalcomBooking> getAskerExpiredBookings(List<Long> bookingIds) {
-    return enrichAskerResultSet(calcomRepository.getAskerExpiredBookings(bookingIds));
-  }
-
-  public List<CalcomBooking> getAskerCancelledBookings(List<Long> bookingIds) {
-    return enrichAskerResultSet(calcomRepository.getAskerCancelledBookings(bookingIds));
   }
 
   List<CalcomBooking> enrichAskerResultSet(List<CalcomBooking> bookings) {
