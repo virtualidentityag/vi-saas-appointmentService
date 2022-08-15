@@ -25,14 +25,20 @@ public class ScheduleRepository {
     // Get default scheduleId
     String SELECT_QUERY = "SELECT \"id\" FROM \"Schedule\" WHERE \"name\" = 'DEFAULT_SCHEDULE' AND \"userId\" = $userIdParam LIMIT 1";
     SELECT_QUERY = SELECT_QUERY.replace("$userIdParam", calcomUserId.toString());
-    Long newDefaultScheduleId = jdbcTemplate.queryForObject(SELECT_QUERY, Long.class);
+    Long defaultScheduleId = jdbcTemplate.queryForObject(SELECT_QUERY, Long.class);
 
-    if(defaultScheduleFound == null ||  defaultScheduleFound < 1){
+    if((defaultScheduleFound == null || defaultScheduleFound < 1) && defaultScheduleId != null){
       String UPDATE_USER_QUERY = "update \"users\" set \"defaultScheduleId\" = $scheduleIdParam where \"id\" = " + calcomUserId;
-      UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$scheduleIdParam", newDefaultScheduleId.toString());
+      UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$scheduleIdParam", defaultScheduleId.toString());
       jdbcTemplate.update(UPDATE_USER_QUERY);
+
+      // Create default availability
+      String INSERT_QUERY = "insert into \"Availability\" (\"scheduleId\", \"days\", \"startTime\", \"endTime\") values ($scheduleIdParam, '{0,1,2,3,4,5,6}', '00:00:00', '00:00:00')";
+      INSERT_QUERY = INSERT_QUERY
+          .replace("$scheduleIdParam", defaultScheduleId.toString());
+      jdbcTemplate.update(INSERT_QUERY);
     }
 
-    return newDefaultScheduleId;
+    return defaultScheduleId;
   }
 }
