@@ -62,7 +62,7 @@ public class MessageApiClient extends com.vi.appointmentservice.messageservice.g
 
     } catch (IntrospectionException exception) {
       throw new InternalServerErrorException(
-          String.format("Could not obtain method properties of %s", queryValue.toString()),
+          String.format("Could not obtain method properties of %s", queryValue),
           exception);
     }
   }

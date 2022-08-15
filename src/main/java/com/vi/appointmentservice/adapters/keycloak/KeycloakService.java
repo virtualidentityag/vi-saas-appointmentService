@@ -40,9 +40,8 @@ public class KeycloakService implements IdentityClient {
     private static final String BODY_KEY_GRANT_TYPE = "grant_type";
     private static final String ENDPOINT_OPENID_CONNECT_LOGIN = "/token";
     private static final String ENDPOINT_OPENID_CONNECT_LOGOUT = "/logout";
-    ;
 
-    private final @NonNull RestTemplate restTemplate;
+  private final @NonNull RestTemplate restTemplate;
     private final @NonNull AuthenticatedUser authenticatedUser;
     private final @NonNull IdentityClientConfig identityClientConfig;
 

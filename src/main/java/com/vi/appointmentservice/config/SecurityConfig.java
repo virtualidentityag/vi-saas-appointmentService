@@ -116,7 +116,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * <p>
    * https://github.com/keycloak/keycloak-documentation/blob/master/securing_apps/topics/oidc/java/spring-security-adapter.adoc
    * <p>
-   * {@link package.class#member label}
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
