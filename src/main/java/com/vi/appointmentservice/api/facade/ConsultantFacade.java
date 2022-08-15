@@ -132,15 +132,12 @@ public class ConsultantFacade {
         // TODO: Check calcom for email match?
         // Association exists, user missing, create
         createdOrUpdatedUser = this.createCalcomUser(consultant);
-        if (createdOrUpdatedUser != null) {
-          updateUserDefaultEntities(createdOrUpdatedUser);
-        }
       } else {
         // User exists, update
         createdOrUpdatedUser = this.updateCalcomUser(consultant);
-        if (createdOrUpdatedUser != null) {
-          updateUserDefaultEntities(createdOrUpdatedUser);
-        }
+      }
+      if (createdOrUpdatedUser != null) {
+        updateUserDefaultEntities(createdOrUpdatedUser);
       }
     } else {
       // NO association exists, create it and user
