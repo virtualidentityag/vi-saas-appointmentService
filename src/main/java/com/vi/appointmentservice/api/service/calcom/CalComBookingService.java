@@ -16,9 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -85,28 +82,6 @@ public class CalComBookingService extends CalComService {
     }
     return bookings;
   }
-
-  public CalcomBooking createBooking(CalcomBooking booking) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    JSONObject bookingObject = new JSONObject(booking);
-    log.debug("Creating booking: {}", bookingObject);
-    HttpEntity<String> request = new HttpEntity<>(bookingObject.toString(), headers);
-
-    return restTemplate.postForEntity(this.buildUri("/v1/bookings"), request, CalcomBooking.class)
-        .getBody();
-  }
-
-  public CalcomBooking updateBooking(CalcomBooking booking) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    JSONObject bookingObject = new JSONObject(booking);
-    log.debug("Updating calcom user: {}", bookingObject);
-    HttpEntity<String> request = new HttpEntity<>(bookingObject.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri("/v1/bookings/" + booking.getId()), request,
-        CalcomBooking.class).getBody();
-  }
-
 
   public CalcomBooking getBookingById(Long bookingId) {
     String response = restTemplate.getForObject(

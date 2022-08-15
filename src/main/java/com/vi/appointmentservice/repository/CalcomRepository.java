@@ -53,10 +53,4 @@ public class CalcomRepository {
         .query("select * from \"Booking\" where id in (:ids)", parameters,
             new CalcomRepositoryBookingMapper());
   }
-
-  public void cancelBookingById(Long bookingId){
-    // TODO: Implement
-  }
-
-
 }

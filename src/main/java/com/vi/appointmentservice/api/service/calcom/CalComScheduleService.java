@@ -12,10 +12,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -54,30 +51,6 @@ public class CalComScheduleService extends CalComService {
       scheduleList.add(schedule.getId());
     }
     return scheduleList;
-  }
-
-  public List<CalcomSchedule> getAllSchedulesOfUser(Long userId) {
-    List<CalcomSchedule> result = this.getAllSchedules();
-    return new ArrayList<>(result).stream().filter(
-            schedule -> schedule.getUserId() != null && schedule.getUserId() == userId.intValue())
-        .collect(Collectors.toList());
-  }
-
-
-  public CalcomSchedule createSchedule(JSONObject schedule) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request = new HttpEntity<>(schedule.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri("/v1/schedules"), request, CalcomSchedule.class)
-        .getBody();
-  }
-
-  public CalcomSchedule editSchedule(JSONObject schedule) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request = new HttpEntity<>(schedule.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri("/v1/schedules/" + schedule.get("id")), request,
-        CalcomSchedule.class).getBody();
   }
 
   public void deleteSchedule(int scheduleId) {
