@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
-import com.vi.appointmentservice.api.model.CalcomUser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

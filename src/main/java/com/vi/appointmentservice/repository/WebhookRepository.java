@@ -1,6 +1,5 @@
 package com.vi.appointmentservice.repository;
 
-import java.util.List;
 import java.util.UUID;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

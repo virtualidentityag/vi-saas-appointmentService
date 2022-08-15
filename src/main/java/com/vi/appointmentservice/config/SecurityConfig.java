@@ -23,8 +23,6 @@ import org.springframework.security.web.authentication.session.NullAuthenticated
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.csrf.CsrfFilter;
 
-import static com.vi.appointmentservice.api.authorization.Authority.APPOINTMENT_ADMIN;
-
 /**
  * Provides the Keycloak/Spring Security configuration.
  */

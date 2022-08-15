@@ -3,7 +3,6 @@ package com.vi.appointmentservice.api.service.calcom;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiConflictException;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import lombok.extern.slf4j.Slf4j;
