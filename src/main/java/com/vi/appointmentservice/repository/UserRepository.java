@@ -17,9 +17,11 @@ public class UserRepository {
     Long userId = user.getId();
     String name = user.getName();
     Boolean isAway = user.getAway();
-    String UPDATE_USER_QUERY = "update \"users\" set \"name\" = $nameParam, \"away\" = $awayParam where \"id\" = " + userId;
+    String email = user.getEmail();
+    String UPDATE_USER_QUERY = "update \"users\" set \"name\" = $nameParam, \"away\" = $awayParam, \"email\" = $emailParam where \"id\" = " + userId;
     UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$nameParam", "'" + name + "'")
-        .replace("$awayParam", isAway.toString());
+        .replace("$awayParam", isAway.toString())
+        .replace("$emailParam", email);
     jdbcTemplate.update(UPDATE_USER_QUERY);
   }
 
