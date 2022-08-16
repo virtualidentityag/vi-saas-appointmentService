@@ -66,13 +66,9 @@ public class MessagesService {
   private AliasMessageDTO createRescheduleAppointmentMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
-    //TODO: next 2 lines should be removed in parallel to frontend
-    messageContent.put("counselor", "dummy counselor");
-    messageContent.put("user", "dummy user");
     messageContent.put("title", booking.getTitle());
     message.setMessageType(MessageType.APPOINTMENT_RESCHEDULED);
-    //TODO: find better solution how to handle zones
-    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).minusHours(2));
+    messageContent.put("date", LocalDateTime.parse(booking.getStartTime()));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0, 16)),
         LocalDateTime.parse(booking.getEndTime().substring(0, 16))));
@@ -83,13 +79,9 @@ public class MessagesService {
   private AliasMessageDTO createNewAppointmentMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
-    //TODO: next 2 lines should be removed in parallel to frontend
-    messageContent.put("counselor", "dummy counselor");
-    messageContent.put("user", "dummy user");
     messageContent.put("title", booking.getTitle());
     message.setMessageType(MessageType.APPOINTMENT_SET);
-    //TODO: find better solution how to handle zones
-    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).minusHours(2));
+    messageContent.put("date", LocalDateTime.parse(booking.getStartTime()));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0, 16)),
         LocalDateTime.parse(booking.getEndTime().substring(0, 16))));
@@ -100,13 +92,8 @@ public class MessagesService {
   private AliasMessageDTO createCancellationMessage(CalcomBooking booking) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
-    messageContent.put("counselor", "dummy counselor");
-    messageContent.put("user", "dummy user");
     messageContent.put("title", booking.getTitle());
-//    messageContent.put("startTime", booking.getStartTime());
-//    messageContent.put("endTime", booking.getEndTime());
-    messageContent.put("date", ZonedDateTime.parse(booking.getStartTime()).minusHours(2));
-    //TODO: find better solution how to handle zones
+    messageContent.put("date", LocalDateTime.parse(booking.getStartTime()));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(booking.getStartTime().substring(0, 16)),
         LocalDateTime.parse(booking.getEndTime().substring(0, 16))));

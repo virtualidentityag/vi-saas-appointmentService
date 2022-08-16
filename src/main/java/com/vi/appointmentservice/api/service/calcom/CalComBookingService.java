@@ -8,7 +8,6 @@ import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomRepository;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import lombok.NonNull;
@@ -114,13 +113,8 @@ public class CalComBookingService extends CalComService {
     ObjectMapper mapper = new ObjectMapper();
     try {
       CalcomBooking calcomBooking = mapper.readValue(response, CalcomBooking.class);
-      //TODO: change this to use zones properly
-      calcomBooking.setStartTime(
-          ZonedDateTime.parse(jsonObject.getJSONObject("booking").get("startTime").toString())
-              .plusHours(2).toString());
-      calcomBooking.setEndTime(
-          ZonedDateTime.parse(jsonObject.getJSONObject("booking").get("endTime").toString())
-              .plusHours(2).toString());
+      calcomBooking.setStartTime(jsonObject.getJSONObject("booking").get("startTime").toString());
+      calcomBooking.setEndTime(jsonObject.getJSONObject("booking").get("endTime").toString());
       return calcomBooking;
     } catch (JsonProcessingException e) {
       return null;
