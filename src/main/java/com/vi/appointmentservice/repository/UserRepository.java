@@ -29,4 +29,10 @@ public class UserRepository {
     jdbcTemplate.update(UPDATE_USER_QUERY);
   }
 
+  public void setDefaultScheduleId(Long calcomUserId, Long defaultScheduleId){
+    String UPDATE_USER_QUERY = "update \"users\" set \"defaultScheduleId\" = $scheduleIdParam where \"id\" = " + calcomUserId;
+    UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$scheduleIdParam", defaultScheduleId.toString());
+    jdbcTemplate.update(UPDATE_USER_QUERY);
+  }
+
 }

@@ -1,6 +1,7 @@
 package com.vi.appointmentservice.repository;
 
 import javax.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -9,6 +10,9 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class ScheduleRepository {
   private final @NotNull JdbcTemplate jdbcTemplate;
+
+  private final @NonNull AvailabilityRepository availabilityRepository;
+  private final @NonNull UserRepository userRepository;
 
   public Long createDefaultScheduleIfNoneExists(Long calcomUserId) {
     // Check if a schedule with name MAIN_SCHEDULE already exists
@@ -27,15 +31,8 @@ public class ScheduleRepository {
     Long defaultScheduleId = jdbcTemplate.queryForObject(SELECT_QUERY, Long.class);
 
     if((defaultScheduleFound == null || defaultScheduleFound < 1) && defaultScheduleId != null){
-      String UPDATE_USER_QUERY = "update \"users\" set \"defaultScheduleId\" = $scheduleIdParam where \"id\" = " + calcomUserId;
-      UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$scheduleIdParam", defaultScheduleId.toString());
-      jdbcTemplate.update(UPDATE_USER_QUERY);
-
-      // Create default availability
-      String INSERT_QUERY = "insert into \"Availability\" (\"scheduleId\", \"days\", \"startTime\", \"endTime\") values ($scheduleIdParam, '{0,1,2,3,4,5,6}', '00:00:00', '00:00:00')";
-      INSERT_QUERY = INSERT_QUERY
-          .replace("$scheduleIdParam", defaultScheduleId.toString());
-      jdbcTemplate.update(INSERT_QUERY);
+      userRepository.setDefaultScheduleId(calcomUserId, defaultScheduleId);
+      availabilityRepository.createDefaultAvailability(defaultScheduleId);
     }
 
     return defaultScheduleId;

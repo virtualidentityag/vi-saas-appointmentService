@@ -1,6 +1,5 @@
 package com.vi.appointmentservice.api.controller;
 
-import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.facade.AskerFacade;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
@@ -33,7 +32,7 @@ public class AskerController implements AskersApi {
 
   @Override
   public ResponseEntity<String> processBooking(CalcomWebhookInput input) {
-    //TODO: move this to a separate controller, has nothing to do with askers
+    //TODO: has been moved to a separate controller, this can be removed once DB data with the old webhook links has been completely replaced
     calcomWebhookHandlerService.handlePayload(input);
     return new ResponseEntity<>(HttpStatus.OK);
   }

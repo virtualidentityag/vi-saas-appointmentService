@@ -9,7 +9,6 @@ import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomRepository;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

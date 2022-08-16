@@ -13,6 +13,8 @@ tags:
     description: Everything related to a onBer asker
   - name: eventType
     description: Everything related to a calcom event-type
+  - name: booking
+    description: Endpoint for booking webhook
 paths:
   /consultants:
     post:
@@ -438,6 +440,26 @@ paths:
         - asker
       summary: Webhook subscriber
       operationId: processBooking
+      requestBody:
+        description: The json string provided by calcom
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalcomWebhookInput'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+  /processBooking:
+    post:
+      tags:
+        - booking
+      summary: Webhook subscriber
+      operationId: processBookingWebhook
       requestBody:
         description: The json string provided by calcom
         content:
