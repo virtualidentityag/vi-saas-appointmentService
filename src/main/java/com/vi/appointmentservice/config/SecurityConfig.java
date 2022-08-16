@@ -1,6 +1,7 @@
 package com.vi.appointmentservice.config;
 
 import com.vi.appointmentservice.api.authorization.RoleAuthorizationAuthorityMapper;
+import com.vi.appointmentservice.config.Authority.AuthorityValue;
 import com.vi.appointmentservice.filter.StatelessCsrfFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -66,12 +68,34 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             CsrfFilter.class);
 
     httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
-            .antMatchers(WHITE_LIST).permitAll()
-            //.antMatchers("/agencies", "/agencies/**").permitAll()
-            //.antMatchers("/consultants", "/consultants/**").permitAll()
-            //.antMatchers("/askers", "/askers/**").permitAll()
-            .anyRequest().permitAll();
+        .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
+        .antMatchers(WHITE_LIST).permitAll()
+
+        .antMatchers(HttpMethod.GET, "/agencies", "/agencies/**", "/askers", "/askers/**",
+            "/consultants", "/consultants/**")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
+            AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
+            AuthorityValue.TECHNICAL_DEFAULT)
+
+        .antMatchers(HttpMethod.DELETE, "/askers/processBooking", "/processBooking")
+        .permitAll() // Security for processBooking handeled through controller secret validation
+
+        .antMatchers(HttpMethod.PUT, "/agencies", "/agencies/**", "/askers", "/askers/**",
+            "/consultants", "/consultants/**")
+        .hasAnyAuthority(AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
+            AuthorityValue.TECHNICAL_DEFAULT)
+
+        .antMatchers(HttpMethod.POST, "/agencies", "/agencies/**", "/askers", "/askers/**",
+            "/consultants", "/consultants/**")
+        .hasAnyAuthority(AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
+            AuthorityValue.TECHNICAL_DEFAULT)
+
+        .antMatchers(HttpMethod.DELETE, "/agencies", "/agencies/**", "/askers", "/askers/**",
+            "/consultants", "/consultants/**")
+        .hasAnyAuthority(AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
+            AuthorityValue.TECHNICAL_DEFAULT)
+
+        .anyRequest().denyAll();
   }
 
   /**
@@ -125,7 +149,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above:
+   * {@link
+   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -137,7 +163,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above:
+   * {@link
+   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -149,7 +177,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above:
+   * {@link
+   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean

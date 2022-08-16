@@ -11,8 +11,6 @@ tags:
     description: Everything related to a onBer consultant
   - name: asker
     description: Everything related to a onBer asker
-  - name: eventType
-    description: Everything related to a calcom event-type
   - name: booking
     description: Endpoint for booking webhook
 paths:
@@ -36,6 +34,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomUser'
+      security:
+        - Bearer: [ ]
   /consultants/{consultantId}:
     put:
       tags:
@@ -63,6 +63,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomUser'
+      security:
+        - Bearer: [ ]
     delete:
       tags:
         - consultant
@@ -78,6 +80,8 @@ paths:
       responses:
         '200':
           description: successful operation
+      security:
+        - Bearer: [ ]
   /consultants/{consultantId}/eventTypes:
     get:
       tags:
@@ -98,6 +102,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomEventTypes'
+      security:
+        - Bearer: [ ]
   /consultants/{consultantId}/bookings:
     get:
       tags:
@@ -123,6 +129,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
+      security:
+        - Bearer: [ ]
   /consultants/{consultantId}/meetingSlug:
     get:
       tags:
@@ -143,6 +151,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeetingSlug'
+      security:
+        - Bearer: [ ]
   /agencies/agencyConsultantsSync:
     post:
       tags:
@@ -159,6 +169,8 @@ paths:
       responses:
         '200':
           description: successful operation
+      security:
+        - Bearer: [ ]
   /agencies/agencyMasterDataSync:
     post:
       tags:
@@ -175,6 +187,8 @@ paths:
       responses:
         '200':
           description: successful operation
+      security:
+        - Bearer: [ ]
   /agencies:
     post:
       tags:
@@ -195,6 +209,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomTeam'
+      security:
+        - Bearer: [ ]
   /agencies/{agencyId}:
     put:
       tags:
@@ -223,6 +239,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomTeam'
+      security:
+        - Bearer: [ ]
     delete:
       tags:
         - agency
@@ -239,6 +257,8 @@ paths:
       responses:
         '200':
           description: successful operation
+      security:
+        - Bearer: [ ]
   /agencies/{agencyId}/eventTypes:
     get:
       tags:
@@ -260,6 +280,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomEventTypes'
+      security:
+        - Bearer: [ ]
     post:
       tags:
         - agency
@@ -287,6 +309,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomEventTypeDTO'
+      security:
+        - Bearer: [ ]
   /agencies/{agencyId}/eventTypes/{eventTypeId}/:
     get:
       tags:
@@ -315,6 +339,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomEventTypeDTO'
+      security:
+        - Bearer: [ ]
     put:
       tags:
         - agency
@@ -349,6 +375,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomEventTypeDTO'
+      security:
+        - Bearer: [ ]
     delete:
       tags:
         - agency
@@ -372,6 +400,8 @@ paths:
       responses:
         '200':
           description: successful operation
+      security:
+        - Bearer: [ ]
   /agencies/{agencyId}/consultants:
     get:
       tags:
@@ -393,6 +423,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfTeamEventTypeConsultants'
+      security:
+        - Bearer: [ ]
   /agencies/{agencyId}/initialMeetingSlug:
     get:
       tags:
@@ -414,6 +446,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeetingSlug'
+      security:
+        - Bearer: [ ]
   /askers/{askerId}/bookings:
     get:
       tags:
@@ -434,12 +468,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
+      security:
+        - Bearer: [ ]
   /askers/processBooking:
     post:
       tags:
         - asker
       summary: Webhook subscriber
       operationId: processBooking
+      parameters:
+        - name: x-cal-signature-256
+          in: header
+          description: Webhook hmac
+          schema:
+            type: string
       requestBody:
         description: The json string provided by calcom
         content:
@@ -454,12 +496,20 @@ paths:
             text/plain:
               schema:
                 type: string
+      security:
+        - Bearer: [ ]
   /processBooking:
     post:
       tags:
         - booking
       summary: Webhook subscriber
       operationId: processBookingWebhook
+      parameters:
+        - name: x-cal-signature-256
+          in: header
+          description: Webhook hmac
+          schema:
+            type: string
       requestBody:
         description: The json string provided by calcom
         content:
@@ -474,6 +524,8 @@ paths:
             text/plain:
               schema:
                 type: string
+      security:
+        - Bearer: [ ]
 components:
   schemas:
     CalcomBooking:
