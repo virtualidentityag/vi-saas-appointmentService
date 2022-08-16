@@ -21,7 +21,7 @@ public class UserRepository {
     String UPDATE_USER_QUERY = "update \"users\" set \"name\" = $nameParam, \"away\" = $awayParam, \"email\" = $emailParam where \"id\" = " + userId;
     UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$nameParam", "'" + name + "'")
         .replace("$awayParam", isAway.toString())
-        .replace("$emailParam", email);
+        .replace("$emailParam", "'" + email + "'");
     jdbcTemplate.update(UPDATE_USER_QUERY);
   }
 
