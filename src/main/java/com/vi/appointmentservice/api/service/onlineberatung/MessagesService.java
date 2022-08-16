@@ -1,6 +1,7 @@
 package com.vi.appointmentservice.api.service.onlineberatung;
 
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.messageservice.generated.web.MessageControllerApi;
@@ -15,6 +16,7 @@ import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -119,15 +121,17 @@ public class MessagesService {
   }
 
   private String getRocketChatGroupId(CalcomBooking booking) {
-    CalcomUserToConsultant byCalComUserId = calcomUserToConsultantRepository
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
         .findByCalComUserId(Long.valueOf(booking.getUserId()));
-    String consultantId = byCalComUserId.getConsultantId();
-    CalcomBookingToAsker byCalcomBookingId = calcomBookingToAskerRepository
-        .findByCalcomBookingId(booking.getId());
-    String askerId = byCalcomBookingId.getAskerId();
-    return userService
-        .getRocketChatGroupId(consultantId, askerId);
-
+    if(calcomUserToConsultant.isPresent()){
+      String consultantId = calcomUserToConsultant.get().getConsultantId();
+      CalcomBookingToAsker byCalcomBookingId = calcomBookingToAskerRepository
+          .findByCalcomBookingId(booking.getId());
+      String askerId = byCalcomBookingId.getAskerId();
+      return userService
+          .getRocketChatGroupId(consultantId, askerId);
+    }
+    throw new NotFoundException("No consultant found for calcom user in booking");
   }
 
   private void addTechnicalUserHeaders(

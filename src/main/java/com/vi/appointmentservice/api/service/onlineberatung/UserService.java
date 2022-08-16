@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-//TODO: maybe ConsultantService would be a better name, based on the usecase
 public class UserService {
 
   @Autowired

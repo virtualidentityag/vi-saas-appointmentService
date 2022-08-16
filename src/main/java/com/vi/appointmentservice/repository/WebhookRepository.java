@@ -23,7 +23,7 @@ public class WebhookRepository {
     INSERT_QUERY = INSERT_QUERY
         .replace("$idParam", "'"+ UUID.randomUUID() +"'")
         .replace("$userIdParam", calcomUserId.toString())
-        .replace("$urlParam" ,"'" + appBaseUrl + "/service/appointservice/askers/processBooking'");
+        .replace("$urlParam" ,"'" + appBaseUrl + "/service/appointservice/processBooking'");
     jdbcTemplate.update(INSERT_QUERY);
   }
 

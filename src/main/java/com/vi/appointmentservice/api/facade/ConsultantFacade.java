@@ -3,16 +3,15 @@ package com.vi.appointmentservice.api.facade;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
+import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTOLocationsInner;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
-import com.vi.appointmentservice.api.service.calcom.CalComAvailabilityService;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.CalComMembershipService;
@@ -20,6 +19,7 @@ import com.vi.appointmentservice.api.service.calcom.CalComScheduleService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
+import com.vi.appointmentservice.repository.AvailabilityRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
 import com.vi.appointmentservice.repository.ScheduleRepository;
@@ -27,6 +27,7 @@ import com.vi.appointmentservice.repository.UserRepository;
 import com.vi.appointmentservice.repository.WebhookRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +44,6 @@ public class ConsultantFacade {
   private final @NonNull CalComUserService calComUserService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull CalComScheduleService calComScheduleService;
-  private final @NonNull CalComAvailabilityService calComAvailabilityService;
   private final @NonNull CalComMembershipService calComMembershipService;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull UserService userService;
@@ -52,6 +52,8 @@ public class ConsultantFacade {
   private final @NonNull ScheduleRepository scheduleRepository;
   private final @NonNull EventTypeRepository eventTypeRepository;
   private final @NonNull WebhookRepository webhookRepository;
+
+  private final @NonNull AvailabilityRepository availabilityRepository;
 
   public List<CalcomUser> initializeConsultantsHandler() {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -112,29 +114,21 @@ public class ConsultantFacade {
   }
 
   public CalcomUser createOrUpdateCalcomUserHandler(ConsultantDTO consultant) {
-    //TODO: remove inline comments
     CalcomUser createdOrUpdatedUser = null;
     log.info("Creating or updating consultant: {}", consultant);
-    if (calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())) {
-      // Found user association
-      Long calComUserId = calcomUserToConsultantRepository.findByConsultantId(consultant.getId())
-          .getCalComUserId();
-      // Check if user really exists
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(consultant.getId());
+    if (calcomUserToConsultant.isPresent()) {
+      Long calComUserId = calcomUserToConsultant.get().getCalComUserId();
       CalcomUser foundUser = calComUserService.getUserById(calComUserId);
       if (foundUser == null) {
-        // TODO: Check calcom for email match?
-        // Association exists, user missing, create
         createdOrUpdatedUser = this.createCalcomUser(consultant);
       } else {
-        // User exists, update
         createdOrUpdatedUser = this.updateCalcomUser(consultant);
       }
       if (createdOrUpdatedUser != null) {
         updateUserDefaultEntities(createdOrUpdatedUser);
       }
     } else {
-      // NO association exists, create it and user
-      // TODO: Check calcom for email match?
       createdOrUpdatedUser = this.createCalcomUser(consultant);
       if (createdOrUpdatedUser != null) {
         this.createUserIdAssociation(createdOrUpdatedUser, consultant);
@@ -153,8 +147,6 @@ public class ConsultantFacade {
         Long newDefaultEventTypeId = addDefaultEventTypeToUser(createdOrUpdatedUser);
         eventTypeRepository.updateEventTypeScheduleId(newDefaultEventTypeId, defaultScheduleId);
       }
-      // Add user to teams of agencies and event-types of teams
-      // this.addUserToTeamsAndEventTypes(consultant);
   }
 
   private Long addDefaultEventTypeToUser(CalcomUser createdUser) {
@@ -197,10 +189,10 @@ public class ConsultantFacade {
   }
 
   private CalcomUser updateCalcomUser(ConsultantDTO consultant) {
-    if (calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())) {
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(consultant.getId());
+    if (calcomUserToConsultant.isPresent()) {
       // Exists, update the user
-      Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultant.getId())
-          .getCalComUserId();
+      Long calcomUserId = calcomUserToConsultant.get().getCalComUserId();
       CalcomUser updateUser = new CalcomUser();
       updateUser.setId(calcomUserId);
       updateUser.setName(consultant.getFirstname() + " " + consultant.getLastname());
@@ -212,7 +204,6 @@ public class ConsultantFacade {
       updateUser.setTimeFormat(24);
       updateUser.setAllowDynamicBooking(false);
       updateUser.setAway(consultant.getAbsent());
-      // TODO: Any more default values?
       userRepository.updateUser(updateUser);
       return calComUserService.getUserById(updateUser.getId());
     } else {
@@ -222,10 +213,8 @@ public class ConsultantFacade {
   }
 
   public HttpStatus deleteConsultantHandler(String consultantId) {
-    checkIfConsultantExists(consultantId);
     // Find associated user
-    Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
-        .getCalComUserId();
+    Long calcomUserId = this.getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
     // Delete team memberships
     calComMembershipService.deleteAllMembershipsOfUser(calcomUserId);
     // Delete personal event-types
@@ -233,10 +222,8 @@ public class ConsultantFacade {
     // Delete schedules
     List<Integer> deletedSchedules = calComScheduleService.deleteAllSchedulesOfUser(calcomUserId);
     // Delete availabilities for schedules
-
     for (Integer scheduleId : deletedSchedules) {
-      // TODO: Does this calcom api work?
-      calComAvailabilityService.deleteAvailability(scheduleId);
+      availabilityRepository.deleteAvailabilityByScheduleId(Long.valueOf(scheduleId));
     }
     // Delete user
     HttpStatus deleteResponseCode = calComUserService.deleteUser(calcomUserId);
@@ -244,50 +231,44 @@ public class ConsultantFacade {
     if (deleteResponseCode == HttpStatus.OK) {
       calcomUserToConsultantRepository.deleteByConsultantId(consultantId);
     }
-    // TODO: ANYTHING ELSE?
     return deleteResponseCode;
 
   }
 
   public List<CalcomBooking> getConsultantActiveBookings(String consultantId) {
-    checkIfConsultantExists(consultantId);
-    Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
-        .getCalComUserId();
+    Long calcomUserId = getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
     return calComBookingService.getConsultantActiveBookings(calcomUserId);
   }
 
   public List<CalcomBooking> getConsultantCancelledBookings(String consultantId) {
-    checkIfConsultantExists(consultantId);
-    Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
-        .getCalComUserId();
+    Long calcomUserId = getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
     return calComBookingService.getConsultantCancelledBookings(calcomUserId);
   }
 
   public List<CalcomBooking> getConsultantExpiredBookings(String consultantId) {
-    checkIfConsultantExists(consultantId);
-    Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
-        .getCalComUserId();
+    Long calcomUserId = getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
     return calComBookingService.getConsultantExpiredBookings(calcomUserId);
   }
 
   public List<CalcomEventTypeDTO> getAllEventTypesOfConsultantHandler(String consultantId) {
-    checkIfConsultantExists(consultantId);
-    return calComEventTypeService.getAllEventTypesOfUser(
-        calcomUserToConsultantRepository.findByConsultantId(consultantId).getCalComUserId());
+    getCalcomUserToConsultantIfExists(consultantId);
+    return calComEventTypeService.getAllEventTypesOfUser(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId());
   }
 
   public MeetingSlug getConsultantMeetingSlugHandler(String consultantId) {
-    checkIfConsultantExists(consultantId);
+    getCalcomUserToConsultantIfExists(consultantId);
     MeetingSlug meetingSlug = new MeetingSlug();
-    meetingSlug.setSlug(calComUserService.getUserById(
-        calcomUserToConsultantRepository.findByConsultantId(consultantId).getCalComUserId())
+    meetingSlug.setSlug(calComUserService.getUserById(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId())
         .getUsername());
     return meetingSlug;
   }
 
-  private void checkIfConsultantExists(String consultantId) {
-    if (!calcomUserToConsultantRepository.existsByConsultantId(consultantId)) {
-      throw new BadRequestException(
+  private CalcomUserToConsultant getCalcomUserToConsultantIfExists(String consultantId) {
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(consultantId);
+    if (calcomUserToConsultant.isPresent()) {
+      return calcomUserToConsultant.get();
+    }else{
+      throw new NotFoundException(
           String.format("No calcom user associated to consultant id '%s'", consultantId));
     }
   }

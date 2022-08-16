@@ -21,9 +21,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-//TODO: what do you think that we move all onlineberatung services like, user, useradmin, messages
-// to one subpackage of service package
-//TODO: and all calcom services to calcom package. classes would not have calcom prefix than
 public class AdminUserService {
 
   @Qualifier("adminUser")

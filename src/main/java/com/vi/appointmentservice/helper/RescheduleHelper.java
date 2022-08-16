@@ -8,10 +8,12 @@ import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
+import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.useradminservice.generated.web.model.AskerResponseDTO;
 import com.vi.appointmentservice.useradminservice.generated.web.model.ConsultantDTO;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
@@ -56,10 +58,10 @@ public class RescheduleHelper {
   }
 
   public CalcomBooking attachConsultantName(CalcomBooking calcomBooking) {
-    if (this.calcomUserToConsultantRepository.existsByCalComUserId(
-        Long.valueOf(calcomBooking.getUserId()))) {
-      String consultantId = this.calcomUserToConsultantRepository.findByCalComUserId(
-          Long.valueOf(calcomBooking.getUserId())).getConsultantId();
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository.findByCalComUserId(
+        Long.valueOf(calcomBooking.getUserId()));
+    if (calcomUserToConsultant.isPresent()) {
+      String consultantId = calcomUserToConsultant.get().getConsultantId();
       ConsultantDTO consultant = null;
       consultant = this.adminUserService.getConsultantById(consultantId);
       calcomBooking.setConsultantName(consultant.getFirstname() + " " + consultant.getLastname());
