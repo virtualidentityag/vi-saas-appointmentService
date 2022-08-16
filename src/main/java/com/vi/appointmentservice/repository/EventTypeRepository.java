@@ -1,7 +1,9 @@
 package com.vi.appointmentservice.repository;
 
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
+import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import java.util.List;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -40,11 +42,14 @@ public class EventTypeRepository {
     String DELETE_QUERY = "delete from \"_user_eventtype\" where \"A\"=" + eventTypeId;
     jdbcTemplate.update(DELETE_QUERY);
     eventTypeConsultants.forEach(eventTypeConsultant -> {
-      Long calcomUserId = calcomUserToConsultantRepository.findByConsultantId(eventTypeConsultant.getConsultantId()).getCalComUserId();
-      String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
-      INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
-          .replace("$userIdParam", calcomUserId.toString());
-      jdbcTemplate.update(INSERT_QUERY);
+      Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(eventTypeConsultant.getConsultantId());
+      if(calcomUserToConsultant.isPresent()){
+        Long calcomUserId = calcomUserToConsultant.get().getCalComUserId();
+        String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
+        INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
+            .replace("$userIdParam", calcomUserId.toString());
+        jdbcTemplate.update(INSERT_QUERY);
+      }
     });
   }
 

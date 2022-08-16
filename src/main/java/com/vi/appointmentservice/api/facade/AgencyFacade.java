@@ -19,6 +19,7 @@ import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
+import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
@@ -80,11 +81,11 @@ public class AgencyFacade {
   public List<TeamEventTypeConsultant> getAllConsultantsOfAgency(Long agencyId){
     List<TeamEventTypeConsultant> availableConsultants = new ArrayList<>();
     for(Long userId : this.getAllConsultantIdsOfAgency(agencyId)){
-      // TODO: refactor int Optional<CalcomUserToConsultant> to avoid double call
-      if (calcomUserToConsultantRepository.existsByCalComUserId(userId)){
+      Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByCalComUserId(userId);
+      if (calcomUserToConsultant.isPresent()){
         TeamEventTypeConsultant teamEventTypeConsultant = new TeamEventTypeConsultant();
         teamEventTypeConsultant.setConsultantName(calComUserService.getUserById(userId).getName());
-        teamEventTypeConsultant.setConsultantId(calcomUserToConsultantRepository.findByCalComUserId(userId).getConsultantId());
+        teamEventTypeConsultant.setConsultantId(calcomUserToConsultant.get().getConsultantId());
         availableConsultants.add(teamEventTypeConsultant);
       }
     }
@@ -110,20 +111,23 @@ public class AgencyFacade {
 
   public void agencyConsultantsSync(AgencyConsultantSyncRequestDTO request) {
     String consultantId = request.getConsultantId();
-    Long calComUserId = calcomUserToConsultantRepository.findByConsultantId(consultantId)
-        .getCalComUserId();
-    consultantFacade.updateUserDefaultEntities(calComUserService.getUserById(calComUserId));
-    List<Long> teamIds = request.getAgencies().stream()
-        .filter(teamToAgencyRepository::existsByAgencyId)
-        .map(agencyId -> teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid())
-        .collect(Collectors.toList());
-    membershipsRepository.updateMemberShipsOfUser(calComUserId, teamIds);
-    // Reset user teamEventTypeMemberships
-    eventTypeRepository.removeTeamEventTypeMembershipsForUser(calComUserId);
-    // Add consultant to team eventTypes
-    for(Long teamId: teamIds){
-      for(CalcomEventTypeDTO eventType: calComEventTypeService.getAllEventTypesOfTeam(teamId)){
-        eventTypeRepository.addTeamEventTypeMemberships(Long.valueOf(eventType.getId()), calComUserId);
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(consultantId);
+        //.getCalComUserId();
+    if(calcomUserToConsultant.isPresent()) {
+      consultantFacade.updateUserDefaultEntities(calComUserService.getUserById(calcomUserToConsultant.get().getCalComUserId()));
+      List<Long> teamIds = request.getAgencies().stream()
+          .filter(teamToAgencyRepository::existsByAgencyId)
+          .map(agencyId -> teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid())
+          .collect(Collectors.toList());
+      membershipsRepository.updateMemberShipsOfUser(calcomUserToConsultant.get().getCalComUserId(), teamIds);
+      // Reset user teamEventTypeMemberships
+      eventTypeRepository.removeTeamEventTypeMembershipsForUser(calcomUserToConsultant.get().getCalComUserId());
+      // Add consultant to team eventTypes
+      for (Long teamId : teamIds) {
+        for (CalcomEventTypeDTO eventType : calComEventTypeService.getAllEventTypesOfTeam(teamId)) {
+          eventTypeRepository.addTeamEventTypeMemberships(Long.valueOf(eventType.getId()),
+              calcomUserToConsultant.get().getCalComUserId());
+        }
       }
     }
   }
@@ -212,11 +216,11 @@ public class AgencyFacade {
     List<TeamEventTypeConsultant> consultants = new ArrayList<>();
     // Get consultant Ids
     for(Long userId : eventTypeRepository.getUserIdsOfEventTypeMembers(eventTypeId)){
-      // TODO: refactor int Optional<CalcomUserToConsultant> to avoid double call
-      if (calcomUserToConsultantRepository.existsByCalComUserId(userId)){
+      Optional<CalcomUserToConsultant> calomUserToConsultant = calcomUserToConsultantRepository.findByCalComUserId(userId);
+      if (calomUserToConsultant.isPresent()){
         TeamEventTypeConsultant teamEventTypeConsultant = new TeamEventTypeConsultant();
         teamEventTypeConsultant.setConsultantName(calComUserService.getUserById(userId).getName());
-        teamEventTypeConsultant.setConsultantId(calcomUserToConsultantRepository.findByCalComUserId(userId).getConsultantId());
+        teamEventTypeConsultant.setConsultantId(calomUserToConsultant.get().getConsultantId());
         consultants.add(teamEventTypeConsultant);
       }
     }
