@@ -57,10 +57,4 @@ public class CalcomRepository {
     return calcomDBNamedParamterTemplate
         .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
   }
-
-  public void cancelBookingById(Long bookingId){
-    // TODO: Implement
-  }
-
-
 }

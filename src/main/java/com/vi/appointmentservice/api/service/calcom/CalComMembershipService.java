@@ -12,10 +12,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -52,31 +49,6 @@ public class CalComMembershipService extends CalComService {
     for (CalcomMembership membership : membershipsOfUser) {
       this.deleteMembership(membership.getUserId(), membership.getTeamId());
     }
-  }
-
-  public List<CalcomMembership> getAllMembershipsOfUser(Long userId) {
-    List<CalcomMembership> result = this.getAllMemberships();
-    return new ArrayList<>(result).stream().filter(
-            membership -> membership.getUserId() != null && membership.getUserId() == userId.intValue())
-        .collect(Collectors.toList());
-  }
-
-
-  public CalcomMembership createMembership(JSONObject membership) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request = new HttpEntity<>(membership.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri("/v1/memberships"), request,
-        CalcomMembership.class).getBody();
-  }
-
-  public CalcomMembership editMembership(JSONObject membership) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request = new HttpEntity<>(membership.toString(), headers);
-    return restTemplate.postForEntity(this.buildUri(
-            "/v1/memberships/" + membership.get("userId") + "_" + membership.get("teamId")), request,
-        CalcomMembership.class).getBody();
   }
 
   public void deleteMembership(Long userId, Long teamId) {

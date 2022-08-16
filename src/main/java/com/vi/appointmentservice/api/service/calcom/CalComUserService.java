@@ -3,7 +3,6 @@ package com.vi.appointmentservice.api.service.calcom;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiConflictException;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import lombok.extern.slf4j.Slf4j;
@@ -49,29 +48,6 @@ public class CalComUserService extends CalComService {
       return null;
     } catch (Exception e) {
       throw new CalComApiErrorException("Could not create calcom user");
-    }
-  }
-
-  public CalcomUser updateUser(JSONObject user) {
-    long userId = user.getLong("id");
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    log.info("Updating calcom user: {}", user);
-    user.remove("id");
-    user.remove("email");
-    HttpEntity<String> request = new HttpEntity<>(user.toString(), headers);
-    try {
-      ResponseEntity<String> response = restTemplate
-          .exchange(this.buildUri("/v1/users/" + userId), HttpMethod.PATCH, request,
-              String.class);
-      String body = response.getBody();
-      JSONObject jsonObject = new JSONObject(body);
-      body = jsonObject.getJSONObject("user").toString();
-      ObjectMapper mapper = new ObjectMapper();
-      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      return mapper.readValue(body, CalcomUser.class);
-    } catch (Exception e) {
-      throw new CalComApiErrorException("Could not update calcom user");
     }
   }
 

@@ -1,6 +1,5 @@
 package com.vi.appointmentservice.repository;
 
-import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import java.util.List;
 import javax.validation.constraints.NotNull;

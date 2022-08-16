@@ -1,6 +1,5 @@
 package com.vi.appointmentservice.repository;
 
-import java.util.List;
 import java.util.UUID;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class WebhookRepository {
 
     String INSERT_QUERY = "insert into \"Webhook\" (\"id\", \"userId\", \"subscriberUrl\", \"active\", \"eventTriggers\") values ($idParam, $userIdParam, $urlParam, true, '{BOOKING_CANCELLED,BOOKING_CREATED,BOOKING_RESCHEDULED}')";
     INSERT_QUERY = INSERT_QUERY
-        .replace("$idParam", "'"+UUID.randomUUID().toString()+"'")
+        .replace("$idParam", "'"+ UUID.randomUUID() +"'")
         .replace("$userIdParam", calcomUserId.toString())
         .replace("$urlParam" ,"'" + appBaseUrl + "/service/appointservice/askers/processBooking'");
     jdbcTemplate.update(INSERT_QUERY);

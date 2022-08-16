@@ -23,18 +23,6 @@ public class SecurityHeaderSupplier {
   private String csrfCookieProperty;
 
   /**
-   * Creates the headers containing keycloak token and csrf headers {@link HttpHeaders} object.
-   *
-   * @return the created {@link HttpHeaders}
-   */
-  public HttpHeaders getKeycloakAndCsrfHttpHeaders() {
-    var header = getCsrfHttpHeaders();
-    this.addKeycloakAuthorizationHeader(header);
-
-    return header;
-  }
-
-  /**
    * Creates the headers containing keycloak token of technical user and csrf headers {@link
    * HttpHeaders} object.
    *
@@ -62,10 +50,6 @@ public class SecurityHeaderSupplier {
     httpHeaders.add(csrfHeaderProperty, csrfToken);
 
     return httpHeaders;
-  }
-
-  private void addKeycloakAuthorizationHeader(HttpHeaders httpHeaders) {
-    httpHeaders.add("Authorization", "Bearer " + authenticatedUser.getAccessToken());
   }
 
   private void addKeycloakAuthorizationHeader(HttpHeaders httpHeaders, String accessToken) {

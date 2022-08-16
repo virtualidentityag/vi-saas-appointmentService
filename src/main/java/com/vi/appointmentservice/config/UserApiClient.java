@@ -63,7 +63,7 @@ public class UserApiClient extends com.vi.appointmentservice.userservice.generat
 
     } catch (IntrospectionException exception) {
       throw new InternalServerErrorException(
-          String.format("Could not obtain method properties of %s", queryValue.toString()),
+          String.format("Could not obtain method properties of %s", queryValue),
           exception);
     }
   }

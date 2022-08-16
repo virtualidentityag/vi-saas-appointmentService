@@ -123,7 +123,7 @@ public class MessagesService {
         .findByCalComUserId(Long.valueOf(booking.getUserId()));
     String consultantId = byCalComUserId.getConsultantId();
     CalcomBookingToAsker byCalcomBookingId = calcomBookingToAskerRepository
-        .findByCalcomBookingId(Long.valueOf(booking.getId()));
+        .findByCalcomBookingId(booking.getId());
     String askerId = byCalcomBookingId.getAskerId();
     return userService
         .getRocketChatGroupId(consultantId, askerId);

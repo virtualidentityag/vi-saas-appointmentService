@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
-import com.vi.appointmentservice.api.model.AgencyAdminResponseDTO;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTOLocationsInner;
@@ -18,26 +17,22 @@ import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.calcom.CalComMembershipService;
 import com.vi.appointmentservice.api.service.calcom.CalComScheduleService;
-import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
 import com.vi.appointmentservice.repository.ScheduleRepository;
-import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import com.vi.appointmentservice.repository.UserRepository;
 import com.vi.appointmentservice.repository.WebhookRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import jdk.jfr.EventType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -53,14 +48,10 @@ public class ConsultantFacade {
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull UserService userService;
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
-  private final @NonNull TeamToAgencyRepository teamToAgencyRepository;
   private final @NonNull UserRepository userRepository;
   private final @NonNull ScheduleRepository scheduleRepository;
   private final @NonNull EventTypeRepository eventTypeRepository;
   private final @NonNull WebhookRepository webhookRepository;
-
-  @Value("${app.base.url}")
-  private String appBaseUrl;
 
   public List<CalcomUser> initializeConsultantsHandler() {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -134,15 +125,12 @@ public class ConsultantFacade {
         // TODO: Check calcom for email match?
         // Association exists, user missing, create
         createdOrUpdatedUser = this.createCalcomUser(consultant);
-        if (createdOrUpdatedUser != null) {
-          updateUserDefaultEntities(createdOrUpdatedUser);
-        }
       } else {
         // User exists, update
         createdOrUpdatedUser = this.updateCalcomUser(consultant);
-        if (createdOrUpdatedUser != null) {
-          updateUserDefaultEntities(createdOrUpdatedUser);
-        }
+      }
+      if (createdOrUpdatedUser != null) {
+        updateUserDefaultEntities(createdOrUpdatedUser);
       }
     } else {
       // NO association exists, create it and user
@@ -182,26 +170,6 @@ public class ConsultantFacade {
     }
     return Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
 
-  }
-
-  private void addUserToTeamsAndEventTypes(ConsultantDTO consultant) {
-    // Add user to team of teams of agencies
-    List<AgencyAdminResponseDTO> agencies = consultant.getAgencies();
-    for (AgencyAdminResponseDTO agency : agencies) {
-      Long teamId;
-      if (teamToAgencyRepository.existsByAgencyId(agency.getId())) {
-        teamId = teamToAgencyRepository.findByAgencyId(agency.getId()).get().getTeamid();
-      } else {
-        // TODO: Create team for agency
-        // teamId = newlyCreatedTeam.getId();
-        // TODO: Create eventType for agency
-      }
-      // TODO: Associate user to team+
-      // TODO: Check event-type
-      // TODO: Associate user to team event-types?
-      // TODO: Check if membership already exists (calcom route currently limited to memerships of api key creator)
-      // TODO: calComTeamService.addUserToTeam(updatedUser.getId(), teamId);
-    }
   }
 
   private CalcomEventTypeDTO getDefaultCalcomEventType(CalcomUser createdUser) {
@@ -265,7 +233,9 @@ public class ConsultantFacade {
     // Delete schedules
     List<Integer> deletedSchedules = calComScheduleService.deleteAllSchedulesOfUser(calcomUserId);
     // Delete availabilities for schedules
+
     for (Integer scheduleId : deletedSchedules) {
+      // TODO: Does this calcom api work?
       calComAvailabilityService.deleteAvailability(scheduleId);
     }
     // Delete user

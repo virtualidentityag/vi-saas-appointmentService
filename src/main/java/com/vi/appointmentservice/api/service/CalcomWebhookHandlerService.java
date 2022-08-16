@@ -26,7 +26,6 @@ public class CalcomWebhookHandlerService {
   private final @NonNull MessagesService messagesService;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
-  private final @NonNull CalcomRepository calcomRepository;
 
   @Transactional
   public void handlePayload(CalcomWebhookInput input) {
@@ -78,7 +77,6 @@ public class CalcomWebhookHandlerService {
           .filter(el -> el.getUid().equals(payload.getUid())).collect(
               Collectors.toList()).get(0).getId();
       messagesService.publishCancellationMessage(bookingId);
-      calcomRepository.cancelBookingById(bookingId);
     } catch (Exception e) {
       log.error(String.valueOf(e));
     }

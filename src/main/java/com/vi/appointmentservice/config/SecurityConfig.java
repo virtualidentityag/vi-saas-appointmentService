@@ -23,8 +23,6 @@ import org.springframework.security.web.authentication.session.NullAuthenticated
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.csrf.CsrfFilter;
 
-import static com.vi.appointmentservice.api.authorization.Authority.APPOINTMENT_ADMIN;
-
 /**
  * Provides the Keycloak/Spring Security configuration.
  */
@@ -116,7 +114,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * <p>
    * https://github.com/keycloak/keycloak-documentation/blob/master/securing_apps/topics/oidc/java/spring-security-adapter.adoc
    * <p>
-   * {@link package.class#member label}
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean

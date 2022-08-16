@@ -3,7 +3,6 @@ package com.vi.appointmentservice.api.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import javax.ws.rs.BadRequestException;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
