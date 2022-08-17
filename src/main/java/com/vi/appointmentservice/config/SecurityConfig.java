@@ -1,8 +1,10 @@
 package com.vi.appointmentservice.config;
 
+import com.vi.appointmentservice.adapters.keycloak.config.KeycloakConfig;
 import com.vi.appointmentservice.api.authorization.RoleAuthorizationAuthorityMapper;
-import com.vi.appointmentservice.config.Authority.AuthorityValue;
+import com.vi.appointmentservice.api.authorization.Authority.AuthorityValue;
 import com.vi.appointmentservice.filter.StatelessCsrfFilter;
+import com.vi.appointmentservice.helper.AuthenticatedUser;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -32,7 +34,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   public static final String[] WHITE_LIST =
-      new String[]{};
+      new String[]{"/error"};
 
   @SuppressWarnings("unused")
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
@@ -45,6 +47,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   @Autowired
   private Environment environment;
+
 
 
   /**
@@ -69,33 +72,27 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
     httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
+
         .antMatchers(WHITE_LIST).permitAll()
 
-        .antMatchers(HttpMethod.GET, "/agencies", "/agencies/**", "/askers", "/askers/**",
-            "/consultants", "/consultants/**")
-        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT,
-            AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
-            AuthorityValue.TECHNICAL_DEFAULT)
+        .antMatchers(HttpMethod.GET, "/consultants/**/meetingSlug")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT)
 
-        .antMatchers(HttpMethod.DELETE, "/askers/processBooking", "/processBooking")
-        .permitAll() // Security for processBooking handeled through controller secret validation
+        .antMatchers(HttpMethod.GET, "/agencies/**/initialMeetingSlug")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT)
 
-        .antMatchers(HttpMethod.PUT, "/agencies", "/agencies/**", "/askers", "/askers/**",
-            "/consultants", "/consultants/**")
+        .antMatchers(HttpMethod.GET, "/consultants", "/consultants/**")
+        .hasAnyAuthority(AuthorityValue.CONSULTANT_DEFAULT)
+
+        .antMatchers(HttpMethod.GET, "/askers", "/askers/**")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT)
+
+        .antMatchers(HttpMethod.POST, "/askers/processBooking", "/processBooking")
+        .permitAll() // auth handeled via hmac in controller
+
+        .anyRequest()
         .hasAnyAuthority(AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
-            AuthorityValue.TECHNICAL_DEFAULT)
-
-        .antMatchers(HttpMethod.POST, "/agencies", "/agencies/**", "/askers", "/askers/**",
-            "/consultants", "/consultants/**")
-        .hasAnyAuthority(AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
-            AuthorityValue.TECHNICAL_DEFAULT)
-
-        .antMatchers(HttpMethod.DELETE, "/agencies", "/agencies/**", "/askers", "/askers/**",
-            "/consultants", "/consultants/**")
-        .hasAnyAuthority(AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
-            AuthorityValue.TECHNICAL_DEFAULT)
-
-        .anyRequest().denyAll();
+            AuthorityValue.TECHNICAL_DEFAULT);
   }
 
   /**

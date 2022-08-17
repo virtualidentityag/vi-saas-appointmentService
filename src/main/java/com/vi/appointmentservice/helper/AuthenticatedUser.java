@@ -3,7 +3,7 @@ package com.vi.appointmentservice.helper;
 import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vi.appointmentservice.config.UserRole;
+import com.vi.appointmentservice.api.authorization.UserRole;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
