@@ -3,12 +3,14 @@ package com.vi.appointmentservice.api.facade;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTOLocationsInner;
+import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
@@ -35,12 +37,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class ConsultantFacade {
+
   private final @NonNull CalComUserService calComUserService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull CalComScheduleService calComScheduleService;
@@ -69,7 +73,7 @@ public class ConsultantFacade {
             "Could not deserialize ConsultantDTO response from userService");
       }
       CalcomUser createdUser = this.createOrUpdateCalcomUserHandler(consultant);
-      if(createdUser != null){
+      if (createdUser != null) {
         createdOrUpdatedUsers.add(createdUser);
       }
     }
@@ -79,7 +83,8 @@ public class ConsultantFacade {
 
   private void createUserIdAssociation(CalcomUser createdUser, ConsultantDTO consultant) {
     calcomUserToConsultantRepository.save(
-        new CalcomUserToConsultant(consultant.getId(), createdUser.getId()));
+        new CalcomUserToConsultant(consultant.getId(), createdUser.getId(),
+            createdUser.getPassword()));
   }
 
   private CalcomUser createCalcomUser(ConsultantDTO consultant) {
@@ -97,6 +102,8 @@ public class ConsultantFacade {
       creationUser.setTimeFormat(24);
       creationUser.setAllowDynamicBooking(false);
       creationUser.setAway(consultant.getAbsent());
+      //TODO: add random string
+      creationUser.setPassword(new BCryptPasswordEncoder().encode(UUID.randomUUID().toString()));
       ObjectMapper objectMapper = new ObjectMapper();
       // Ignore null values
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -116,7 +123,8 @@ public class ConsultantFacade {
   public CalcomUser createOrUpdateCalcomUserHandler(ConsultantDTO consultant) {
     CalcomUser createdOrUpdatedUser = null;
     log.info("Creating or updating consultant: {}", consultant);
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(consultant.getId());
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+        .findByConsultantId(consultant.getId());
     if (calcomUserToConsultant.isPresent()) {
       Long calComUserId = calcomUserToConsultant.get().getCalComUserId();
       CalcomUser foundUser = calComUserService.getUserById(calComUserId);
@@ -139,14 +147,14 @@ public class ConsultantFacade {
   }
 
   void updateUserDefaultEntities(CalcomUser createdOrUpdatedUser) {
-      webhookRepository.updateUserWebhook(createdOrUpdatedUser.getId());
-      Long defaultScheduleId = scheduleRepository.createDefaultScheduleIfNoneExists(
-          createdOrUpdatedUser.getId());
-      // Add default eventTypes
-      if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
-        Long newDefaultEventTypeId = addDefaultEventTypeToUser(createdOrUpdatedUser);
-        eventTypeRepository.updateEventTypeScheduleId(newDefaultEventTypeId, defaultScheduleId);
-      }
+    webhookRepository.updateUserWebhook(createdOrUpdatedUser.getId());
+    Long defaultScheduleId = scheduleRepository.createDefaultScheduleIfNoneExists(
+        createdOrUpdatedUser.getId());
+    // Add default eventTypes
+    if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
+      Long newDefaultEventTypeId = addDefaultEventTypeToUser(createdOrUpdatedUser);
+      eventTypeRepository.updateEventTypeScheduleId(newDefaultEventTypeId, defaultScheduleId);
+    }
   }
 
   private Long addDefaultEventTypeToUser(CalcomUser createdUser) {
@@ -189,7 +197,8 @@ public class ConsultantFacade {
   }
 
   private CalcomUser updateCalcomUser(ConsultantDTO consultant) {
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(consultant.getId());
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+        .findByConsultantId(consultant.getId());
     if (calcomUserToConsultant.isPresent()) {
       // Exists, update the user
       Long calcomUserId = calcomUserToConsultant.get().getCalComUserId();
@@ -252,25 +261,38 @@ public class ConsultantFacade {
 
   public List<CalcomEventTypeDTO> getAllEventTypesOfConsultantHandler(String consultantId) {
     getCalcomUserToConsultantIfExists(consultantId);
-    return calComEventTypeService.getAllEventTypesOfUser(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId());
+    return calComEventTypeService
+        .getAllEventTypesOfUser(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId());
   }
 
   public MeetingSlug getConsultantMeetingSlugHandler(String consultantId) {
     getCalcomUserToConsultantIfExists(consultantId);
     MeetingSlug meetingSlug = new MeetingSlug();
-    meetingSlug.setSlug(calComUserService.getUserById(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId())
+    meetingSlug.setSlug(calComUserService
+        .getUserById(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId())
         .getUsername());
     return meetingSlug;
   }
 
   private CalcomUserToConsultant getCalcomUserToConsultantIfExists(String consultantId) {
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(consultantId);
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+        .findByConsultantId(consultantId);
     if (calcomUserToConsultant.isPresent()) {
       return calcomUserToConsultant.get();
-    }else{
+    } else {
       throw new NotFoundException(
           String.format("No calcom user associated to consultant id '%s'", consultantId));
     }
   }
 
+  public CalcomToken getToken(String consultantId) {
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+        .findByConsultantId(consultantId);
+    if (calcomUserToConsultant.isEmpty()) {
+      throw new BadRequestException("Calcom user doesn't exist for given ID");
+    }
+    CalcomToken token = new CalcomToken();
+    token.setToken(calcomUserToConsultant.get().getToken());
+    return token;
+  }
 }

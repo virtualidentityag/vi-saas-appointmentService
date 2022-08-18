@@ -36,6 +36,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomUser'
+  /consultants/token:
+    get:
+      tags:
+        - consultant
+      summary: Get SSO token
+      operationId: getToken
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomToken'
   /consultants/{consultantId}:
     put:
       tags:
@@ -994,3 +1007,8 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/TeamEventTypeConsultant'
+    CalcomToken:
+      type: object
+      properties:
+        token:
+          type: string
