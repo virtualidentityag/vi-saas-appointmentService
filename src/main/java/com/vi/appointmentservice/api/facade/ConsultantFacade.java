@@ -102,8 +102,6 @@ public class ConsultantFacade {
       creationUser.setTimeFormat(24);
       creationUser.setAllowDynamicBooking(false);
       creationUser.setAway(consultant.getAbsent());
-      //TODO: add random string
-      creationUser.setPassword(new BCryptPasswordEncoder().encode(UUID.randomUUID().toString()));
       ObjectMapper objectMapper = new ObjectMapper();
       // Ignore null values
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -114,9 +112,13 @@ public class ConsultantFacade {
         throw new InternalServerErrorException("Could not serialize createCalcomUser payload");
       }
       // Create association
+      String userPassword = UUID.randomUUID().toString();
       CalcomUser createdUser = calComUserService.createUser(userPayloadJson);
-      userRepository.initUserAddExtraData(createdUser.getId());
-      return calComUserService.getUserById(createdUser.getId());
+      userRepository.initUserAddExtraData(createdUser.getId(),
+          new BCryptPasswordEncoder().encode(userPassword));
+      var calcomUser = calComUserService.getUserById(createdUser.getId());
+      calcomUser.setPassword(userPassword);
+      return calcomUser;
     }
   }
 
