@@ -28,7 +28,7 @@ public class UserRepository {
   public void initUserAddExtraData(Long calcomUserId, String userPassword){
     String UPDATE_USER_QUERY = "update \"users\" set \"username\" = $usernameParam, \"password\" = $password, \"plan\" = 'PRO', \"completedOnboarding\" = true, \"verified\" = true where \"id\" = " + calcomUserId;
     UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$usernameParam", "'" + UUID.randomUUID() + "'");
-    UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("password", "'" + userPassword + "'");
+    UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$password", "'" + userPassword + "'");
     jdbcTemplate.update(UPDATE_USER_QUERY);
   }
 

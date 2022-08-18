@@ -49,6 +49,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomToken'
+      security:
+        - Bearer: [ ]
   /consultants/{consultantId}:
     put:
       tags:
