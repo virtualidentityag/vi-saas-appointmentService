@@ -36,7 +36,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomUser'
-  /consultants/token:
+  /consultants/{consultantId}/token:
     get:
       tags:
         - consultant
