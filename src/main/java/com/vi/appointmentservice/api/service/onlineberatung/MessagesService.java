@@ -42,9 +42,9 @@ public class MessagesService {
   private final @NonNull IdentityClient identityClient;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
 
-  private final SimpleDateFormat fromFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-  private final SimpleDateFormat fromFormatMinutes = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-  private final DateTimeFormatter toFormat = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+  private final static SimpleDateFormat fromFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+  private final static SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+  private final static SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
   @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
@@ -52,17 +52,17 @@ public class MessagesService {
   @Value("${keycloakService.technical.password}")
   private String keycloakTechnicalPassword;
 
-  private String formatDate(String dateString){
+  private static String formatDate(String dateString){
     try {
-      return toFormat.format((TemporalAccessor) fromFormat.parse(dateString));
+      return toFormat.format(fromFormat.parse(dateString));
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private String formatDateWithoutSeconds(String dateString){
+  private static String formatDateWithoutSeconds(String dateString){
     try {
-      return toFormat.format((TemporalAccessor) fromFormatMinutes.parse(dateString.substring(0, 16)));
+      return toFormatMinutesOnly.format(fromFormat.parse(dateString));
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
