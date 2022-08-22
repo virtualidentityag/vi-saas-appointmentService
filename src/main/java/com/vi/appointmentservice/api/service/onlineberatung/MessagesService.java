@@ -17,7 +17,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAccessor;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +43,8 @@ public class MessagesService {
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
 
   private final SimpleDateFormat fromFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-  private final SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-  private final SimpleDateFormat toFormatNoSeconds = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+  private final SimpleDateFormat fromFormatMinutes = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+  private final DateTimeFormatter toFormat = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
   @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
@@ -52,7 +54,7 @@ public class MessagesService {
 
   private String formatDate(String dateString){
     try {
-      return toFormat.format(fromFormat.parse(dateString));
+      return toFormat.format((TemporalAccessor) fromFormat.parse(dateString));
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
@@ -60,7 +62,7 @@ public class MessagesService {
 
   private String formatDateWithoutSeconds(String dateString){
     try {
-      return toFormatNoSeconds.format(fromFormat.parse(dateString));
+      return toFormat.format((TemporalAccessor) fromFormatMinutes.parse(dateString.substring(0, 16)));
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
