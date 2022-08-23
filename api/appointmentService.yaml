@@ -11,8 +11,8 @@ tags:
     description: Everything related to a onBer consultant
   - name: asker
     description: Everything related to a onBer asker
-  - name: eventType
-    description: Everything related to a calcom event-type
+  - name: booking
+    description: Endpoint for booking webhook
 paths:
   /consultants:
     post:
@@ -34,6 +34,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomUser'
+  /consultants/token:
+    get:
+      tags:
+        - consultant
+      summary: Get SSO token
+      operationId: getToken
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomToken'
+      security:
+        - Bearer: [ ]
   /consultants/{consultantId}:
     put:
       tags:
@@ -61,6 +76,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomUser'
+      security:
+        - Bearer: [ ]
     delete:
       tags:
         - consultant
@@ -76,6 +93,8 @@ paths:
       responses:
         '200':
           description: successful operation
+      security:
+        - Bearer: [ ]
   /consultants/{consultantId}/eventTypes:
     get:
       tags:
@@ -96,32 +115,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomEventTypes'
-    post:
-      tags:
-        - consultant
-      summary: Add a new eventType to a consultant
-      operationId: addEventTypeToConsultant
-      parameters:
-        - name: consultantId
-          in: path
-          description: ID of onber consultant
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: EventType object that needs to be added to cal.com
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CalcomEventType'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomEventType'
+      security:
+        - Bearer: [ ]
   /consultants/{consultantId}/bookings:
     get:
       tags:
@@ -135,6 +130,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: status
+          in: query
+          description: status of booking
+          schema:
+            type: string
       responses:
         '200':
           description: successful operation
@@ -142,6 +142,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
+      security:
+        - Bearer: [ ]
   /consultants/{consultantId}/meetingSlug:
     get:
       tags:
@@ -162,6 +164,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeetingSlug'
+      security:
+        - Bearer: [ ]
+  /agencies/agencyConsultantsSync:
+    post:
+      tags:
+        - agency
+      summary: Sycronise consultant and agency data with calcom
+      operationId: agencyConsultantsSync
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com with consultants
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyConsultantSyncRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+      security:
+        - Bearer: [ ]
+  /agencies/agencyMasterDataSync:
+    post:
+      tags:
+        - agency
+      summary: Sycronise agency master data with team data. For example name of agency ...
+      operationId: agencyMasterDataSync
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyMasterDataSyncRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+      security:
+        - Bearer: [ ]
   /agencies:
     post:
       tags:
@@ -182,6 +222,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomTeam'
+      security:
+        - Bearer: [ ]
   /agencies/{agencyId}:
     put:
       tags:
@@ -210,6 +252,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CalcomTeam'
+      security:
+        - Bearer: [ ]
     delete:
       tags:
         - agency
@@ -226,6 +270,8 @@ paths:
       responses:
         '200':
           description: successful operation
+      security:
+        - Bearer: [ ]
   /agencies/{agencyId}/eventTypes:
     get:
       tags:
@@ -247,6 +293,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomEventTypes'
+      security:
+        - Bearer: [ ]
     post:
       tags:
         - agency
@@ -265,7 +313,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CalcomEventType'
+              $ref: '#/components/schemas/CreateUpdateCalcomEventTypeDTO'
         required: true
       responses:
         '200':
@@ -273,7 +321,123 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CalcomEventType'
+                $ref: '#/components/schemas/CalcomEventTypeDTO'
+      security:
+        - Bearer: [ ]
+  /agencies/{agencyId}/eventTypes/{eventTypeId}/:
+    get:
+      tags:
+        - agency
+      summary: Get specific event-type by id
+      operationId: getAgencyEventTypeById
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: eventTypeId
+          in: path
+          description: ID of calcom eventType
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomEventTypeDTO'
+      security:
+        - Bearer: [ ]
+    put:
+      tags:
+        - agency
+      summary: Update an event-type with event-type object
+      operationId: updateAgencyEventType
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: eventTypeId
+          in: path
+          description: ID of calcom eventType
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: event-type object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUpdateCalcomEventTypeDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomEventTypeDTO'
+      security:
+        - Bearer: [ ]
+    delete:
+      tags:
+        - agency
+      summary: Delete an event-type
+      operationId: deleteAgencyEventType
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: eventTypeId
+          in: path
+          description: ID of calcom eventType
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+      security:
+        - Bearer: [ ]
+  /agencies/{agencyId}/consultants:
+    get:
+      tags:
+        - agency
+      summary: Get all available consultants of agency
+      operationId: getAllConsultantsOfAgency
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfTeamEventTypeConsultants'
+      security:
+        - Bearer: [ ]
   /agencies/{agencyId}/initialMeetingSlug:
     get:
       tags:
@@ -295,26 +459,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeetingSlug'
-  /askers/{askerId}/meetingSlug:
-    get:
-      tags:
-        - asker
-      summary: Get meeting booking link for an askers assigned consultant
-      operationId: getAskerMeetingSlug
-      parameters:
-        - name: askerId
-          in: path
-          description: ID of onber asker
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MeetingSlug'
+      security:
+        - Bearer: [ ]
   /askers/{askerId}/bookings:
     get:
       tags:
@@ -335,102 +481,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
-  /askers/bookings/{bookingId}:
-    get:
-      tags:
-        - asker
-      summary: Get booking details
-      operationId: getBookingDetails
-      parameters:
-        - name: bookingId
-          in: path
-          description: ID of calcom booking id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomBooking'
-  /eventTypes/{eventTypeId}:
-    get:
-      tags:
-        - eventType
-      summary: Get specific event-type by id
-      operationId: getEventTypeById
-      parameters:
-        - name: eventTypeId
-          in: path
-          description: ID of calcom eventType
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomEventType'
-    put:
-      tags:
-        - eventType
-      summary: Update an event-type with event-type object
-      operationId: updateEventType
-      parameters:
-        - name: eventTypeId
-          in: path
-          description: ID of calcom eventType
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        description: event-type object that needs to be updated
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CalcomEventType'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomEventType'
-    delete:
-      tags:
-        - eventType
-      summary: Delete an event-type
-      operationId: deleteEventType
-      parameters:
-        - name: eventTypeId
-          in: path
-          description: ID of calcom eventType
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: successful operation
+      security:
+        - Bearer: [ ]
   /askers/processBooking:
     post:
       tags:
         - asker
       summary: Webhook subscriber
       operationId: processBooking
+      parameters:
+        - name: x-cal-signature-256
+          in: header
+          description: Webhook hmac
+          schema:
+            type: string
       requestBody:
         description: The json string provided by calcom
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CalcomWebhook'
+              type: string
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+  /processBooking:
+    post:
+      tags:
+        - booking
+      summary: Webhook subscriber
+      operationId: processBookingWebhook
+      parameters:
+        - name: x-cal-signature-256
+          in: header
+          description: Webhook hmac
+          schema:
+            type: string
+      requestBody:
+        description: The json string provided by calcom
+        content:
+          application/json:
+            schema:
+              type: string
         required: true
       responses:
         '200':
@@ -445,8 +541,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          format: int32
+          type: long
           example: 1
         userId:
           type: integer
@@ -474,6 +569,10 @@ components:
         consultantName:
           type: string
         askerName:
+          type: string
+        askerId:
+          type: string
+        description:
           type: string
     ArrayOfCalcomBookings:
       type: array
@@ -562,6 +661,90 @@ components:
           format: nullable
         plan:
           type: string
+    CalcomEventTypeDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        title:
+          type: string
+        slug:
+          type: string
+        length:
+          type: integer
+          format: int32
+        hidden:
+          type: boolean
+        position:
+          type: integer
+          format: int32
+        userId:
+          type: integer
+          format: int32
+        teamId:
+          type: integer
+          format: int32
+        eventName:
+          type: string
+        timeZone:
+          type: string
+        periodType:
+          type: string
+        periodStartDate:
+          type: string
+        periodEndDate:
+          type: string
+        periodDays:
+          type: integer
+          format: int32
+        periodCountCalendarDays:
+          type: boolean
+        requiresConfirmation:
+          type: boolean
+        recurringEvent:
+          type: string
+        disableGuests:
+          type: boolean
+        hideCalendarNotes:
+          type: boolean
+        minimumBookingNotice:
+          type: integer
+          format: int32
+        beforeEventBuffer:
+          type: integer
+          format: int32
+        afterEventBuffer:
+          type: integer
+          format: int32
+        schedulingType:
+          type: string
+        price:
+          type: integer
+          format: int32
+        currency:
+          type: string
+        slotInterval:
+          type: string
+        successRedirectUrl:
+          type: string
+        description:
+          type: string
+        locations:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+        metadata:
+          type: object
+        type:
+          type: string
+        consultants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamEventTypeConsultant'
     CalcomEventType:
       type: object
       properties:
@@ -642,14 +825,42 @@ components:
           type: object
         type:
           type: string
-        consultantIds:
-          type: array
-          items:
-            type: string
     ArrayOfCalcomEventTypes:
       type: array
       items:
-        $ref: '#/components/schemas/CalcomEventType'
+        $ref: '#/components/schemas/CalcomEventTypeDTO'
+    CreateUpdateCalcomEventTypeDTO:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 30 Min Meeting
+        slug:
+          type: string
+          example: 30minMeet
+        length:
+          type: integer
+          format: int32
+          example: 30
+        minimumBookingNotice:
+          type: integer
+          format: int32
+          example: 120
+        beforeEventBuffer:
+          type: integer
+          format: int32
+          example: 0
+        afterEventBuffer:
+          type: integer
+          format: int32
+          example: 0
+        description:
+          type: string
+          format: nullable
+        consultants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamEventTypeConsultant'
     MeetingSlug:
       type: object
       properties:
@@ -689,7 +900,7 @@ components:
           type: boolean
         role:
           type: string
-    CalcomWebhook:
+    CalcomWebhookInput:
       type: object
       properties:
         triggerEvent:
@@ -817,3 +1028,35 @@ components:
         scheduleId:
           type: integer
           format: int32
+    AgencyConsultantSyncRequestDTO:
+      type: object
+      properties:
+        consultantId:
+          type: string
+        agencies:
+          type: array
+          items:
+            type: long
+    AgencyMasterDataSyncRequestDTO:
+      type: object
+      properties:
+        id:
+          type: long
+        name:
+          type: string
+    TeamEventTypeConsultant:
+      type: object
+      properties:
+        consultantId:
+          type: string
+        consultantName:
+          type: string
+    ArrayOfTeamEventTypeConsultants:
+      type: array
+      items:
+        $ref: '#/components/schemas/TeamEventTypeConsultant'
+    CalcomToken:
+      type: object
+      properties:
+        token:
+          type: string

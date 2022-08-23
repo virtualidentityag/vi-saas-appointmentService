@@ -1,11 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="appointmentService clean compile" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" value="local" />
-    <option name="ALTERNATIVE_JRE_PATH" value="11" />
-    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="ENABLE_JMX_AGENT" value="false" />
     <module name="appointmentservice" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="com.vi.appointmentservice.AppointmentServiceApplication" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />
       <option name="IS_SUBST" value="false" />
@@ -17,6 +12,44 @@
         <ENTRY IS_ENABLED="true" PARSER="env" PATH=".env" />
       </ENTRIES>
     </extension>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.vi.appointmentservice.AppointmentServiceApplication" />
+    <option name="ENABLE_JMX_AGENT" value="false" />
+    <option name="ACTIVE_PROFILES" value="local" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="ALTERNATIVE_JRE_PATH" value="$USER_HOME$/.jdks/azul-11.0.14" />
+    <envs>
+      <env name="calcom_apikey" value="cal_a4251eb69c8565424e39383aebd51576" />
+      <env name="AGENCY_ADMIN_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80" />
+      <env name="AGENCY_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80" />
+      <env name="CONSULTING_TYPE_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80" />
+      <env name="CSRF_COOKIE_PROPERTY" value="CSRF-TOKEN" />
+      <env name="CSRF_HEADER_PROPERTY" value="X-CSRF-TOKEN" />
+      <env name="CSRF_WHITELIST_HEADER_PROPERTY" value="X-U25-CSRF-TOKEN" />
+      <env name="IDENTITY_OPENID_CONNECT_URL" value="https://app-develop.suchtberatung.digital/auth/realms/online-beratung/protocol/openid-connect" />
+      <env name="IDENTITY_OTP_URL" value="https://app-develop.suchtberatung.digital/auth/realms/online-beratung/otp-config" />
+      <env name="KEYCLOAKAPI_LOGIN" value="https://app-develop.suchtberatung.digital/auth/realms/online-beratung/protocol/openid-connect" />
+      <env name="KEYCLOAKAPI_LOGOUT" value="https://app-develop.suchtberatung.digital/auth/realms/online-beratung/protocol/openid-connect" />
+      <env name="KEYCLOAKSERVICE_TECHUSER_ID" value="658c7779-bb6d-42e2-bec9-3f2010b76ea1" />
+      <env name="KEYCLOAK_AUTH_SERVER_URL" value="https://app-develop.suchtberatung.digital/auth" />
+      <env name="KEYCLOAK_CONFIG_ADMIN_CLIENTID" value="admin-cli" />
+      <env name="KEYCLOAK_CONFIG_APP_CLIENTID" value="app" />
+      <env name="KEYCLOAK_CORS" value="false" />
+      <env name="KEYCLOAK_PRINCIPAL_ATTRIBUTE" value="preferred_username" />
+      <env name="KEYCLOAK_REALM" value="online-beratung" />
+      <env name="KEYCLOAK_RESOURCE" value="appointment-service" />
+      <env name="LIVE_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80" />
+      <env name="MAIL_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80" />
+      <env name="MESSAGE_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80/service" />
+      <env name="MULTITENANCY_ENABLED" value="false" />
+      <env name="TENANT_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80" />
+      <env name="USER_ADMIN_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80/service" />
+      <env name="USER_SERVICE_API_URL" value="http://app-develop.suchtberatung.digital:80/service" />
+      <env name="KEYCLOAK_CONFIG_ADMIN_USERNAME" value="keycloak-realmadmin" />
+      <env name="KEYCLOAK_CONFIG_ADMIN_PASSWORD" value="f.YxXZCf7C=SGvuN6#G =MJN bA`Q@gr" />
+      <env name="KEYCLOAKSERVICE_TECHNICAL_USERNAME" value="keycloak-dev-technical" />
+      <env name="KEYCLOAKSERVICE_TECHNICAL_PASSWORD" value="VyI/SS;s#|RpLv`Q'p6d/xe@06y:,wh" />
+      <env name="CALCOM_APIKEY" value="cal_07084b837ef068162b7f39499d9f69d0" />
+    </envs>
     <method v="2">
       <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="clean" />
       <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="compile" />
