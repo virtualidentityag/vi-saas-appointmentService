@@ -1,7 +1,10 @@
 package com.vi.appointmentservice.config;
 
+import com.vi.appointmentservice.adapters.keycloak.config.KeycloakConfig;
 import com.vi.appointmentservice.api.authorization.RoleAuthorizationAuthorityMapper;
+import com.vi.appointmentservice.api.authorization.Authority.AuthorityValue;
 import com.vi.appointmentservice.filter.StatelessCsrfFilter;
+import com.vi.appointmentservice.helper.AuthenticatedUser;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -16,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,7 +34,9 @@ import org.springframework.security.web.csrf.CsrfFilter;
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   public static final String[] WHITE_LIST =
-      new String[]{};
+      new String[]{"/error"};
+
+  private static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
 
   @SuppressWarnings("unused")
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
@@ -43,6 +49,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   @Autowired
   private Environment environment;
+
 
 
   /**
@@ -66,12 +73,28 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             CsrfFilter.class);
 
     httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
-            .antMatchers(WHITE_LIST).permitAll()
-            //.antMatchers("/agencies", "/agencies/**").permitAll()
-            //.antMatchers("/consultants", "/consultants/**").permitAll()
-            //.antMatchers("/askers", "/askers/**").permitAll()
-            .anyRequest().permitAll();
+        .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
+
+        .antMatchers(WHITE_LIST).permitAll()
+
+        .antMatchers(HttpMethod.GET, "/consultants/**/meetingSlug")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT)
+
+        .antMatchers(HttpMethod.GET, "/agencies/**/initialMeetingSlug")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT)
+
+        .antMatchers(HttpMethod.GET, "/consultants", "/consultants/**","/consultants/token")
+        .hasAnyAuthority(AuthorityValue.CONSULTANT_DEFAULT)
+
+        .antMatchers(HttpMethod.GET, "/askers", "/askers/**")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT)
+
+        .antMatchers(HttpMethod.POST, "/askers/processBooking", "/processBooking")
+        .permitAll() // auth handeled via hmac in controller
+
+        .anyRequest()
+        .hasAnyAuthority(AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
+            AuthorityValue.TECHNICAL_DEFAULT);
   }
 
   /**
@@ -125,7 +148,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above:
+   * {@link
+   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -137,7 +162,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above:
+   * {@link
+   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -149,7 +176,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above:
+   * {@link
+   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean

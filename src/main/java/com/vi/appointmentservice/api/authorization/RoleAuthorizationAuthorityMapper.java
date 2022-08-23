@@ -1,5 +1,6 @@
 package com.vi.appointmentservice.api.authorization;
 
+import java.util.Optional;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -28,12 +29,15 @@ public class RoleAuthorizationAuthorityMapper implements GrantedAuthoritiesMappe
   }
 
   private Set<GrantedAuthority> mapAuthorities(Set<String> roleNames) {
-    return roleNames.stream()
-        .map(Authority::fromRoleName)
-        .filter(Objects::nonNull)
-        .map(Authority::getAuthority)
+    return roleNames.parallelStream()
+        .map(UserRole::getRoleByValue)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .map(Authority::getAuthoritiesByUserRole)
+        .flatMap(Collection::parallelStream)
         .map(SimpleGrantedAuthority::new)
         .collect(Collectors.toSet());
   }
+
 
 }

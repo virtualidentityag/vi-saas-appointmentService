@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.config;
+package com.vi.appointmentservice.api.authorization;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
