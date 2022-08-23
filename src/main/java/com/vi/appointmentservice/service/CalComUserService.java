@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +60,7 @@ public class CalComUserService extends CalComService {
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             return mapper.readValue(body, CalcomUser.class);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(ExceptionUtils.getStackTrace(e));
             return null;
         }
 
@@ -85,7 +86,7 @@ public class CalComUserService extends CalComService {
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             return mapper.readValue(body, CalcomUser.class);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(ExceptionUtils.getStackTrace(e));
             return null;
         }
     }

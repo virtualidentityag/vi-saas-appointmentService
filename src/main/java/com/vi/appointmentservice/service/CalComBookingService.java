@@ -50,6 +50,7 @@ public class CalComBookingService extends CalComService {
         log.info("Found {} bookings for user {}", filteredBookings.size(), userId);
         for(CalcomBooking booking : filteredBookings){
             rescheduleHelper.attachRescheduleLink(booking);
+            rescheduleHelper.attachAskerName(booking);
         }
         return filteredBookings;
     }
@@ -76,13 +77,18 @@ public class CalComBookingService extends CalComService {
     }
 
 
-    public CalcomBooking getBookingById(Long bookingId) throws JsonProcessingException {
+    public CalcomBooking getBookingById(Long bookingId){
         String response = restTemplate.getForObject(String.format(this.buildUri("/v1/bookings/" + bookingId), calcomApiUrl, calcomApiKey), String.class);
         JSONObject jsonObject = new JSONObject(response);
         log.debug(String.valueOf(jsonObject));
         response = jsonObject.getJSONObject("booking").toString();
         log.debug(response);
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(response, CalcomBooking.class);
+        try {
+            return mapper.readValue(response, CalcomBooking.class);
+        }catch (JsonProcessingException e){
+            return null;
+        }
+
     }
 }

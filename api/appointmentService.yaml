@@ -471,6 +471,10 @@ components:
         rescheduleLink:
           type: string
           example: /consultant-slug/event-typ-slug?rescheduleUid=myUId
+        consultantName:
+          type: string
+        askerName:
+          type: string
     ArrayOfCalcomBookings:
       type: array
       items:
@@ -774,6 +778,11 @@ components:
               properties:
                 user:
                   type: string
+                bookingId:
+                  type: long
+                isInitialAppointment:
+                  type: boolean
+
     CalcomSchedule:
       type: object
       properties:

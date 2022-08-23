@@ -11,7 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +26,29 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class UserService {
-    private final @NonNull UserControllerApi userControllerApi;
-    private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-    private final @NonNull IdentityClient identityClient;
+
+    @Autowired
+    @Qualifier("regularUser")
+    public void setUserControllerApi(
+        UserControllerApi userControllerApi) {
+        this.userControllerApi = userControllerApi;
+    }
+
+    @Autowired
+    public void setSecurityHeaderSupplier(
+        SecurityHeaderSupplier securityHeaderSupplier) {
+        this.securityHeaderSupplier = securityHeaderSupplier;
+    }
+
+    @Autowired
+    public void setIdentityClient(IdentityClient identityClient) {
+        this.identityClient = identityClient;
+    }
+
+    private UserControllerApi userControllerApi;
+    private SecurityHeaderSupplier securityHeaderSupplier;
+    private IdentityClient identityClient;
 
     @Value("${keycloakService.technical.username}")
     private String keycloakTechnicalUsername;
@@ -55,6 +76,11 @@ public class UserService {
         return consultantsResult;
     }
 
+
+    public String getRocketChatGroupId(String consultantId, String askerId){
+        addTechnicalUserHeaders(userControllerApi.getApiClient());
+        return userControllerApi.getRocketChatGroupId(consultantId, askerId, 0).getGroupId();
+    }
     private void addTechnicalUserHeaders(ApiClient apiClient) {
         KeycloakLoginResponseDTO keycloakLoginResponseDTO = identityClient.loginUser(
                 keycloakTechnicalUsername, keycloakTechnicalPassword
@@ -64,4 +90,5 @@ public class UserService {
                 .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
         headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
     }
+
 }
