@@ -19,7 +19,7 @@
                 <constraints nullable="false" unique="true"/>
             </column>
             <column name="token" type="VARCHAR(255)">
-                <constraints nullable="false" primaryKey="true"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
