@@ -33,7 +33,6 @@ public class ConsultantController implements ConsultantsApi {
 
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull ConsultantFacade consultantFacade;
-  private final @NonNull AuthenticatedUser authenticatedUser;
 
 
   @GetMapping(value = "/consultants/initialize", produces = {"application/json"})
