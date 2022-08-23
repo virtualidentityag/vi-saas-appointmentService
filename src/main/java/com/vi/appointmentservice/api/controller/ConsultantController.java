@@ -100,7 +100,7 @@ public class ConsultantController implements ConsultantsApi {
   }
 
   @Override
-  public ResponseEntity<CalcomToken> getToken(String consultantId) {
+  public ResponseEntity<CalcomToken> getToken() {
     return new ResponseEntity<>(consultantFacade.getToken(authenticatedUser.getUserId()), HttpStatus.OK);
   }
 }

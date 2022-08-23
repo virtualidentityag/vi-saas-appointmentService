@@ -83,7 +83,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers(HttpMethod.GET, "/agencies/**/initialMeetingSlug")
         .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT)
 
-        .antMatchers(HttpMethod.GET, "/consultants", "/consultants/**","/consultants/{consultantId:" + UUID_PATTERN + "}/token")
+        .antMatchers(HttpMethod.GET, "/consultants", "/consultants/**","/consultants/token")
         .hasAnyAuthority(AuthorityValue.CONSULTANT_DEFAULT)
 
         .antMatchers(HttpMethod.GET, "/askers", "/askers/**")
