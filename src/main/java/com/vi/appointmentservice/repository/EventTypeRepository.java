@@ -31,7 +31,7 @@ public class EventTypeRepository {
     jdbcTemplate.update(DELETE_QUERY);
   }
 
-  public void addTeamEventTypeMemberships(Long eventTypeId, Long calcomUserId) {
+  public void addUserEventTypeRelation(Long eventTypeId, Long calcomUserId) {
     String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
     INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
         .replace("$userIdParam", calcomUserId.toString());

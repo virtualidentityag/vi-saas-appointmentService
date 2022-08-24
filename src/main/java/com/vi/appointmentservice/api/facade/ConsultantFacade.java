@@ -170,7 +170,9 @@ public class ConsultantFacade {
     } catch (JsonProcessingException e) {
       throw new CalComApiErrorException("Could not serialize default event-type");
     }
-    return Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
+    Long createdEventTypeId = Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
+    eventTypeRepository.addUserEventTypeRelation(createdUser.getId(), createdEventTypeId);
+    return createdEventTypeId;
 
   }
 
