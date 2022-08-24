@@ -3,6 +3,7 @@ package com.vi.appointmentservice.api.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
@@ -41,10 +42,11 @@ public class BookingController implements ProcessBookingApi {
           "Could not generate hmac for webhook verification: " + e);
     }
     if (xCalSignature256.equals(verifyHmac)) {
-      ObjectMapper mapper = new ObjectMapper().configure(
-          DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      objectMapper.registerModule(new JavaTimeModule());
       try {
-        calcomWebhookHandlerService.handlePayload(mapper.readValue(body, CalcomWebhookInput.class));
+        calcomWebhookHandlerService.handlePayload(objectMapper.readValue(body, CalcomWebhookInput.class));
       } catch (JsonProcessingException e) {
         throw new BadRequestException("Bad webhook body format.");
       }
