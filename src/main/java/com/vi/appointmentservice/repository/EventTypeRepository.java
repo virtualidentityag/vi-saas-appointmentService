@@ -22,7 +22,8 @@ public class EventTypeRepository {
    */
 
   public void removeTeamEventTypeMembershipsForUser(Long calcomUserId) {
-    String DELETE_QUERY = "delete from \"_user_eventtype\" where \"B\"=" + calcomUserId;
+    String DELETE_QUERY = "delete from \"_user_eventtype\" where \"B\"=" + calcomUserId +
+        " and A in (select ID from \"EventType\" where \"schedulingType\" in ('roundRobin'))";
     jdbcTemplate.update(DELETE_QUERY);
   }
 
