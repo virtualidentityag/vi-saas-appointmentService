@@ -36,6 +36,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   public static final String[] WHITE_LIST =
       new String[]{"/error", "/askers/processbooking", "/processbooking"};
 
+  private static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
+
   @SuppressWarnings("unused")
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
 
@@ -81,7 +83,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers(HttpMethod.GET, "/agencies/**/initialMeetingSlug")
         .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT)
 
-        .antMatchers(HttpMethod.GET, "/consultants", "/consultants/**")
+        .antMatchers(HttpMethod.GET, "/consultants", "/consultants/**","/consultants/token")
         .hasAnyAuthority(AuthorityValue.CONSULTANT_DEFAULT)
 
         .antMatchers(HttpMethod.GET, "/askers", "/askers/**")

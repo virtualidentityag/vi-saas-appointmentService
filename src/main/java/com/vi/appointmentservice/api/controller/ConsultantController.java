@@ -4,6 +4,7 @@ import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException
 import com.vi.appointmentservice.api.facade.ConsultantFacade;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
+import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
@@ -32,6 +33,7 @@ public class ConsultantController implements ConsultantsApi {
 
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull ConsultantFacade consultantFacade;
+
 
   @GetMapping(value = "/consultants/initialize", produces = {"application/json"})
   ResponseEntity<String> initializeConsultants() {
@@ -95,5 +97,10 @@ public class ConsultantController implements ConsultantsApi {
   public ResponseEntity<MeetingSlug> getConsultantMeetingSlug(String consultantId) {
     return new ResponseEntity<>(consultantFacade.getConsultantMeetingSlugHandler(consultantId),
         HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<CalcomToken> getToken() {
+    return new ResponseEntity<>(consultantFacade.getToken(authenticatedUser.getUserId()), HttpStatus.OK);
   }
 }

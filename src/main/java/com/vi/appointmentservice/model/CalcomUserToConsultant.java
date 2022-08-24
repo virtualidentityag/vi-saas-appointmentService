@@ -26,6 +26,9 @@ public class CalcomUserToConsultant implements Serializable {
     @Column(name = "calcomuserid", unique = true, nullable = false)
     private Long calComUserId;
 
+    @Column(name = "token", unique = true, nullable = false)
+    private String token;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
