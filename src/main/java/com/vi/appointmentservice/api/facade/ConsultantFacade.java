@@ -100,7 +100,7 @@ public class ConsultantFacade {
       creationUser.setWeekStart("Monday");
       creationUser.setLocale("de");
       creationUser.setTimeFormat(24);
-      creationUser.setAllowDynamicBooking(false);
+      creationUser.setAllowDynamicBooking(true);
       creationUser.setAway(consultant.getAbsent());
       ObjectMapper objectMapper = new ObjectMapper();
       // Ignore null values
@@ -170,7 +170,9 @@ public class ConsultantFacade {
     } catch (JsonProcessingException e) {
       throw new CalComApiErrorException("Could not serialize default event-type");
     }
-    return Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
+    Long createdEventTypeId = Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
+    eventTypeRepository.addUserEventTypeRelation(createdEventTypeId, createdUser.getId());
+    return createdEventTypeId;
 
   }
 
@@ -213,7 +215,7 @@ public class ConsultantFacade {
       updateUser.setWeekStart("Monday");
       updateUser.setLocale("de");
       updateUser.setTimeFormat(24);
-      updateUser.setAllowDynamicBooking(false);
+      updateUser.setAllowDynamicBooking(true);
       updateUser.setAway(consultant.getAbsent());
       userRepository.updateUser(updateUser);
       return calComUserService.getUserById(updateUser.getId());
