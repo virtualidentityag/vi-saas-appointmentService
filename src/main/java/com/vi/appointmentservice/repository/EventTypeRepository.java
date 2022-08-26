@@ -22,7 +22,8 @@ public class EventTypeRepository {
    */
 
   public void removeTeamEventTypeMembershipsForUser(Long calcomUserId) {
-    String DELETE_QUERY = "delete from \"_user_eventtype\" where \"B\"=" + calcomUserId;
+    String DELETE_QUERY = "delete from \"_user_eventtype\" where \"B\"=" + calcomUserId +
+        " and \"A\" in (select ID from \"EventType\" where \"schedulingType\" in ('roundRobin'))";
     jdbcTemplate.update(DELETE_QUERY);
   }
 
@@ -31,7 +32,7 @@ public class EventTypeRepository {
     jdbcTemplate.update(DELETE_QUERY);
   }
 
-  public void addTeamEventTypeMemberships(Long eventTypeId, Long calcomUserId) {
+  public void addUserEventTypeRelation(Long eventTypeId, Long calcomUserId) {
     String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
     INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
         .replace("$userIdParam", calcomUserId.toString());
