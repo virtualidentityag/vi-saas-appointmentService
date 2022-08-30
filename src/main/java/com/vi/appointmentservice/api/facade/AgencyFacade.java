@@ -179,7 +179,7 @@ public class AgencyFacade {
     eventType.setMinimumBookingNotice(120);
     eventType.setBeforeEventBuffer(0);
     eventType.setAfterEventBuffer(0);
-    // eventType.setSuccessRedirectUrl(appBaseUrl + "/sessions/user/view/");
+    eventType.setMetadata("{defaultEventType: 'true'}");
     eventType.setDescription("");
     eventType.setSchedulingType("ROUND_ROBIN");
     return eventType;
