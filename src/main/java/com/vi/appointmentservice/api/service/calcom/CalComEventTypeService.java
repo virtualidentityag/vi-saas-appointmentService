@@ -142,5 +142,16 @@ public class CalComEventTypeService extends CalComService {
         null, String.class).getStatusCode();
   }
 
-
+  public CalcomEventTypeDTO getDefaultEventTypeOfTeam(Long teamId) {
+    List<CalcomEventTypeDTO> allEventTypesOfTeam = getAllEventTypesOfTeam(teamId);
+    return allEventTypesOfTeam.stream().filter(el -> {
+      try {
+        String metadata = (String) el.getMetadata();
+        JSONObject jsonObject = new JSONObject(metadata);
+        return jsonObject.getBoolean("defaultEventType");
+      } catch (Exception e) {
+        return false;
+      }
+    }).collect(Collectors.toList()).get(0);
+  }
 }

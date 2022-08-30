@@ -8,6 +8,9 @@ import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -15,15 +18,19 @@ import org.springframework.stereotype.Repository;
 public class EventTypeRepository {
 
   private final @NotNull JdbcTemplate jdbcTemplate;
+  private final @NotNull NamedParameterJdbcTemplate namedParameterJdbcTemplate;
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+
   /**
-   * A = eventTypeId
-   * B = userId
+   * A = eventTypeId B = userId
    */
 
-  public void removeTeamEventTypeMembershipsForUser(Long calcomUserId) {
-    String DELETE_QUERY = "delete from \"_user_eventtype\" where \"B\"=" + calcomUserId;
-    jdbcTemplate.update(DELETE_QUERY);
+  public void removeTeamEventTypeMembershipsForUser(Long calcomUserId, List<Long> teamIds) {
+    String QUERY = "DELETE FROM \"_user_eventtype\" WHERE \"B\"= :calcomUserId AND "
+        + "\"A\" NOT IN (SELECT id from \"EventType\" WHERE \"teamId\" in :teamIds)";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("calcomUserId", calcomUserId).addValue("teamIds", teamIds);
+    namedParameterJdbcTemplate.update(QUERY, parameters);
   }
 
   public void removeTeamEventTypeMembershipsForEventType(Long eventTypeId) {
