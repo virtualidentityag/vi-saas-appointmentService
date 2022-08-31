@@ -125,7 +125,7 @@ public class AgencyFacade {
       // Add consultant to team eventTypes
       for (Long teamId : teamIds) {
         CalcomEventTypeDTO eventType = calComEventTypeService.getDefaultEventTypeOfTeam(teamId);
-        eventTypeRepository.addTeamEventTypeMemberships(Long.valueOf(eventType.getId()),
+        eventTypeRepository.addUserEventTypeRelation(Long.valueOf(eventType.getId()),
             calcomUserToConsultant.get().getCalComUserId());
       }
     }
