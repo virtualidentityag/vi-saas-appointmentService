@@ -896,6 +896,8 @@ components:
         userId:
           type: integer
           format: int64
+        disableImpersonation:
+          type: boolean
         accepted:
           type: boolean
         role:
