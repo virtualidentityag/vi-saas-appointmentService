@@ -28,8 +28,8 @@ public class EventTypeRepository {
 
   public void removeTeamEventTypeMembershipsForUser(Long calcomUserId, List<Long> teamIds) {
     String QUERY = "DELETE FROM \"_user_eventtype\" WHERE \"B\"= :calcomUserId AND "
-        + "\"A\" NOT IN (SELECT id from \"EventType\" WHERE \"teamId\" in (:teamIds)) "+""
-        + "\"A\" IN (select ID from \"EventType\" where \"schedulingType\" in ('roundRobin'))";
+        + "\"A\" NOT IN (SELECT id from \"EventType\" WHERE \"teamId\" in (:teamIds)) AND "
+        + "\"A\" IN (SELECT ID FROM \"EventType\" where \"schedulingType\" in ('roundRobin'))";
     SqlParameterSource parameters = new MapSqlParameterSource("teamIds", teamIds)
         .addValue("calcomUserId", calcomUserId);
     namedParameterJdbcTemplate.update(QUERY, parameters);
