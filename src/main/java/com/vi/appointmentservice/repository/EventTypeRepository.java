@@ -41,10 +41,15 @@ public class EventTypeRepository {
   }
 
   public void addUserEventTypeRelation(Long eventTypeId, Long calcomUserId) {
-    String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
-    INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
-        .replace("$userIdParam", calcomUserId.toString());
-    jdbcTemplate.update(INSERT_QUERY);
+    try {
+      String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
+      INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
+          .replace("$userIdParam", calcomUserId.toString());
+      jdbcTemplate.update(INSERT_QUERY);
+    } catch (Exception e) {
+      //do nothing in case relation existss
+    }
+
   }
 
   public void updateUsersOfEventType(Long eventTypeId, List<TeamEventTypeConsultant> eventTypeConsultants) {
