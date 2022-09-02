@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserService {
 
+  public static final Integer DIGI_CONSULTING_TYPE = 1;
+
+
   @Autowired
   @Qualifier("regularUser")
   public void setUserControllerApi(
@@ -73,7 +76,7 @@ public class UserService {
 
   public String getRocketChatGroupId(String consultantId, String askerId) {
     addTechnicalUserHeaders(userControllerApi.getApiClient());
-    return userControllerApi.getRocketChatGroupId(consultantId, askerId, 0).getGroupId();
+    return userControllerApi.getRocketChatGroupId(consultantId, askerId, DIGI_CONSULTING_TYPE).getGroupId();
   }
 
   private void addTechnicalUserHeaders(ApiClient apiClient) {

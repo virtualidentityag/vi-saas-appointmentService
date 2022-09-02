@@ -77,7 +77,12 @@ public class CalComBookingService extends CalComService {
       }
       booking.setAskerId(calcomBookingAsker.getAskerId());
       rescheduleHelper.attachRescheduleLink(booking);
-      rescheduleHelper.attachAskerName(booking);
+      try{
+        rescheduleHelper.attachAskerName(booking);
+      }catch (Exception e){
+        //TODO: tmp fix until we see how deletion workflow affects users
+      }
+
     }
     return bookings;
   }
