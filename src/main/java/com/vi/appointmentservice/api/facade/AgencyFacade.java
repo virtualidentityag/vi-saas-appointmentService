@@ -121,13 +121,12 @@ public class AgencyFacade {
           .collect(Collectors.toList());
       membershipsRepository.updateMemberShipsOfUser(calcomUserToConsultant.get().getCalComUserId(), teamIds);
       // Reset user teamEventTypeMemberships
-      eventTypeRepository.removeTeamEventTypeMembershipsForUser(calcomUserToConsultant.get().getCalComUserId());
+      eventTypeRepository.removeTeamEventTypeMembershipsForUser(calcomUserToConsultant.get().getCalComUserId(), teamIds);
       // Add consultant to team eventTypes
       for (Long teamId : teamIds) {
-        for (CalcomEventTypeDTO eventType : calComEventTypeService.getAllEventTypesOfTeam(teamId)) {
-          eventTypeRepository.addUserEventTypeRelation(Long.valueOf(eventType.getId()),
-              calcomUserToConsultant.get().getCalComUserId());
-        }
+        CalcomEventTypeDTO eventType = calComEventTypeService.getDefaultEventTypeOfTeam(teamId);
+        eventTypeRepository.addUserEventTypeRelation(Long.valueOf(eventType.getId()),
+            calcomUserToConsultant.get().getCalComUserId());
       }
     }
   }
@@ -180,7 +179,7 @@ public class AgencyFacade {
     eventType.setMinimumBookingNotice(120);
     eventType.setBeforeEventBuffer(0);
     eventType.setAfterEventBuffer(0);
-    // eventType.setSuccessRedirectUrl(appBaseUrl + "/sessions/user/view/");
+    eventType.setMetadata("{defaultEventType: 'true'}");
     eventType.setDescription("");
     eventType.setSchedulingType("ROUND_ROBIN");
     return eventType;

@@ -39,10 +39,12 @@ import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class ConsultantFacade {
 
   private final @NonNull CalComUserService calComUserService;
@@ -190,7 +192,6 @@ public class ConsultantFacade {
     eventType.setMinimumBookingNotice(120);
     eventType.setBeforeEventBuffer(0);
     eventType.setAfterEventBuffer(0);
-    // eventType.setSuccessRedirectUrl(appBaseUrl + "/sessions/user/view/");
     eventType.setDescription("");
     List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
     CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();

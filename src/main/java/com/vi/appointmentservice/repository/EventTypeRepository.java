@@ -8,6 +8,9 @@ import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -15,16 +18,21 @@ import org.springframework.stereotype.Repository;
 public class EventTypeRepository {
 
   private final @NotNull JdbcTemplate jdbcTemplate;
+  private final @NotNull NamedParameterJdbcTemplate namedParameterJdbcTemplate;
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+
   /**
    * A = eventTypeId
    * B = userId
    */
 
-  public void removeTeamEventTypeMembershipsForUser(Long calcomUserId) {
-    String DELETE_QUERY = "delete from \"_user_eventtype\" where \"B\"=" + calcomUserId +
-        " and \"A\" in (select ID from \"EventType\" where \"schedulingType\" in ('roundRobin'))";
-    jdbcTemplate.update(DELETE_QUERY);
+  public void removeTeamEventTypeMembershipsForUser(Long calcomUserId, List<Long> teamIds) {
+    String QUERY = "DELETE FROM \"_user_eventtype\" WHERE \"B\"= :calcomUserId AND "
+        + "\"A\" NOT IN (SELECT id from \"EventType\" WHERE \"teamId\" in (:teamIds)) AND "
+        + "\"A\" IN (SELECT ID FROM \"EventType\" where \"schedulingType\" in ('roundRobin'))";
+    SqlParameterSource parameters = new MapSqlParameterSource("teamIds", teamIds)
+        .addValue("calcomUserId", calcomUserId);
+    namedParameterJdbcTemplate.update(QUERY, parameters);
   }
 
   public void removeTeamEventTypeMembershipsForEventType(Long eventTypeId) {
@@ -33,10 +41,15 @@ public class EventTypeRepository {
   }
 
   public void addUserEventTypeRelation(Long eventTypeId, Long calcomUserId) {
-    String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
-    INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
-        .replace("$userIdParam", calcomUserId.toString());
-    jdbcTemplate.update(INSERT_QUERY);
+    try {
+      String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
+      INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
+          .replace("$userIdParam", calcomUserId.toString());
+      jdbcTemplate.update(INSERT_QUERY);
+    } catch (Exception e) {
+      //do nothing in case relation existss
+    }
+
   }
 
   public void updateUsersOfEventType(Long eventTypeId, List<TeamEventTypeConsultant> eventTypeConsultants) {
