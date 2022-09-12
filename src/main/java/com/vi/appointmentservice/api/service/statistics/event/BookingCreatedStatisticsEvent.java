@@ -1,5 +1,8 @@
 package com.vi.appointmentservice.api.service.statistics.event;
 
+import static com.vi.appointmentservice.helper.CustomLocalDateTime.toIsoTime;
+
+import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.helper.CustomOffsetDateTime;
 import com.vi.appointmentservice.helper.json.OffsetDateTimeToStringSerializer;
 import com.vi.appointmentservice.statisticsservice.generated.web.model.EventType;
@@ -18,9 +21,12 @@ public class BookingCreatedStatisticsEvent implements StatisticsEvent {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final EventType EVENT_TYPE = EventType.BOOKING_CREATED;
+  private final CalcomWebhookInputPayload payload;
+  private final String consultantId;
 
-
-  public BookingCreatedStatisticsEvent(){
+  public BookingCreatedStatisticsEvent(CalcomWebhookInputPayload payload, String consultantId){
+    this.payload = payload;
+    this.consultantId = consultantId;
     OBJECT_MAPPER.registerModule(new JavaTimeModule());
     OBJECT_MAPPER.registerModule(buildSimpleModule());
   }
@@ -41,10 +47,16 @@ public class BookingCreatedStatisticsEvent implements StatisticsEvent {
     var bookingCreatedStatisticsEventMessage =
         new BookingCreatedStatisticsEventMessage()
             .eventType(EVENT_TYPE)
-            //.userId()
-            //.userRole()
-            .timestamp(CustomOffsetDateTime.nowInUtc()
-            );
+            .userId(consultantId)
+            .userRole(com.vi.appointmentservice.statisticsservice.generated.web.model.UserRole.CONSULTANT)
+            .timestamp(CustomOffsetDateTime.nowInUtc())
+            .type(payload.getType())
+            .title(payload.getTitle())
+            .startTime(toIsoTime(payload.getStartTime().toLocalDateTime()))
+            .endTime(toIsoTime(payload.getEndTime().toLocalDateTime()))
+            .uid(payload.getUid())
+            .bookingId(payload.getBookingId()
+        );
 
     try {
       return Optional.of(OBJECT_MAPPER.writeValueAsString(bookingCreatedStatisticsEventMessage));

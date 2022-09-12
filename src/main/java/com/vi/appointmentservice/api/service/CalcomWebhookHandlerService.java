@@ -1,14 +1,23 @@
 package com.vi.appointmentservice.api.service;
 
+import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
+import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
+import com.vi.appointmentservice.api.service.statistics.StatisticsService;
+import com.vi.appointmentservice.api.service.statistics.event.BookingCanceledStatisticsEvent;
+import com.vi.appointmentservice.api.service.statistics.event.BookingCreatedStatisticsEvent;
+import com.vi.appointmentservice.api.service.statistics.event.BookingRescheduledStatisticsEvent;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
+import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
+import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +34,9 @@ public class CalcomWebhookHandlerService {
   private final @NonNull MessagesService messagesService;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
+  private final @NonNull StatisticsService statisticsService;
+  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+  private final @NonNull AdminUserService adminUserService;
 
   @Transactional
   public void handlePayload(CalcomWebhookInput input) {
@@ -49,6 +61,7 @@ public class CalcomWebhookHandlerService {
     if (!isTeamEvent(payload)) {
       messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
     }
+    statisticsService.fireEvent(new BookingCreatedStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
   }
 
   private boolean isTeamEvent(CalcomWebhookInputPayload payload) {
@@ -59,6 +72,20 @@ public class CalcomWebhookHandlerService {
     return eventType.getTeamId() != null;
   }
 
+  private String getConsultantId(Integer bookingId) {
+    CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository.findByCalComUserId(
+        Long.valueOf(booking.getUserId()));
+    if (calcomUserToConsultant.isPresent()) {
+      String consultantId = calcomUserToConsultant.get().getConsultantId();
+      com.vi.appointmentservice.useradminservice.generated.web.model.ConsultantDTO consultant = null;
+      consultant = this.adminUserService.getConsultantById(consultantId);
+      return consultant.getId();
+    } else {
+      throw new InternalServerErrorException("Could not find calcomUserToConsultant for bookingId " + bookingId);
+    }
+  }
+
   private void handleRescheduleEvent(CalcomWebhookInputPayload payload) {
     calcomBookingToAskerRepository
         .deleteByCalcomBookingId(payload.getMetadata().getBookingId());
@@ -67,6 +94,7 @@ public class CalcomWebhookHandlerService {
     CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId);
     calcomBookingToAskerRepository.save(userAssociation);
     messagesService.publishRescheduledAppointmentMessage(newBookingId);
+    statisticsService.fireEvent(new BookingRescheduledStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
   }
 
   private void handleCancelEvent(CalcomWebhookInputPayload payload) {
@@ -79,6 +107,7 @@ public class CalcomWebhookHandlerService {
     } catch (Exception e) {
       log.error(String.valueOf(e));
     }
+    statisticsService.fireEvent(new BookingCanceledStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
   }
 
   private void createBookingAskerRelation(CalcomWebhookInputPayload payload) {
