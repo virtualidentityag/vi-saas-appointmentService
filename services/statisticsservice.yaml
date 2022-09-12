@@ -40,29 +40,6 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /statistics/registration:
-    get:
-      tags:
-        - statistics-controller
-      summary: 'Returns a list of user registration data per tenant'
-      operationId: getRegistrationStatistics
-      responses:
-        200:
-          description: successful operation
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/RegistrationStatisticsListResponseDTO'
-        204:
-          description: successful operation, but no content
-        401:
-          description: UNAUTHORIZED - no/invalid Keycloak token
-        403:
-          description: FORBIDDEN - no/invalid role/authorization or CSRF token
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
 
 components:
   schemas:
@@ -106,7 +83,9 @@ components:
         - "CREATE_MESSAGE"
         - "START_VIDEO_CALL"
         - "STOP_VIDEO_CALL"
-        - "REGISTRATION"
+        - "BOOKING_CREATED"
+        - "BOOKING_RESCHEDULED"
+        - "BOOKING_CANCELLED"
 
     UserRole:
       type: string
@@ -200,89 +179,51 @@ components:
           description: The uuid of the video call
           example: 123e4567-e89b-12d3-a456-556642440000
 
-    RegistrationStatisticsEventMessage:
+
+    BookingCreatedStatisticsEventMessage:
       type: object
-      required:
-        - sessionId
-        - userId
-        - registrationDate
       allOf:
         - $ref: '#/components/schemas/StatisticsEventMessage'
         - type: object
       properties:
-        sessionId:
+        type:
+          type: string
+        title:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        uid:
+          type: string
+        bookingId:
           type: integer
-          format: int64
-          description: The id of the session
-          example: 12345
-        tenantId:
-          type: integer
-          format: int64
-          description: The id of the tenant
-          example: 1
-        registrationDate:
-          type: string
-          example: '2022-08-15T21:11:29'
-        age:
-          type: integer
-          example: '25'
-        gender:
-          type: string
-          example: 'FEMALE'
-        counsellingRelation:
-          type: string
-          example: 'SELF_COUNSELLING'
-        topicsInternalAttributes:
-          type: array
-          items:
-            type: string
-          example: [ 'angeho01','angeho13' ]
-        mainTopicInternalAttribute:
-          type: string
-          example: 'angeho01'
-        postalCode:
-          type: string
-          example: '99999'
 
-    RegistrationStatisticsListResponseDTO:
+    BookingRescheduledStatisticsEventMessage:
       type: object
+      allOf:
+        - $ref: '#/components/schemas/StatisticsEventMessage'
+        - type: object
       properties:
-        registrationStatistics:
-          type: array
-          items:
-            $ref: '#/components/schemas/RegistrationStatisticsResponseDTO'
-
-    RegistrationStatisticsResponseDTO:
-      type: object
-      required:
-        - userId
-        - registrationDate
-      properties:
-        userId:
+        startTime:
           type: string
-        registrationDate:
+        endTime:
           type: string
-          example: '2022-08-15T21:11:29'
-        age:
+        uid:
+          type: string
+        bookingId:
           type: integer
-          example: '25'
-        gender:
+
+    BookingCanceledStatisticsEventMessage:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/StatisticsEventMessage'
+        - type: object
+      properties:
+        uid:
           type: string
-          example: 'FEMALE'
-        counsellingRelation:
-          type: string
-          example: 'SELF_COUNSELLING'
-        topicsInternalAttributes:
-          type: array
-          items:
-            type: string
-          example: [ 'angeho01','angeho13' ]
-        mainTopicInternalAttribute:
-          type: string
-          example: 'angeho01'
-        postalCode:
-          type: string
-          example: '99999'
+        bookingId:
+          type: integer
 
   securitySchemes:
     Bearer:

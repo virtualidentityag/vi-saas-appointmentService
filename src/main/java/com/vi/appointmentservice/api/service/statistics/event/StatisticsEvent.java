@@ -1,6 +1,6 @@
 package com.vi.appointmentservice.api.service.statistics.event;
 
-
+import com.vi.appointmentservice.statisticsservice.generated.web.model.EventType;
 import java.util.Optional;
 
 /** Interface for statistics event. */
@@ -18,5 +18,5 @@ public interface StatisticsEvent {
    *
    * @return the {@link EventType}
    */
-  com.vi.appointmentservice.statisticsservice.generated.web.model.EventType getEventType();
+  EventType getEventType();
 }
