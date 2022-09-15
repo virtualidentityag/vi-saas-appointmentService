@@ -54,6 +54,11 @@ public class CalcomWebhookHandlerService {
     } else if ("BOOKING_CANCELLED".equals(input.getTriggerEvent())) {
       handleCancelEvent(payload);
     }
+    try {
+      createStatisticsEvent(input.getTriggerEvent(), payload);
+    } catch (Exception e) {
+      log.error("Could not create statistics event", e);
+    }
   }
 
   private void handleCreateEvent(CalcomWebhookInputPayload payload) {
@@ -61,7 +66,6 @@ public class CalcomWebhookHandlerService {
     if (!isTeamEvent(payload)) {
       messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
     }
-    statisticsService.fireEvent(new BookingCreatedStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
   }
 
   private boolean isTeamEvent(CalcomWebhookInputPayload payload) {
@@ -94,7 +98,6 @@ public class CalcomWebhookHandlerService {
     CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId);
     calcomBookingToAskerRepository.save(userAssociation);
     messagesService.publishRescheduledAppointmentMessage(newBookingId);
-    statisticsService.fireEvent(new BookingRescheduledStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
   }
 
   private void handleCancelEvent(CalcomWebhookInputPayload payload) {
@@ -107,7 +110,25 @@ public class CalcomWebhookHandlerService {
     } catch (Exception e) {
       log.error(String.valueOf(e));
     }
-    statisticsService.fireEvent(new BookingCanceledStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
+  }
+
+  private void createStatisticsEvent(String eventType, CalcomWebhookInputPayload payload) {
+    switch (eventType) {
+      case "BOOKING_CREATED":
+        statisticsService.fireEvent(new BookingCreatedStatisticsEvent(payload,
+            this.getConsultantId(payload.getBookingId())));
+        break;
+      case "BOOKING_RESCHEDULED":
+        statisticsService.fireEvent(new BookingRescheduledStatisticsEvent(payload,
+            this.getConsultantId(payload.getBookingId())));
+        break;
+      case "BOOKING_CANCELLED":
+        statisticsService.fireEvent(new BookingCanceledStatisticsEvent(payload,
+            this.getConsultantId(payload.getBookingId())));
+        break;
+      default:
+        log.warn("Webhook event {} ignored for statistics", eventType);
+    }
   }
 
   private void createBookingAskerRelation(CalcomWebhookInputPayload payload) {
