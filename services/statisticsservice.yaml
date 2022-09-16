@@ -226,6 +226,8 @@ components:
           type: string
         bookingId:
           type: integer
+        prevBookingId:
+          type: integer
 
   securitySchemes:
     Bearer:

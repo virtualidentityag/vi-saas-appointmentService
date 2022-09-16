@@ -51,7 +51,8 @@ public class BookingCanceledStatisticsEvent implements StatisticsEvent {
             .userRole(UserRole.CONSULTANT)
             .timestamp(CustomOffsetDateTime.nowInUtc())
             .uid(payload.getUid())
-            .bookingId(payload.getBookingId()
+            .bookingId(payload.getBookingId())
+            .prevBookingId(Math.toIntExact(payload.getMetadata().getBookingId())
         );
 
     try {
