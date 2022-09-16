@@ -213,6 +213,8 @@ components:
           type: string
         bookingId:
           type: integer
+        prevBookingId:
+          type: integer
 
     BookingCanceledStatisticsEventMessage:
       type: object

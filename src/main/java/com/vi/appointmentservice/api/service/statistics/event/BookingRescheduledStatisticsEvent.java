@@ -52,7 +52,8 @@ public class BookingRescheduledStatisticsEvent implements StatisticsEvent {
             .startTime(toIsoTime(payload.getStartTime().toLocalDateTime()))
             .endTime(toIsoTime(payload.getEndTime().toLocalDateTime()))
             .uid(payload.getUid())
-            .bookingId(payload.getBookingId()
+            .bookingId(payload.getBookingId())
+            .prevBookingId(Math.toIntExact(payload.getMetadata().getBookingId())
             );
 
     try {
