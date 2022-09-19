@@ -34,7 +34,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   public static final String[] WHITE_LIST =
-      new String[]{"/error", "/askers/processbooking", "/processbooking"};
+      new String[]{"/error", "/askers/processbooking", "/processbooking","/calDav"};
 
   private static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
 

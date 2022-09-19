@@ -37,6 +37,15 @@ public class DatabaseConnectionsConfiguration {
   @Value("${calcom.database.driverClass}")
   private String calcomDatabaseDriver;
 
+  @Value("${caldav.database.url}")
+  private String caldavDatabaseUrl;
+
+  @Value("${caldav.database.username}")
+  private String caldavDatabaseUsername;
+
+  @Value("${caldav.database.password}")
+  private String caldavDatabasePassword;
+
   @Bean
   @Primary
   public DataSource dataSource() {
@@ -48,6 +57,13 @@ public class DatabaseConnectionsConfiguration {
   public DataSource calcomDBDataSource() {
     return DataSourceBuilder.create().url(calcomDatabaseUrl)
         .username(calcomDatabaseUsername).password(calcomDatabasePassword).driverClassName(calcomDatabaseDriver)
+        .build();
+  }
+
+  @Bean(name = "caldavDBDataSource")
+  public DataSource caldavDBDataSource() {
+    return DataSourceBuilder.create().url(caldavDatabaseUrl)
+        .username(caldavDatabaseUsername).password(caldavDatabasePassword).driverClassName(className)
         .build();
   }
 
@@ -63,6 +79,12 @@ public class DatabaseConnectionsConfiguration {
   public NamedParameterJdbcTemplate calcomDBNamedParamterTemplate(
       @Qualifier("calcomDBDataSource") DataSource calcomDBDataSource) {
     return new NamedParameterJdbcTemplate(calcomDBDataSource);
+  }
+
+  @Bean(name = "caldavDBNamedParameterTemplate")
+  public NamedParameterJdbcTemplate caldavDBNamedParameterTemplate(
+      @Qualifier("caldavDBDataSource") DataSource caldavDBDataSource) {
+    return new NamedParameterJdbcTemplate(caldavDBDataSource);
   }
 
 }
