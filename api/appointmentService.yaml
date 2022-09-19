@@ -14,7 +14,7 @@ tags:
   - name: booking
     description: Endpoint for booking webhook
 paths:
-  /calDav:
+  /caldav:
     post:
       tags:
         - caldav
