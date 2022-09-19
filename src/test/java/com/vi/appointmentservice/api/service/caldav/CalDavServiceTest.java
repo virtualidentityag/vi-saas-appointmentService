@@ -34,7 +34,7 @@ public class CalDavServiceTest {
     calDavService.resetPassword(credentials);
     Mockito.verify(calDavRepository).resetCredentials(Mockito.anyString(), token.capture());
     String tokenCaptorValue = token.getValue();
-    MatcherAssert.assertThat(tokenCaptorValue, Matchers.is("1C55207D44A7EB28DA7754C00698CFE7"));
+    MatcherAssert.assertThat(tokenCaptorValue, Matchers.is("f4cc5ecca85d5145bbcfee34c71b714d"));
   }
 
 }
