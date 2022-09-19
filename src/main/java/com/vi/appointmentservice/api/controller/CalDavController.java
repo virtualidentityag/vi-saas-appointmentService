@@ -2,7 +2,7 @@ package com.vi.appointmentservice.api.controller;
 
 import com.vi.appointmentservice.api.model.CalDavCredentials;
 import com.vi.appointmentservice.api.service.calcom.caldav.CalDavService;
-import com.vi.appointmentservice.generated.api.controller.CalDavApi;
+import com.vi.appointmentservice.generated.api.controller.CaldavApi;
 import io.swagger.annotations.Api;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "calDav")
 @RequiredArgsConstructor
-public class CalDavController implements CalDavApi {
+public class CalDavController implements CaldavApi {
 
   private final @NotNull CalDavService calDavService;
 
