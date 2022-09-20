@@ -21,7 +21,7 @@ paths:
       summary: Reset caldav password for given user email
       operationId: resetCalDavPassword
       requestBody:
-        description: consultant object that needs to be added to cal.com
+        description: Credentials for CalDav user
         content:
           application/json:
             schema:

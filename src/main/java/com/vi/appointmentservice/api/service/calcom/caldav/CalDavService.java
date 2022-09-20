@@ -7,10 +7,12 @@ import java.security.NoSuchAlgorithmException;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.DatatypeConverter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CalDavService {
 
   private final @NotNull CalDavRepository calDavRepository;
@@ -30,7 +32,7 @@ public class CalDavService {
       return DatatypeConverter
           .printHexBinary(digest).toLowerCase();
     } catch (NoSuchAlgorithmException e) {
-      //
+      log.error("Issue during encrypting", e);
     }
     return null;
   }
