@@ -1,14 +1,24 @@
 package com.vi.appointmentservice.api.service;
 
+import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
+import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
+import com.vi.appointmentservice.api.service.statistics.StatisticsService;
+import com.vi.appointmentservice.api.service.statistics.event.BookingCanceledStatisticsEvent;
+import com.vi.appointmentservice.api.service.statistics.event.BookingCreatedStatisticsEvent;
+import com.vi.appointmentservice.api.service.statistics.event.BookingRescheduledStatisticsEvent;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
+import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
+import com.vi.appointmentservice.repository.CalcomRepository;
+import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +35,10 @@ public class CalcomWebhookHandlerService {
   private final @NonNull MessagesService messagesService;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
+  private final @NonNull StatisticsService statisticsService;
+  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+  private final @NonNull AdminUserService adminUserService;
+  private final @NonNull CalcomRepository calcomRepository;
 
   @Transactional
   public void handlePayload(CalcomWebhookInput input) {
@@ -42,6 +56,11 @@ public class CalcomWebhookHandlerService {
     } else if ("BOOKING_CANCELLED".equals(input.getTriggerEvent())) {
       handleCancelEvent(payload);
     }
+    try {
+      createStatisticsEvent(input.getTriggerEvent(), payload);
+    } catch (Exception e) {
+      log.error("Could not create statistics event", e);
+    }
   }
 
   private void handleCreateEvent(CalcomWebhookInputPayload payload) {
@@ -57,6 +76,20 @@ public class CalcomWebhookHandlerService {
     CalcomEventTypeDTO eventType = calComEventTypeService
         .getEventTypeById(Long.valueOf(booking.getEventTypeId()));
     return eventType.getTeamId() != null;
+  }
+
+  private String getConsultantId(Integer bookingId) {
+    CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository.findByCalComUserId(
+        Long.valueOf(booking.getUserId()));
+    if (calcomUserToConsultant.isPresent()) {
+      String consultantId = calcomUserToConsultant.get().getConsultantId();
+      com.vi.appointmentservice.useradminservice.generated.web.model.ConsultantDTO consultant = null;
+      consultant = this.adminUserService.getConsultantById(consultantId);
+      return consultant.getId();
+    } else {
+      throw new InternalServerErrorException("Could not find calcomUserToConsultant for bookingId " + bookingId);
+    }
   }
 
   private void handleRescheduleEvent(CalcomWebhookInputPayload payload) {
@@ -78,6 +111,23 @@ public class CalcomWebhookHandlerService {
       messagesService.publishCancellationMessage(bookingId);
     } catch (Exception e) {
       log.error(String.valueOf(e));
+    }
+  }
+
+  private void createStatisticsEvent(String eventType, CalcomWebhookInputPayload payload) {
+    switch (eventType) {
+      case "BOOKING_CREATED":
+        statisticsService.fireEvent(new BookingCreatedStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
+        break;
+      case "BOOKING_RESCHEDULED":
+        statisticsService.fireEvent(new BookingRescheduledStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
+        break;
+      case "BOOKING_CANCELLED":
+        Integer bookingId = calcomRepository.getBookingIdByUid(payload.getUid());
+        statisticsService.fireEvent(new BookingCanceledStatisticsEvent(payload, this.getConsultantId(bookingId), bookingId));
+        break;
+      default:
+        log.warn("Webhook event {} ignored for statistics", eventType);
     }
   }
 
