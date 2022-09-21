@@ -57,4 +57,13 @@ public class CalcomRepository {
     return calcomDBNamedParamterTemplate
         .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
   }
+
+  public Integer getBookingIdByUid(String uid) {
+    String QUERY = "SELECT \"id\" FROM \"Booking\" AS booking WHERE booking.\"uid\" = :uid LIMIT 1";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("uid", uid);
+
+    return calcomDBNamedParamterTemplate
+        .queryForObject(QUERY, parameters, Integer.class);
+  }
 }
