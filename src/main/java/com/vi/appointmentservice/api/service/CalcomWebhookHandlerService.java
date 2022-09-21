@@ -6,9 +6,12 @@ import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
+import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
+import com.vi.appointmentservice.appointmentservice.generated.web.model.Appointment;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ public class CalcomWebhookHandlerService {
   private final @NonNull MessagesService messagesService;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
+  private final @NonNull VideoAppointmentService videoAppointmentService;
 
   @Transactional
   public void handlePayload(CalcomWebhookInput input) {
@@ -45,7 +49,9 @@ public class CalcomWebhookHandlerService {
   }
 
   private void handleCreateEvent(CalcomWebhookInputPayload payload) {
-    createBookingAskerRelation(payload);
+    Appointment appointment = videoAppointmentService
+        .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
+    createBookingAskerRelation(payload, appointment.getId());
     if (!isTeamEvent(payload)) {
       messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
     }
@@ -60,11 +66,14 @@ public class CalcomWebhookHandlerService {
   }
 
   private void handleRescheduleEvent(CalcomWebhookInputPayload payload) {
+    Appointment appointment = videoAppointmentService
+        .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
     calcomBookingToAskerRepository
         .deleteByCalcomBookingId(payload.getMetadata().getBookingId());
     String askerId = payload.getMetadata().getUser();
     Long newBookingId = Long.valueOf(payload.getBookingId());
-    CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId);
+    CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId,
+        appointment.getId().toString());
     calcomBookingToAskerRepository.save(userAssociation);
     messagesService.publishRescheduledAppointmentMessage(newBookingId);
   }
@@ -81,11 +90,12 @@ public class CalcomWebhookHandlerService {
     }
   }
 
-  private void createBookingAskerRelation(CalcomWebhookInputPayload payload) {
+  private void createBookingAskerRelation(CalcomWebhookInputPayload payload,
+      UUID appointmentId) {
     var newBookingId = Long.valueOf(payload.getBookingId());
     String askerId = payload.getMetadata().getUser();
     CalcomBookingToAsker calcomBookingToAskerEntity = new CalcomBookingToAsker(newBookingId,
-        askerId);
+        askerId, appointmentId.toString());
     calcomBookingToAskerRepository.save(calcomBookingToAskerEntity);
   }
 
