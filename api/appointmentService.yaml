@@ -14,6 +14,22 @@ tags:
   - name: booking
     description: Endpoint for booking webhook
 paths:
+  /caldav:
+    post:
+      tags:
+        - caldav
+      summary: Reset caldav password for given user email
+      operationId: resetCalDavPassword
+      requestBody:
+        description: Credentials for CalDav user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalcomUser/CalDavCredentials'
+        required: true
+      responses:
+        '200':
+          description: successful operation
   /consultants:
     post:
       tags:
@@ -1061,4 +1077,11 @@ components:
       type: object
       properties:
         token:
+          type: string
+    CalDavCredentials:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
           type: string
