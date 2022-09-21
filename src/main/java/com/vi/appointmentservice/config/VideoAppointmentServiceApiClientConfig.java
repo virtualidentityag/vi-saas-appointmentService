@@ -13,7 +13,7 @@ import com.vi.appointmentservice.appointmentservice.generated.ApiClient;
 @Component
 public class VideoAppointmentServiceApiClientConfig {
 
-  @Value("${video.appointment.service.api.url}")
+  @Value("${user.service.api.url}")
   private String videoAppointmentServiceApiUrl;
 
   @Bean
