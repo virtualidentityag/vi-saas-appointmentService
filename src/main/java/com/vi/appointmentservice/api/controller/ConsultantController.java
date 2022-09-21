@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "consultant")
-@Slf4j
 @RequiredArgsConstructor
 public class ConsultantController implements ConsultantsApi {
 

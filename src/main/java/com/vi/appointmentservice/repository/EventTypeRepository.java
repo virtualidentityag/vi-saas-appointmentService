@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Repository;
 public class EventTypeRepository {
 
   private final @NotNull JdbcTemplate jdbcTemplate;
-  private final @NotNull NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  private final @NotNull NamedParameterJdbcTemplate calcomDBNamedParamterTemplate;
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
 
   /**
@@ -32,7 +33,7 @@ public class EventTypeRepository {
         + "\"A\" IN (SELECT ID FROM \"EventType\" where \"schedulingType\" in ('roundRobin'))";
     SqlParameterSource parameters = new MapSqlParameterSource("teamIds", teamIds)
         .addValue("calcomUserId", calcomUserId);
-    namedParameterJdbcTemplate.update(QUERY, parameters);
+    calcomDBNamedParamterTemplate.update(QUERY, parameters);
   }
 
   public void removeTeamEventTypeMembershipsForEventType(Long eventTypeId) {
