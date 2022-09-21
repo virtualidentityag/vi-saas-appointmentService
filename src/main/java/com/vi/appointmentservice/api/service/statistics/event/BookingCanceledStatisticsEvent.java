@@ -24,9 +24,12 @@ public class BookingCanceledStatisticsEvent implements StatisticsEvent {
   private final CalcomWebhookInputPayload payload;
   private final String consultantId;
 
-  public BookingCanceledStatisticsEvent(CalcomWebhookInputPayload payload, String consultantId){
+  private final Integer bookingId;
+
+  public BookingCanceledStatisticsEvent(CalcomWebhookInputPayload payload, String consultantId, Integer bookingId){
     this.payload = payload;
     this.consultantId = consultantId;
+    this.bookingId = bookingId;
     OBJECT_MAPPER.registerModule(new JavaTimeModule());
     OBJECT_MAPPER.registerModule(buildSimpleModule());
   }
@@ -51,9 +54,8 @@ public class BookingCanceledStatisticsEvent implements StatisticsEvent {
             .userRole(UserRole.CONSULTANT)
             .timestamp(CustomOffsetDateTime.nowInUtc())
             .uid(payload.getUid())
-            .bookingId(payload.getBookingId())
-            .prevBookingId(Math.toIntExact(payload.getMetadata().getBookingId())
-        );
+            .bookingId(bookingId)
+            .prevBookingId(bookingId);
 
     try {
       return Optional.of(OBJECT_MAPPER.writeValueAsString(bookingCanceledStatisticsEventMessage));

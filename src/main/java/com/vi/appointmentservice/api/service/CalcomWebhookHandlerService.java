@@ -78,10 +78,6 @@ public class CalcomWebhookHandlerService {
     return eventType.getTeamId() != null;
   }
 
-  private String getConsultantIdByUid(String uid) {
-    return this.getConsultantId(calcomRepository.getBookingIdByUid(uid));
-  }
-
   private String getConsultantId(Integer bookingId) {
     CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
     Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository.findByCalComUserId(
@@ -127,7 +123,8 @@ public class CalcomWebhookHandlerService {
         statisticsService.fireEvent(new BookingRescheduledStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
         break;
       case "BOOKING_CANCELLED":
-        statisticsService.fireEvent(new BookingCanceledStatisticsEvent(payload, this.getConsultantIdByUid(payload.getUid())));
+        Integer bookingId = calcomRepository.getBookingIdByUid(payload.getUid());
+        statisticsService.fireEvent(new BookingCanceledStatisticsEvent(payload, this.getConsultantId(bookingId), bookingId));
         break;
       default:
         log.warn("Webhook event {} ignored for statistics", eventType);
