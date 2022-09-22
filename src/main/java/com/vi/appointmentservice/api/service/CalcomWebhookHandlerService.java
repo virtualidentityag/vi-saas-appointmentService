@@ -8,17 +8,20 @@ import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
+import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
 import com.vi.appointmentservice.api.service.statistics.StatisticsService;
 import com.vi.appointmentservice.api.service.statistics.event.BookingCanceledStatisticsEvent;
 import com.vi.appointmentservice.api.service.statistics.event.BookingCreatedStatisticsEvent;
 import com.vi.appointmentservice.api.service.statistics.event.BookingRescheduledStatisticsEvent;
+import com.vi.appointmentservice.appointmentservice.generated.web.model.Appointment;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,7 @@ public class CalcomWebhookHandlerService {
   private final @NonNull MessagesService messagesService;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
+  private final @NonNull VideoAppointmentService videoAppointmentService;
   private final @NonNull StatisticsService statisticsService;
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   private final @NonNull AdminUserService adminUserService;
@@ -64,7 +68,9 @@ public class CalcomWebhookHandlerService {
   }
 
   private void handleCreateEvent(CalcomWebhookInputPayload payload) {
-    createBookingAskerRelation(payload);
+    Appointment appointment = videoAppointmentService
+        .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
+    createBookingAskerRelation(payload, appointment.getId());
     if (!isTeamEvent(payload)) {
       messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
     }
@@ -93,11 +99,14 @@ public class CalcomWebhookHandlerService {
   }
 
   private void handleRescheduleEvent(CalcomWebhookInputPayload payload) {
+    Appointment appointment = videoAppointmentService
+        .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
     calcomBookingToAskerRepository
         .deleteByCalcomBookingId(payload.getMetadata().getBookingId());
     String askerId = payload.getMetadata().getUser();
     Long newBookingId = Long.valueOf(payload.getBookingId());
-    CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId);
+    CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(newBookingId, askerId,
+        appointment.getId().toString());
     calcomBookingToAskerRepository.save(userAssociation);
     messagesService.publishRescheduledAppointmentMessage(newBookingId);
   }
@@ -112,6 +121,15 @@ public class CalcomWebhookHandlerService {
     } catch (Exception e) {
       log.error(String.valueOf(e));
     }
+  }
+
+  private void createBookingAskerRelation(CalcomWebhookInputPayload payload,
+      UUID appointmentId) {
+    var newBookingId = Long.valueOf(payload.getBookingId());
+    String askerId = payload.getMetadata().getUser();
+    CalcomBookingToAsker calcomBookingToAskerEntity = new CalcomBookingToAsker(newBookingId,
+        askerId, appointmentId.toString());
+    calcomBookingToAskerRepository.save(calcomBookingToAskerEntity);
   }
 
   private void createStatisticsEvent(String eventType, CalcomWebhookInputPayload payload) {
@@ -130,14 +148,5 @@ public class CalcomWebhookHandlerService {
         log.warn("Webhook event {} ignored for statistics", eventType);
     }
   }
-
-  private void createBookingAskerRelation(CalcomWebhookInputPayload payload) {
-    var newBookingId = Long.valueOf(payload.getBookingId());
-    String askerId = payload.getMetadata().getUser();
-    CalcomBookingToAsker calcomBookingToAskerEntity = new CalcomBookingToAsker(newBookingId,
-        askerId);
-    calcomBookingToAskerRepository.save(calcomBookingToAskerEntity);
-  }
-
 
 }

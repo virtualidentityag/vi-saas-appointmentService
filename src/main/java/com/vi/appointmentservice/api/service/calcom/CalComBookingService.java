@@ -75,6 +75,7 @@ public class CalComBookingService extends CalComService {
         log.error("Inconsistent data. Asker not found for booking.");
         continue;
       }
+      booking.setVideoAppointmentId(calcomBookingAsker.getVideoAppointmentId());
       booking.setAskerId(calcomBookingAsker.getAskerId());
       rescheduleHelper.attachRescheduleLink(booking);
       try{
@@ -101,6 +102,7 @@ public class CalComBookingService extends CalComService {
         continue;
       }
       booking.setAskerId(calcomBookingAsker.getAskerId());
+      booking.setVideoAppointmentId(calcomBookingAsker.getVideoAppointmentId());
       rescheduleHelper.attachRescheduleLink(booking);
       rescheduleHelper.attachConsultantName(booking);
     }

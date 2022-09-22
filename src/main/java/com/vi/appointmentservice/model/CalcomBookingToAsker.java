@@ -27,6 +27,9 @@ public class CalcomBookingToAsker implements Serializable {
     @Column(name = "askerId", unique = true, nullable = false)
     private String askerId;
 
+    @Column(name = "videoAppointmentId", unique = true, nullable = false)
+    private String videoAppointmentId;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
