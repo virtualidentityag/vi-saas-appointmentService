@@ -44,6 +44,7 @@ public class CalComEventTypeService extends CalComService {
     }
     response = jsonObject.getJSONArray("event_types").toString();
     ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     try {
       return mapper.readValue(response, new TypeReference<>() {
       });
