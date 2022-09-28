@@ -25,6 +25,7 @@ public class AuthenticatedUserConfig {
 
   private static final String CLAIM_NAME_USER_ID = "userId";
   private static final String CLAIM_NAME_USERNAME = "username";
+  private static final String CLAIM_NAME_EMAIL = "email";
 
   /**
    * Returns the @KeycloakAuthenticationToken which represents the token for a Keycloak
@@ -68,6 +69,7 @@ public class AuthenticatedUserConfig {
     authenticatedUser.setAccessToken(getUserAccessToken(keycloakSecContext));
     authenticatedUser.setUserId(getUserAttribute(claimMap, CLAIM_NAME_USER_ID));
     authenticatedUser.setUsername(getUserAttribute(claimMap, CLAIM_NAME_USERNAME));
+    authenticatedUser.setEmail(getUserAttribute(claimMap, CLAIM_NAME_EMAIL));
 
     return authenticatedUser;
   }

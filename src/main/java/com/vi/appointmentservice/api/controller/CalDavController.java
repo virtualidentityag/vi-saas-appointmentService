@@ -1,11 +1,14 @@
 package com.vi.appointmentservice.api.controller;
 
 import com.vi.appointmentservice.api.model.CalDavCredentials;
+import com.vi.appointmentservice.api.model.HasCalDavAccountDTO;
 import com.vi.appointmentservice.api.service.calcom.caldav.CalDavService;
 import com.vi.appointmentservice.generated.api.controller.CaldavApi;
+import com.vi.appointmentservice.helper.AuthenticatedUser;
 import io.swagger.annotations.Api;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +26,10 @@ public class CalDavController implements CaldavApi {
       @Valid CalDavCredentials calDavCredentials) {
     calDavService.resetPassword(calDavCredentials);
     return new ResponseEntity<Void>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<HasCalDavAccountDTO> hasCalDavAccount() {
+    return new ResponseEntity<>(calDavService.hasCalDavAccount(), HttpStatus.OK);
   }
 }

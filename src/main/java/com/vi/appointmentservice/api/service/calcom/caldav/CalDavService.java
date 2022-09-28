@@ -1,11 +1,14 @@
 package com.vi.appointmentservice.api.service.calcom.caldav;
 
 import com.vi.appointmentservice.api.model.CalDavCredentials;
+import com.vi.appointmentservice.api.model.HasCalDavAccountDTO;
+import com.vi.appointmentservice.helper.AuthenticatedUser;
 import com.vi.appointmentservice.repository.CalDavRepository;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.DatatypeConverter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,11 +20,19 @@ public class CalDavService {
 
   private final @NotNull CalDavRepository calDavRepository;
 
+  private final @NonNull AuthenticatedUser authenticatedUser;
+
   public void resetPassword(CalDavCredentials credentials) {
     String token = String.format(
         "%s:BaikalDAV:%s",
         calDavRepository.getUserName(credentials.getEmail()), credentials.getPassword());
     calDavRepository.resetCredentials(credentials.getEmail(), toMD5(token));
+  }
+
+  public HasCalDavAccountDTO hasCalDavAccount(){
+    HasCalDavAccountDTO result = new HasCalDavAccountDTO();
+    result.setHasCalDavAccount(calDavRepository.getAccountExists(authenticatedUser.getEmail()));
+    return result;
   }
 
   private String toMD5(String token) {
@@ -36,5 +47,6 @@ public class CalDavService {
     }
     return null;
   }
+
 
 }
