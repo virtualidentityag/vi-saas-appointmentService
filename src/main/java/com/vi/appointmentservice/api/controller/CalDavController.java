@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class CalDavController implements CaldavApi {
 
+  private final @NonNull AuthenticatedUser authenticatedUser;
+
   private final @NotNull CalDavService calDavService;
 
   @Override
@@ -30,6 +32,6 @@ public class CalDavController implements CaldavApi {
 
   @Override
   public ResponseEntity<HasCalDavAccountDTO> hasCalDavAccount() {
-    return new ResponseEntity<>(calDavService.hasCalDavAccount(), HttpStatus.OK);
+    return new ResponseEntity<>(calDavService.hasCalDavAccount(authenticatedUser.getEmail()), HttpStatus.OK);
   }
 }

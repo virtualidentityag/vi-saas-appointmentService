@@ -2,7 +2,6 @@ package com.vi.appointmentservice.api.service.calcom.caldav;
 
 import com.vi.appointmentservice.api.model.CalDavCredentials;
 import com.vi.appointmentservice.api.model.HasCalDavAccountDTO;
-import com.vi.appointmentservice.helper.AuthenticatedUser;
 import com.vi.appointmentservice.repository.CalDavRepository;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,6 +10,7 @@ import javax.xml.bind.DatatypeConverter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,8 +20,6 @@ public class CalDavService {
 
   private final @NotNull CalDavRepository calDavRepository;
 
-  private final @NonNull AuthenticatedUser authenticatedUser;
-
   public void resetPassword(CalDavCredentials credentials) {
     String token = String.format(
         "%s:BaikalDAV:%s",
@@ -29,9 +27,12 @@ public class CalDavService {
     calDavRepository.resetCredentials(credentials.getEmail(), toMD5(token));
   }
 
-  public HasCalDavAccountDTO hasCalDavAccount(){
+  public HasCalDavAccountDTO hasCalDavAccount(String email){
+    if(email == null){
+      throw new AccessDeniedException("Authenticated User has no email");
+    }
     HasCalDavAccountDTO result = new HasCalDavAccountDTO();
-    result.setHasCalDavAccount(calDavRepository.getAccountExists(authenticatedUser.getEmail()));
+    result.setHasCalDavAccount(calDavRepository.getAccountExists(email));
     return result;
   }
 

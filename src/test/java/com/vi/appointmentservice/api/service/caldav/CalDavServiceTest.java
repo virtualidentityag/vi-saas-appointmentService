@@ -47,13 +47,13 @@ public class CalDavServiceTest {
   @Test
   public void hasCalDavAccount_Should_Return_True_DTO_If_Account_Exists() {
     when(calDavRepository.getAccountExists(any())).thenReturn(true);
-    assertThat(calDavService.hasCalDavAccount().getHasCalDavAccount()).isTrue();
+    assertThat(calDavService.hasCalDavAccount("testEmail").getHasCalDavAccount()).isTrue();
   }
 
   @Test
   public void hasCalDavAccount_Should_Return_False_DTO_If_Account_Not_Exists() {
     when(calDavRepository.getAccountExists(any())).thenReturn(false);
-    assertThat(calDavService.hasCalDavAccount().getHasCalDavAccount()).isFalse();
+    assertThat(calDavService.hasCalDavAccount("testEmail").getHasCalDavAccount()).isFalse();
   }
 
 }
