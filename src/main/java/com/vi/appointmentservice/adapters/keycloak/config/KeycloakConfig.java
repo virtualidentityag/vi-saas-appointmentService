@@ -66,12 +66,10 @@ public class KeycloakConfig {
         if (claimMap.containsKey("username")) {
           authenticatedUser.setUsername(claimMap.get("username").toString());
         }
-        if (claimMap.containsKey("email")) {
-          authenticatedUser.setEmail(claimMap.get("email").toString());
-        }
         authenticatedUser.setUserId(claimMap.get("userId").toString());
         authenticatedUser.setAccessToken(securityContext.getTokenString());
         authenticatedUser.setRoles(securityContext.getToken().getRealmAccess().getRoles());
+        authenticatedUser.setEmail(securityContext.getToken().getEmail());
       } catch (Exception exception) {
         throw new KeycloakException("Keycloak data missing.", exception);
       }
