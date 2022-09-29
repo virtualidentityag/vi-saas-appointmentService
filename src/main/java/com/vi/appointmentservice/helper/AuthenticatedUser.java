@@ -33,7 +33,6 @@ public class AuthenticatedUser {
 
   private Set<String> grantedAuthorities;
 
-  @NonNull
   private String email;
 
   @JsonIgnore
