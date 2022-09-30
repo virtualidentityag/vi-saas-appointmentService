@@ -34,7 +34,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   public static final String[] WHITE_LIST =
-      new String[]{"/error", "/askers/processbooking", "/processbooking","/caldav"};
+      new String[]{"/error", "/askers/processbooking", "/processbooking", "/caldav"};
 
   private static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
 
@@ -88,6 +88,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
         .antMatchers(HttpMethod.GET, "/askers", "/askers/**")
         .hasAnyAuthority(AuthorityValue.USER_DEFAULT)
+
+        .antMatchers(HttpMethod.GET, "/caldav/hasAccount")
+        .hasAuthority(AuthorityValue.CONSULTANT_DEFAULT)
 
         .antMatchers(HttpMethod.POST, "/askers/processBooking", "/processBooking")
         .permitAll() // auth handeled via hmac in controller

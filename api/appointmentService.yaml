@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Appointment Service
-  description: '!UNFINISHED! Spec for Appointment Service'
+  description: 'API Spec for Appointment Service'
   version: 0.2.0
 
 tags:
@@ -13,6 +13,8 @@ tags:
     description: Everything related to a onBer asker
   - name: booking
     description: Endpoint for booking webhook
+  - name: caldav
+    description: Endpoints related to the CalDav Server
 paths:
   /caldav:
     post:
@@ -30,6 +32,21 @@ paths:
       responses:
         '200':
           description: successful operation
+  /caldav/hasAccount:
+    get:
+      tags:
+        - caldav
+      summary: Return if the logged in users has a caldav account
+      operationId: hasCalDavAccount
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HasCalDavAccountDTO'
+      security:
+        - Bearer: [ ]
   /consultants:
     post:
       tags:
@@ -1087,3 +1104,8 @@ components:
           type: string
         password:
           type: string
+    HasCalDavAccountDTO:
+      type: object
+      properties:
+        hasCalDavAccount:
+          type: boolean

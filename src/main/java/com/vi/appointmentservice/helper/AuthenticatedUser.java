@@ -33,6 +33,8 @@ public class AuthenticatedUser {
 
   private Set<String> grantedAuthorities;
 
+  private String email;
+
   @JsonIgnore
   public boolean isAdviceSeeker() {
     return nonNull(roles) && roles.contains(UserRole.USER.getValue());
