@@ -105,8 +105,7 @@ public class RescheduleHelper {
         .getAskerUserNamesForIds(bookingIdAskerId.values());
     calcomBookings.stream().forEach(booking ->{
       if (askerUserNamesForIds.get(booking.getAskerId()) != null) {
-        booking.setAskerName(
-            askerUserNamesForIds.get(askerUserNamesForIds.get(booking.getAskerId())));
+        booking.setAskerName(askerUserNamesForIds.get(booking.getAskerId()));
       } else {
         booking.setAskerName("Unknown name");
       }
