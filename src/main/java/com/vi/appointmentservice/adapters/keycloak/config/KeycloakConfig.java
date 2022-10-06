@@ -69,6 +69,7 @@ public class KeycloakConfig {
         authenticatedUser.setUserId(claimMap.get("userId").toString());
         authenticatedUser.setAccessToken(securityContext.getTokenString());
         authenticatedUser.setRoles(securityContext.getToken().getRealmAccess().getRoles());
+        authenticatedUser.setEmail(securityContext.getToken().getEmail());
       } catch (Exception exception) {
         throw new KeycloakException("Keycloak data missing.", exception);
       }

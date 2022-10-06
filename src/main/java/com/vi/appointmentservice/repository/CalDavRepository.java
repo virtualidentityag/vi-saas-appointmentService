@@ -31,5 +31,12 @@ public class CalDavRepository {
         .queryForObject(QUERY, parameters, new SingleColumnRowMapper<>()), StandardCharsets.UTF_8);
   }
 
+  public boolean getAccountExists(String email) {
+    String QUERY = "SELECT COUNT(id) FROM users WHERE username = :email";
+    SqlParameterSource parameters = new MapSqlParameterSource("email", email);
+    Integer count = caldavDBNamedParameterTemplate.queryForObject(QUERY, parameters, Integer.class);
+    return count != null && count > 0;
+  }
+
 
 }
