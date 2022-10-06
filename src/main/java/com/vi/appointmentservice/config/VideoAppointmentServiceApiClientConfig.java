@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import com.vi.appointmentservice.appointmentservice.generated.web.AppointmentControllerApi;
 import com.vi.appointmentservice.appointmentservice.generated.ApiClient;
+import org.springframework.web.context.annotation.RequestScope;
+
 @Component
 public class VideoAppointmentServiceApiClientConfig {
 
@@ -17,6 +19,7 @@ public class VideoAppointmentServiceApiClientConfig {
   private String videoAppointmentServiceApiUrl;
 
   @Bean
+  @RequestScope
   public AppointmentControllerApi appointmentControllerApi() {
     final RestTemplate restTemplate = new RestTemplate();
     final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();

@@ -4,6 +4,7 @@ import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
+import com.vi.appointmentservice.config.MessageApiClient;
 import com.vi.appointmentservice.messageservice.generated.web.MessageControllerApi;
 import com.vi.appointmentservice.messageservice.generated.web.model.AliasMessageDTO;
 import com.vi.appointmentservice.messageservice.generated.web.model.MessageType;
@@ -21,23 +22,29 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class MessagesService {
 
-  private final @NonNull MessageControllerApi messageControllerApi;
   private final @NonNull UserService userService;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
+  @Value("${message.service.api.url}")
+  private String messageServiceApiUrl;
 
   private final static SimpleDateFormat fromFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   private final static SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -123,6 +130,7 @@ public class MessagesService {
   }
 
   private void sendMessage(CalcomBooking booking, AliasMessageDTO message) {
+    var messageControllerApi = getMessageControllerApi();
     addTechnicalUserHeaders(messageControllerApi.getApiClient());
     messageControllerApi.saveAliasMessageWithContent(getRocketChatGroupId(booking), message);
   }
@@ -132,9 +140,9 @@ public class MessagesService {
         .findByCalComUserId(Long.valueOf(booking.getUserId()));
     if(calcomUserToConsultant.isPresent()){
       String consultantId = calcomUserToConsultant.get().getConsultantId();
-      CalcomBookingToAsker byCalcomBookingId = calcomBookingToAskerRepository
+      Optional<CalcomBookingToAsker> byCalcomBookingId = calcomBookingToAskerRepository
           .findByCalcomBookingId(booking.getId());
-      String askerId = byCalcomBookingId.getAskerId();
+      String askerId = byCalcomBookingId.get().getAskerId();
       return userService
           .getRocketChatGroupId(consultantId, askerId);
     }
@@ -152,5 +160,17 @@ public class MessagesService {
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 
+  public MessageControllerApi getMessageControllerApi() {
+    final RestTemplate restTemplate = new RestTemplate();
+    final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+    final HttpClient httpClient = HttpClientBuilder.create()
+        .setRedirectStrategy(new LaxRedirectStrategy())
+        .build();
+    factory.setHttpClient(httpClient);
+    restTemplate.setRequestFactory(factory);
+    com.vi.appointmentservice.messageservice.generated.ApiClient apiClient = new MessageApiClient(restTemplate);
+    apiClient.setBasePath(this.messageServiceApiUrl);
+    return new MessageControllerApi(apiClient);
+  }
 
 }
