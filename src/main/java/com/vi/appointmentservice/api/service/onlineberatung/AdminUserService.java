@@ -5,30 +5,30 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
-import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
+import com.vi.appointmentservice.config.AdminUserApiClient;
+import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.useradminservice.generated.ApiClient;
 import com.vi.appointmentservice.useradminservice.generated.web.AdminUserControllerApi;
 import com.vi.appointmentservice.useradminservice.generated.web.model.AskerResponseDTO;
 import com.vi.appointmentservice.useradminservice.generated.web.model.ConsultantDTO;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
 public class AdminUserService {
 
-  @Qualifier("adminUser")
-  @Autowired
-  public void setAdminUserControllerApi(
-      AdminUserControllerApi adminUserControllerApi) {
-    this.adminUserControllerApi = adminUserControllerApi;
-  }
+  @Value("${user.admin.service.api.url}")
+  private String adminUserServiceApiUrl;
 
   @Autowired
   public void setSecurityHeaderSupplier(
@@ -41,7 +41,6 @@ public class AdminUserService {
     this.identityClient = identityClient;
   }
 
-  private AdminUserControllerApi adminUserControllerApi;
   private SecurityHeaderSupplier securityHeaderSupplier;
   private IdentityClient identityClient;
 
@@ -51,7 +50,64 @@ public class AdminUserService {
   @Value("${keycloakService.technical.password}")
   private String keycloakTechnicalPassword;
 
+  @Autowired
+  RestTemplate restTemplate;
+
+  public Map<String, String> getConsultantNamesForIds(Collection<String> consultantIds) {
+    Map<String, String> consultantNames = new HashMap<>();
+    var adminUserControllerApi = getAdminUserControllerApi();
+    addTechnicalUserHeaders(adminUserControllerApi.getApiClient());
+    consultantIds.stream().forEach(consultantId -> {
+      String consultantResponse = new JSONObject(
+          adminUserControllerApi.getConsultant(consultantId)).getJSONObject("embedded").toString();
+      try {
+        ObjectMapper mapper = new ObjectMapper().configure(
+            DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ConsultantDTO consultantDTO = mapper.readValue(consultantResponse, ConsultantDTO.class);
+        consultantNames
+            .put(consultantId, consultantDTO.getFirstname() + " " + consultantDTO.getLastname());
+      } catch (JsonProcessingException e) {
+        consultantNames
+            .put(consultantId, "Unknown Consultant");
+      }
+    });
+
+    return consultantNames;
+  }
+
+  public Map<String, String> getAskerUserNamesForIds(Collection<String> askerIds) {
+    Map<String, String> result = new HashMap<>();
+    var adminUserControllerApi = getAdminUserControllerApi();
+    addTechnicalUserHeaders(adminUserControllerApi.getApiClient());
+    askerIds.stream().forEach(askerId -> {
+      AskerResponseDTO asker = adminUserControllerApi.getAsker(askerId);
+      if (asker != null) {
+        result.put(askerId, asker.getUsername());
+      } else {
+        result.put(askerId, "Unknown asker");
+      }
+    });
+    return result;
+  }
+
+  private void addTechnicalUserHeaders(ApiClient apiClient) {
+    KeycloakLoginResponseDTO keycloakLoginResponseDTO = identityClient.loginUser(
+        keycloakTechnicalUsername, keycloakTechnicalPassword
+    );
+    log.debug("Technical Acces Token: {}", keycloakLoginResponseDTO.getAccessToken());
+    HttpHeaders headers = this.securityHeaderSupplier
+        .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
+    headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  }
+
+  public AdminUserControllerApi getAdminUserControllerApi() {
+    ApiClient apiClient = new AdminUserApiClient(restTemplate);
+    apiClient.setBasePath(this.adminUserServiceApiUrl);
+    return new AdminUserControllerApi(apiClient);
+  }
+
   public ConsultantDTO getConsultantById(String consultantId) {
+    var adminUserControllerApi = getAdminUserControllerApi();
     addTechnicalUserHeaders(adminUserControllerApi.getApiClient());
     String consultantResponse = new JSONObject(
         adminUserControllerApi.getConsultant(consultantId)).getJSONObject("embedded").toString();
@@ -64,18 +120,4 @@ public class AdminUserService {
     }
   }
 
-  public AskerResponseDTO getAskerById(String askerId) {
-    addTechnicalUserHeaders(adminUserControllerApi.getApiClient());
-    return adminUserControllerApi.getAsker(askerId);
-  }
-
-  private void addTechnicalUserHeaders(ApiClient apiClient) {
-    KeycloakLoginResponseDTO keycloakLoginResponseDTO = identityClient.loginUser(
-        keycloakTechnicalUsername, keycloakTechnicalPassword
-    );
-    log.debug("Technical Acces Token: {}", keycloakLoginResponseDTO.getAccessToken());
-    HttpHeaders headers = this.securityHeaderSupplier
-        .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
-    headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
-  }
 }
