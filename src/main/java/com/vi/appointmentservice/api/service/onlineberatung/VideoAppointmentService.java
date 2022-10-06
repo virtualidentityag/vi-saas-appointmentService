@@ -6,21 +6,27 @@ import com.vi.appointmentservice.appointmentservice.generated.ApiClient;
 import com.vi.appointmentservice.appointmentservice.generated.web.AppointmentControllerApi;
 import com.vi.appointmentservice.appointmentservice.generated.web.model.Appointment;
 import com.vi.appointmentservice.appointmentservice.generated.web.model.AppointmentStatus;
+import com.vi.appointmentservice.config.VideoAppointmentsApiClient;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import java.time.OffsetDateTime;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class VideoAppointmentService {
 
-  private final @NonNull AppointmentControllerApi appointmentControllerApi;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
 
@@ -30,11 +36,16 @@ public class VideoAppointmentService {
   @Value("${keycloakService.technical.password}")
   private String keycloakTechnicalPassword;
 
+  @Value("${user.service.api.url}")
+  private String videoAppointmentServiceApiUrl;
+
+
   public Appointment createAppointment(String consultantEmail, OffsetDateTime startTime) {
     Appointment appointment = new Appointment();
     appointment.setConsultantEmail(consultantEmail);
     appointment.setStatus(AppointmentStatus.CREATED);
     appointment.setDatetime(startTime);
+    var appointmentControllerApi = getAppointmentControllerApi();
     addTechnicalUserHeaders(appointmentControllerApi.getApiClient());
     return appointmentControllerApi.createAppointment(appointment);
   }
@@ -47,5 +58,19 @@ public class VideoAppointmentService {
     HttpHeaders headers = this.securityHeaderSupplier
         .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  }
+
+
+  public AppointmentControllerApi getAppointmentControllerApi() {
+    final RestTemplate restTemplate = new RestTemplate();
+    final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+    final HttpClient httpClient = HttpClientBuilder.create()
+        .setRedirectStrategy(new LaxRedirectStrategy())
+        .build();
+    factory.setHttpClient(httpClient);
+    restTemplate.setRequestFactory(factory);
+    ApiClient apiClient = new VideoAppointmentsApiClient(restTemplate);
+    apiClient.setBasePath(this.videoAppointmentServiceApiUrl);
+    return new AppointmentControllerApi(apiClient);
   }
 }
