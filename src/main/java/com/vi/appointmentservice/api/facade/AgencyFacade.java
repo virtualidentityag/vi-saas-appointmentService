@@ -170,18 +170,28 @@ public class AgencyFacade {
     eventType.setTeamId(Math.toIntExact(team.getId()));
     eventType.setTitle("Erstberatung " + team.getName());
     eventType.setSlug(UUID.randomUUID().toString());
-    eventType.setLength(60);
+    eventType.setLength(50);
     eventType.setHidden(false);
     eventType.setEventName("Erstberatung {ATTENDEE} mit {HOST}");
     eventType.setRequiresConfirmation(false);
     eventType.setDisableGuests(true);
     eventType.setHideCalendarNotes(true);
-    eventType.setMinimumBookingNotice(120);
+    eventType.setMinimumBookingNotice(240);
     eventType.setBeforeEventBuffer(0);
-    eventType.setAfterEventBuffer(0);
+    eventType.setAfterEventBuffer(10);
+    eventType.setSlotInterval("15");
+    eventType.setPeriodDays(30);
     eventType.setMetadata("{defaultEventType: 'true'}");
-    eventType.setDescription("");
     eventType.setSchedulingType("ROUND_ROBIN");
+    eventType.setDescription(
+        "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
+            + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
+            + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!");
+    List<Object> locations = new ArrayList<>();
+    locations.add("{\"type\": \"integrations:daily\"}");
+    locations.add("{\"type\": \"inPerson\", \"address\": \"Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit\", \"displayLocationPublicly\": false}");
+    locations.add("{\"link\": \"https://app.suchtberatung.digital/\", \"type\": \"link\", \"displayLocationPublicly\": false}");
+    eventType.setLocations(locations);
     return eventType;
   }
 

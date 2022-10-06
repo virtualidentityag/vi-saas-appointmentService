@@ -9,7 +9,6 @@ import com.vi.appointmentservice.api.exception.httpresponses.InternalServerError
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
-import com.vi.appointmentservice.api.model.CalcomEventTypeDTOLocationsInner;
 import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
@@ -172,7 +171,8 @@ public class ConsultantFacade {
     } catch (JsonProcessingException e) {
       throw new CalComApiErrorException("Could not serialize default event-type");
     }
-    Long createdEventTypeId = Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
+    Long createdEventTypeId = Long
+        .valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
     eventTypeRepository.addUserEventTypeRelation(createdEventTypeId, createdUser.getId());
     return createdEventTypeId;
 
@@ -183,20 +183,25 @@ public class ConsultantFacade {
     eventType.setUserId(Math.toIntExact(createdUser.getId()));
     eventType.setTitle("Beratung mit " + createdUser.getName());
     eventType.setSlug(UUID.randomUUID().toString());
-    eventType.setLength(60);
+    eventType.setLength(50);
     eventType.setHidden(false);
     eventType.setEventName("Beratung {ATTENDEE} mit {HOST}");
     eventType.setRequiresConfirmation(false);
     eventType.setDisableGuests(true);
     eventType.setHideCalendarNotes(true);
-    eventType.setMinimumBookingNotice(120);
+    eventType.setMinimumBookingNotice(240);
     eventType.setBeforeEventBuffer(0);
-    eventType.setAfterEventBuffer(0);
-    eventType.setDescription("");
-    List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
-    CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
-    location.setType("integrations:daily");
-    locations.add(location);
+    eventType.setAfterEventBuffer(10);
+    eventType.setSlotInterval("15");
+    eventType.setPeriodDays(30);
+    eventType.setDescription(
+        "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
+            + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
+            + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!");
+    List<Object> locations = new ArrayList<>();
+    locations.add("{\"type\": \"integrations:daily\"}");
+    locations.add("{\"type\": \"inPerson\", \"address\": \"Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit\", \"displayLocationPublicly\": false}");
+    locations.add("{\"link\": \"https://app.suchtberatung.digital/\", \"type\": \"link\", \"displayLocationPublicly\": false}");
     eventType.setLocations(locations);
     return eventType;
   }
