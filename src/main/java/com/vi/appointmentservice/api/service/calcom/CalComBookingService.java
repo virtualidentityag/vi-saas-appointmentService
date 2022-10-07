@@ -10,6 +10,7 @@ import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomRepository;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -68,23 +69,19 @@ public class CalComBookingService extends CalComService {
 
   private List<CalcomBooking> enrichConsultantResultSet(List<CalcomBooking> bookings) {
     for (CalcomBooking booking : bookings) {
-      CalcomBookingToAsker calcomBookingAsker = calcomBookingToAskerRepository
+      Optional<CalcomBookingToAsker> calcomBookingAsker = calcomBookingToAskerRepository
           .findByCalcomBookingId(
               booking.getId());
-      if(calcomBookingAsker == null){
-        log.error("Inconsistent data. Asker not found for booking.");
+      if(!calcomBookingAsker.isPresent()){
+        log.error("Inconsistent data. Asker not found for booking + " + booking.getId());
         continue;
       }
-      booking.setVideoAppointmentId(calcomBookingAsker.getVideoAppointmentId());
-      booking.setAskerId(calcomBookingAsker.getAskerId());
+      CalcomBookingToAsker entity = calcomBookingAsker.get();
+      booking.setVideoAppointmentId(entity.getVideoAppointmentId());
+      booking.setAskerId(entity.getAskerId());
       rescheduleHelper.attachRescheduleLink(booking);
-      try{
-        rescheduleHelper.attachAskerName(booking);
-      }catch (Exception e){
-        //TODO: tmp fix until we see how deletion workflow affects users
-      }
-
     }
+    rescheduleHelper.attachAskerNames(bookings);
     return bookings;
   }
 
@@ -94,18 +91,19 @@ public class CalComBookingService extends CalComService {
 
   List<CalcomBooking> enrichAskerResultSet(List<CalcomBooking> bookings) {
     for (CalcomBooking booking : bookings) {
-      CalcomBookingToAsker calcomBookingAsker = calcomBookingToAskerRepository
+      Optional<CalcomBookingToAsker> calcomBookingAsker = calcomBookingToAskerRepository
           .findByCalcomBookingId(
               booking.getId());
-      if(calcomBookingAsker == null){
-        log.error("Inconsistent data. Asker not found for booking.");
+      if(!calcomBookingAsker.isPresent()){
+        log.error("Inconsistent data. Asker not found for booking + " + booking.getId());
         continue;
       }
-      booking.setAskerId(calcomBookingAsker.getAskerId());
-      booking.setVideoAppointmentId(calcomBookingAsker.getVideoAppointmentId());
+      CalcomBookingToAsker entity = calcomBookingAsker.get();
+      booking.setAskerId(entity.getAskerId());
+      booking.setVideoAppointmentId(entity.getVideoAppointmentId());
       rescheduleHelper.attachRescheduleLink(booking);
-      rescheduleHelper.attachConsultantName(booking);
     }
+    rescheduleHelper.attachConsultantName(bookings);
     return bookings;
   }
 
