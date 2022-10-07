@@ -112,7 +112,6 @@ public class AgencyFacade {
   public void agencyConsultantsSync(AgencyConsultantSyncRequestDTO request) {
     String consultantId = request.getConsultantId();
     Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(consultantId);
-        //.getCalComUserId();
     if(calcomUserToConsultant.isPresent()) {
       consultantFacade.updateUserDefaultEntities(calComUserService.getUserById(calcomUserToConsultant.get().getCalComUserId()));
       List<Long> teamIds = request.getAgencies().stream()
@@ -121,13 +120,17 @@ public class AgencyFacade {
           .collect(Collectors.toList());
       membershipsRepository.updateMemberShipsOfUser(calcomUserToConsultant.get().getCalComUserId(), teamIds);
       // Reset user teamEventTypeMemberships
-      eventTypeRepository.removeTeamEventTypeMembershipsForUser(calcomUserToConsultant.get().getCalComUserId(), teamIds);
-      // Add consultant to team eventTypes
-      for (Long teamId : teamIds) {
-        CalcomEventTypeDTO eventType = calComEventTypeService.getDefaultEventTypeOfTeam(teamId);
-        eventTypeRepository.addUserEventTypeRelation(Long.valueOf(eventType.getId()),
-            calcomUserToConsultant.get().getCalComUserId());
+      if (!teamIds.isEmpty()) {
+        eventTypeRepository.removeTeamEventTypeMembershipsForUser(
+            calcomUserToConsultant.get().getCalComUserId(), teamIds);
+        // Add consultant to team eventTypes
+        for (Long teamId : teamIds) {
+          CalcomEventTypeDTO eventType = calComEventTypeService.getDefaultEventTypeOfTeam(teamId);
+          eventTypeRepository.addUserEventTypeRelation(Long.valueOf(eventType.getId()),
+              calcomUserToConsultant.get().getCalComUserId());
+        }
       }
+
     }
   }
 
@@ -274,7 +277,6 @@ public class AgencyFacade {
     eventTypePayload.setRequiresConfirmation(false);
     eventTypePayload.setDisableGuests(true);
     eventTypePayload.setHideCalendarNotes(true);
-    // eventTypePayload.setSuccessRedirectUrl( appBaseUrl + "/sessions/user/view/");
     JSONObject eventTypePayloadJson;
     try {
       eventTypePayloadJson = new JSONObject(objectMapper.writeValueAsString(eventTypePayload));
