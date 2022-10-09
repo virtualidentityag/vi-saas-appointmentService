@@ -769,6 +769,9 @@ components:
           type: array
           items:
             type: object
+            properties:
+              type:
+                type: string
         metadata:
           type: object
         type:

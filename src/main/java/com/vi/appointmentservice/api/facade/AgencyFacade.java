@@ -12,6 +12,7 @@ import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
 import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTOLocationsInner;
 import com.vi.appointmentservice.api.model.CalcomTeam;
 import com.vi.appointmentservice.api.model.CreateUpdateCalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
@@ -187,10 +188,10 @@ public class AgencyFacade {
         "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
             + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
             + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!");
-    List<Object> locations = new ArrayList<>();
-    locations.add("{\"type\": \"integrations:daily\"}");
-    locations.add("{\"type\": \"inPerson\", \"address\": \"Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit\", \"displayLocationPublicly\": false}");
-    locations.add("{\"link\": \"https://app.suchtberatung.digital/\", \"type\": \"link\", \"displayLocationPublicly\": false}");
+    List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
+    CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
+    location.setType("integrations:daily");
+    locations.add(location);
     eventType.setLocations(locations);
     return eventType;
   }

@@ -9,6 +9,7 @@ import com.vi.appointmentservice.api.exception.httpresponses.InternalServerError
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTOLocationsInner;
 import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
@@ -171,8 +172,7 @@ public class ConsultantFacade {
     } catch (JsonProcessingException e) {
       throw new CalComApiErrorException("Could not serialize default event-type");
     }
-    Long createdEventTypeId = Long
-        .valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
+    Long createdEventTypeId = Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
     eventTypeRepository.addUserEventTypeRelation(createdEventTypeId, createdUser.getId());
     return createdEventTypeId;
 
@@ -198,10 +198,10 @@ public class ConsultantFacade {
         "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
             + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
             + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!");
-    List<Object> locations = new ArrayList<>();
-    locations.add("{\"type\": \"integrations:daily\"}");
-    locations.add("{\"type\": \"inPerson\", \"address\": \"Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit\", \"displayLocationPublicly\": false}");
-    locations.add("{\"link\": \"https://app.suchtberatung.digital/\", \"type\": \"link\", \"displayLocationPublicly\": false}");
+    List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
+    CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
+    location.setType("integrations:daily");
+    locations.add(location);
     eventType.setLocations(locations);
     return eventType;
   }
