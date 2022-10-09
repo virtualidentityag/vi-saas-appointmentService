@@ -58,7 +58,10 @@ public class ConsultantFacade {
   private final @NonNull ScheduleRepository scheduleRepository;
   private final @NonNull EventTypeRepository eventTypeRepository;
   private final @NonNull WebhookRepository webhookRepository;
-
+  private static final String DEFAULT_EVENT_DESCRIPTION =
+      "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
+          + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
+          + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!";
   private final @NonNull AvailabilityRepository availabilityRepository;
 
   public List<CalcomUser> initializeConsultantsHandler() {
@@ -172,7 +175,8 @@ public class ConsultantFacade {
     } catch (JsonProcessingException e) {
       throw new CalComApiErrorException("Could not serialize default event-type");
     }
-    Long createdEventTypeId = Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
+    Long createdEventTypeId = Long
+        .valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
     eventTypeRepository.addUserEventTypeRelation(createdEventTypeId, createdUser.getId());
     return createdEventTypeId;
 
@@ -192,12 +196,9 @@ public class ConsultantFacade {
     eventType.setMinimumBookingNotice(240);
     eventType.setBeforeEventBuffer(0);
     eventType.setAfterEventBuffer(10);
-    eventType.setSlotInterval("15");
+    eventType.setSlotInterval(15);
     eventType.setPeriodDays(30);
-    eventType.setDescription(
-        "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
-            + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
-            + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!");
+    eventType.setDescription(DEFAULT_EVENT_DESCRIPTION);
     List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
     CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
     location.setType("integrations:daily");
