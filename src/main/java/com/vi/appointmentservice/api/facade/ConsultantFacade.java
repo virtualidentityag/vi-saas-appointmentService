@@ -58,7 +58,10 @@ public class ConsultantFacade {
   private final @NonNull ScheduleRepository scheduleRepository;
   private final @NonNull EventTypeRepository eventTypeRepository;
   private final @NonNull WebhookRepository webhookRepository;
-
+  private static final String DEFAULT_EVENT_DESCRIPTION =
+      "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
+          + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
+          + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!";
   private final @NonNull AvailabilityRepository availabilityRepository;
 
   public List<CalcomUser> initializeConsultantsHandler() {
@@ -172,8 +175,10 @@ public class ConsultantFacade {
     } catch (JsonProcessingException e) {
       throw new CalComApiErrorException("Could not serialize default event-type");
     }
-    Long createdEventTypeId = Long.valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
+    Long createdEventTypeId = Long
+        .valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
     eventTypeRepository.addUserEventTypeRelation(createdEventTypeId, createdUser.getId());
+    eventTypeRepository.setPeriodType(createdEventTypeId);
     return createdEventTypeId;
 
   }
@@ -183,16 +188,19 @@ public class ConsultantFacade {
     eventType.setUserId(Math.toIntExact(createdUser.getId()));
     eventType.setTitle("Beratung mit " + createdUser.getName());
     eventType.setSlug(UUID.randomUUID().toString());
-    eventType.setLength(60);
+    eventType.setLength(50);
     eventType.setHidden(false);
     eventType.setEventName("Beratung {ATTENDEE} mit {HOST}");
     eventType.setRequiresConfirmation(false);
     eventType.setDisableGuests(true);
     eventType.setHideCalendarNotes(true);
-    eventType.setMinimumBookingNotice(120);
+    eventType.setMinimumBookingNotice(240);
     eventType.setBeforeEventBuffer(0);
-    eventType.setAfterEventBuffer(0);
-    eventType.setDescription("");
+    eventType.setAfterEventBuffer(10);
+    eventType.setSlotInterval(15);
+    eventType.setPeriodDays(30);
+    eventType.setPeriodCountCalendarDays(true);
+    eventType.setDescription(DEFAULT_EVENT_DESCRIPTION);
     List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
     CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
     location.setType("integrations:daily");
