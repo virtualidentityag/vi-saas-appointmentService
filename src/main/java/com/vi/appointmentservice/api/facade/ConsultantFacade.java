@@ -178,6 +178,7 @@ public class ConsultantFacade {
     Long createdEventTypeId = Long
         .valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
     eventTypeRepository.addUserEventTypeRelation(createdEventTypeId, createdUser.getId());
+    eventTypeRepository.addStartAndEndPeriodDate(createdEventTypeId);
     return createdEventTypeId;
 
   }
@@ -199,8 +200,6 @@ public class ConsultantFacade {
     eventType.setSlotInterval(15);
     eventType.setPeriodDays(30);
     eventType.setPeriodCountCalendarDays(true);
-    eventType.setPeriodStartDate("1970-01-01 00:00:00.000");
-    eventType.setPeriodEndDate("1970-01-01 00:00:00.000");
     eventType.setDescription(DEFAULT_EVENT_DESCRIPTION);
     List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
     CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
