@@ -7,7 +7,6 @@ import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -85,4 +84,9 @@ public class EventTypeRepository {
     jdbcTemplate.update(UPDATE_QUERY);
   }
 
+  public void setPeriodType(Long eventTypeId) {
+    String UPDATE_QUERY = "update \"EventType\" set \"periodType\"='rolling' where \"id\" = eventTypeId";
+    UPDATE_QUERY = UPDATE_QUERY.replace("eventTypeId", eventTypeId.toString());
+    jdbcTemplate.update(UPDATE_QUERY);
+  }
 }
