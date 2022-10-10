@@ -178,7 +178,6 @@ public class ConsultantFacade {
     Long createdEventTypeId = Long
         .valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
     eventTypeRepository.addUserEventTypeRelation(createdEventTypeId, createdUser.getId());
-    eventTypeRepository.addStartAndEndPeriodDate(createdEventTypeId);
     return createdEventTypeId;
 
   }
@@ -199,6 +198,7 @@ public class ConsultantFacade {
     eventType.setAfterEventBuffer(10);
     eventType.setSlotInterval(15);
     eventType.setPeriodDays(30);
+    eventType.setPeriodType("rolling");
     eventType.setPeriodCountCalendarDays(true);
     eventType.setDescription(DEFAULT_EVENT_DESCRIPTION);
     List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();

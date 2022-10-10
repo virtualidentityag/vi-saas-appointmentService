@@ -173,8 +173,7 @@ public class AgencyFacade {
       } catch (JsonProcessingException e) {
         throw new InternalServerErrorException("Could not serialize createCalcomUser payload");
       }
-      CalcomEventTypeDTO eventType = calComEventTypeService.createEventType(eventTypePayloadJson);
-      eventTypeRepository.addStartAndEndPeriodDate(Long.valueOf(eventType.getId()));
+      calComEventTypeService.createEventType(eventTypePayloadJson);
     }
   }
 
@@ -194,6 +193,7 @@ public class AgencyFacade {
     eventType.setAfterEventBuffer(10);
     eventType.setSlotInterval(15);
     eventType.setPeriodDays(30);
+    eventType.setPeriodType("rolling");
     eventType.setPeriodCountCalendarDays(true);
     eventType.setMetadata("{defaultEventType: 'true'}");
     eventType.setSchedulingType("ROUND_ROBIN");
