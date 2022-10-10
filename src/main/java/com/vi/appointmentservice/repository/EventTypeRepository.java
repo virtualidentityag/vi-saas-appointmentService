@@ -87,11 +87,11 @@ public class EventTypeRepository {
 
 
   public void addStartAndEndPeriodDate(Long eventTypeId) {
-    String UPDATE_QUERY_START_PERIOD_DATE = "update \"EventType\" set \"periodStartDate\"='1970-01-01 00:00:00.000' where id = $eventTypeId";
+    String UPDATE_QUERY_START_PERIOD_DATE = "update \"EventType\" set \"periodStartDate\"='1970-01-01 00:00:00.000' where id = eventTypeId";
     UPDATE_QUERY_START_PERIOD_DATE = UPDATE_QUERY_START_PERIOD_DATE.replace("eventTypeId", eventTypeId.toString());
     jdbcTemplate.update(UPDATE_QUERY_START_PERIOD_DATE);
 
-    String UPDATE_QUERY_END_PERIOD_DATE = "update \"EventType\" set \"periodEndDate\"='1970-01-01 00:00:00.000' where id = $eventTypeId";
+    String UPDATE_QUERY_END_PERIOD_DATE = "update \"EventType\" set \"periodEndDate\"='1970-01-01 00:00:00.000' where id = eventTypeId";
     UPDATE_QUERY_END_PERIOD_DATE = UPDATE_QUERY_END_PERIOD_DATE.replace("eventTypeId", eventTypeId.toString());
     jdbcTemplate.update(UPDATE_QUERY_END_PERIOD_DATE);
   }
