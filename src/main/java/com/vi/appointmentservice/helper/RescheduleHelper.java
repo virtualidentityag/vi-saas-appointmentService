@@ -12,17 +12,18 @@ import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
-import com.vi.appointmentservice.useradminservice.generated.web.model.AskerResponseDTO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class RescheduleHelper {
 
   private final @NonNull CalComEventTypeService eventTypeService;
@@ -83,6 +84,7 @@ public class RescheduleHelper {
             consultantNamesForIds.get(bookingUserIdConsultantId.get(booking.getUserId())));
       } else {
         booking.setConsultantName("Unknown name");
+        log.error("Unknown asker name for bookingId " + booking.getId());
       }
     });
 
@@ -96,8 +98,6 @@ public class RescheduleHelper {
               booking.getId());
       if (byCalcomBookingId.isPresent()) {
           bookingIdAskerId.put(booking.getId(), byCalcomBookingId.get().getAskerId());
-      } else {
-        bookingIdAskerId.put(booking.getId(), null);
       }
     });
 

@@ -760,7 +760,7 @@ components:
         currency:
           type: string
         slotInterval:
-          type: string
+          type: integer
         successRedirectUrl:
           type: string
         description:
@@ -844,7 +844,7 @@ components:
         currency:
           type: string
         slotInterval:
-          type: string
+          type: integer
         successRedirectUrl:
           type: string
         description:
