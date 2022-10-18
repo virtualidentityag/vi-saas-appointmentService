@@ -20,7 +20,9 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -80,11 +82,14 @@ public class AdminUserService {
     var adminUserControllerApi = getAdminUserControllerApi();
     addTechnicalUserHeaders(adminUserControllerApi.getApiClient());
     askerIds.stream().forEach(askerId -> {
-      AskerResponseDTO asker = adminUserControllerApi.getAsker(askerId);
-      if (asker != null) {
+      try {
+        AskerResponseDTO asker = adminUserControllerApi.getAsker(askerId);
         result.put(askerId, asker.getUsername());
-      } else {
-        result.put(askerId, "Unknown asker");
+      } catch (HttpClientErrorException ex) {
+        if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+          result.put(askerId, "Unknown asker");
+          log.warn("Asker with username {} not found in userservice DB");
+        }
       }
     });
     return result;
