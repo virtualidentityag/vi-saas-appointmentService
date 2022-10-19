@@ -22,6 +22,7 @@ import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.AvailabilityRepository;
+import com.vi.appointmentservice.repository.CalcomRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
 import com.vi.appointmentservice.repository.ScheduleRepository;
@@ -58,6 +59,7 @@ public class ConsultantFacade {
   private final @NonNull ScheduleRepository scheduleRepository;
   private final @NonNull EventTypeRepository eventTypeRepository;
   private final @NonNull WebhookRepository webhookRepository;
+  private final @NonNull CalcomRepository calcomRepository;
   private static final String DEFAULT_EVENT_DESCRIPTION =
       "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
           + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
@@ -247,6 +249,18 @@ public class ConsultantFacade {
     for (Integer scheduleId : deletedSchedules) {
       availabilityRepository.deleteAvailabilityByScheduleId(Long.valueOf(scheduleId));
     }
+
+    List<CalcomBooking> bookings = new ArrayList<>();
+    bookings.addAll(calcomRepository.getConsultantActiveBookings(calcomUserId));
+    bookings.addAll(calcomRepository.getConsultantCancelledBookings(calcomUserId));
+    bookings.addAll(calcomRepository.getConsultantExpiredBookings(calcomUserId));
+
+    bookings.forEach(booking -> {
+      calComBookingService.cancelBooking(booking.getUid());
+      calcomRepository.deleteBooking(booking.getId());
+      calcomRepository.deleteAttendee(booking.getId());
+    });
+
     // Delete user
     HttpStatus deleteResponseCode = calComUserService.deleteUser(calcomUserId);
     // Remove association

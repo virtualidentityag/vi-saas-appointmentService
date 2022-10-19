@@ -516,32 +516,24 @@ paths:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
       security:
         - Bearer: [ ]
-  /askers/processBooking:
-    post:
+  /askers/{askerId}:
+    delete:
       tags:
         - asker
-      summary: Webhook subscriber
-      operationId: processBooking
+      summary: Delete asker data
+      operationId: deleteAskerData
       parameters:
-        - name: x-cal-signature-256
-          in: header
-          description: Webhook hmac
+        - name: askerId
+          in: path
+          description: ID of asker
+          required: true
           schema:
             type: string
-      requestBody:
-        description: The json string provided by calcom
-        content:
-          application/json:
-            schema:
-              type: string
-        required: true
       responses:
         '200':
           description: successful operation
-          content:
-            text/plain:
-              schema:
-                type: string
+      security:
+        - Bearer: [ ]
   /processBooking:
     post:
       tags:

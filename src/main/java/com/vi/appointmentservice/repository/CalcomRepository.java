@@ -66,4 +66,19 @@ public class CalcomRepository {
     return calcomDBNamedParamterTemplate
         .queryForObject(QUERY, parameters, Integer.class);
   }
+
+  public void deleteBooking(Long bookingId) {
+    String QUERY = "DELETE FROM \"Booking\" AS booking WHERE booking.\"id\" = :bookingId";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("bookingId", bookingId);
+    calcomDBNamedParamterTemplate.update(QUERY, parameters);
+  }
+
+  public void deleteAttendee(Long bookingId) {
+    String QUERY = "DELETE FROM \"Attendee\" AS attendee WHERE attendee.\"bookingId\" = :bookingId";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("bookingId", bookingId);
+    calcomDBNamedParamterTemplate.update(QUERY, parameters);
+  }
+
 }
