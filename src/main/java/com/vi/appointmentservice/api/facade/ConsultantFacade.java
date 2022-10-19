@@ -16,7 +16,6 @@ import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
-import com.vi.appointmentservice.api.service.calcom.CalComMembershipService;
 import com.vi.appointmentservice.api.service.calcom.CalComScheduleService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
@@ -25,6 +24,7 @@ import com.vi.appointmentservice.repository.AvailabilityRepository;
 import com.vi.appointmentservice.repository.CalcomRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
+import com.vi.appointmentservice.repository.MembershipsRepository;
 import com.vi.appointmentservice.repository.ScheduleRepository;
 import com.vi.appointmentservice.repository.UserRepository;
 import com.vi.appointmentservice.repository.WebhookRepository;
@@ -52,7 +52,7 @@ public class ConsultantFacade {
   private final @NonNull CalComUserService calComUserService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull CalComScheduleService calComScheduleService;
-  private final @NonNull CalComMembershipService calComMembershipService;
+  private final @NonNull MembershipsRepository calMembershipsRepository;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull UserService userService;
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
@@ -241,7 +241,7 @@ public class ConsultantFacade {
     // Find associated user
     Long calcomUserId = this.getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
     // Delete team memberships
-    calComMembershipService.deleteAllMembershipsOfUser(calcomUserId);
+    calMembershipsRepository.deleteAllMembershipsOfUser(calcomUserId);
     // Delete personal event-types
     calComEventTypeService.deleteAllEventTypesOfUser(calcomUserId);
     // Delete schedules

@@ -29,6 +29,11 @@ public class MembershipsRepository {
     jdbcTemplate.update(DELETE_MEMBERSHIP_QUERY);
   }
 
+  public void deleteAllMembershipsOfUser(Long userId) {
+    String DELETE_MEMBERSHIP_QUERY = "delete from \"Membership\" where \"userId\"=" + userId;
+    jdbcTemplate.update(DELETE_MEMBERSHIP_QUERY);
+  }
+
   public List<Long> getUsersOfTeam(Long calcomTeamId) {
     String query = "select \"userId\" from \"Membership\" where \"teamId\"=" + calcomTeamId;
     return jdbcTemplate.queryForList(query, Integer.class).stream()
