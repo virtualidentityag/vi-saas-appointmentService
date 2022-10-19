@@ -35,6 +35,7 @@ import java.util.UUID;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
@@ -101,7 +102,7 @@ public class ConsultantFacade {
     } else {
       CalcomUser creationUser = new CalcomUser();
       creationUser.setName(consultant.getFirstname() + " " + consultant.getLastname());
-      creationUser.setEmail(consultant.getEmail());
+      creationUser.setEmail(StringUtils.lowerCase(consultant.getEmail()));
       // Default values
       creationUser.setTimeZone("Europe/Berlin");
       creationUser.setWeekStart("Monday");
@@ -220,7 +221,7 @@ public class ConsultantFacade {
       CalcomUser updateUser = new CalcomUser();
       updateUser.setId(calcomUserId);
       updateUser.setName(consultant.getFirstname() + " " + consultant.getLastname());
-      updateUser.setEmail(consultant.getEmail());
+      updateUser.setEmail(StringUtils.lowerCase(consultant.getEmail()));
       // Default values
       updateUser.setTimeZone("Europe/Berlin");
       updateUser.setWeekStart("Monday");
