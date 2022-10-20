@@ -43,7 +43,7 @@ public class AskerFacade {
       if (calcomBooking != null) {
         calComBookingService.cancelBooking(calcomBooking.getUid());
         calcomRepository.deleteBooking(booking.getCalcomBookingId());
-        calcomRepository.deleteAttendee(booking.getCalcomBookingId());
+        calcomRepository.deleteAttendeeWithoutBooking();
         calcomBookingToAskerRepository.deleteByCalcomBookingId(booking.getCalcomBookingId());
       }
     });

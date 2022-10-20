@@ -259,7 +259,7 @@ public class ConsultantFacade {
     bookings.forEach(booking -> {
       calComBookingService.cancelBooking(booking.getUid());
       calcomRepository.deleteBooking(booking.getId());
-      calcomRepository.deleteAttendee(booking.getId());
+      calcomRepository.deleteAttendeeWithoutBooking();
     });
 
     // Delete user
