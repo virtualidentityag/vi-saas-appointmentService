@@ -85,11 +85,9 @@ public class AdminUserService {
       try {
         AskerResponseDTO asker = adminUserControllerApi.getAsker(askerId);
         result.put(askerId, asker.getUsername());
-      } catch (ResponseStatusException ex) {
-        if (HttpStatus.NOT_FOUND.equals(ex.getStatus())) {
-          result.put(askerId, "Unknown asker");
-          log.warn("Asker with username {} not found in userservice DB");
-        }
+      } catch (Exception ex) {
+        result.put(askerId, "Unknown asker");
+        log.warn("Asker with username {} not found in userservice DB");
       }
     });
     return result;
