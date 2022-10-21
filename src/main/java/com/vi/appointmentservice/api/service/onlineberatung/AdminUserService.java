@@ -22,8 +22,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
@@ -85,8 +85,8 @@ public class AdminUserService {
       try {
         AskerResponseDTO asker = adminUserControllerApi.getAsker(askerId);
         result.put(askerId, asker.getUsername());
-      } catch (HttpClientErrorException ex) {
-        if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+      } catch (ResponseStatusException ex) {
+        if (HttpStatus.NOT_FOUND.equals(ex.getStatus())) {
           result.put(askerId, "Unknown asker");
           log.warn("Asker with username {} not found in userservice DB");
         }
