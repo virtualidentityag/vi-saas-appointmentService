@@ -22,8 +22,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
@@ -60,15 +60,15 @@ public class AdminUserService {
     var adminUserControllerApi = getAdminUserControllerApi();
     addTechnicalUserHeaders(adminUserControllerApi.getApiClient());
     consultantIds.stream().forEach(consultantId -> {
-      String consultantResponse = new JSONObject(
-          adminUserControllerApi.getConsultant(consultantId)).getJSONObject("embedded").toString();
       try {
+        String consultantResponse = new JSONObject(
+            adminUserControllerApi.getConsultant(consultantId)).getJSONObject("embedded").toString();
         ObjectMapper mapper = new ObjectMapper().configure(
             DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ConsultantDTO consultantDTO = mapper.readValue(consultantResponse, ConsultantDTO.class);
         consultantNames
             .put(consultantId, consultantDTO.getFirstname() + " " + consultantDTO.getLastname());
-      } catch (JsonProcessingException e) {
+      } catch (Exception e) {
         consultantNames
             .put(consultantId, "Unknown Consultant");
       }
@@ -85,11 +85,9 @@ public class AdminUserService {
       try {
         AskerResponseDTO asker = adminUserControllerApi.getAsker(askerId);
         result.put(askerId, asker.getUsername());
-      } catch (HttpClientErrorException ex) {
-        if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
-          result.put(askerId, "Unknown asker");
-          log.warn("Asker with username {} not found in userservice DB");
-        }
+      } catch (Exception ex) {
+        result.put(askerId, "Unknown asker");
+        log.warn("Asker with username {} not found in userservice DB");
       }
     });
     return result;

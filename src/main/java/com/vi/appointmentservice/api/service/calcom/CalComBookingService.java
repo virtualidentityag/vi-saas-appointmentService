@@ -16,6 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,6 +30,7 @@ public class CalComBookingService extends CalComService {
   private final @NonNull RescheduleHelper rescheduleHelper;
   private final @NonNull CalcomRepository calcomRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
+  private @Value("${calcom.url}") String calcomUrl;
 
   @Autowired
   public CalComBookingService(RestTemplate restTemplate,
@@ -108,6 +113,7 @@ public class CalComBookingService extends CalComService {
   }
 
   public CalcomBooking getBookingById(Long bookingId) {
+    try {
     String response = restTemplate.getForObject(
         String.format(this.buildUri("/v1/bookings/" + bookingId), calcomApiUrl, calcomApiKey),
         String.class);
@@ -116,14 +122,33 @@ public class CalComBookingService extends CalComService {
     response = jsonObject.getJSONObject("booking").toString();
     log.debug(response);
     ObjectMapper mapper = new ObjectMapper();
-    try {
+
       CalcomBooking calcomBooking = mapper.readValue(response, CalcomBooking.class);
       calcomBooking.setStartTime(jsonObject.getJSONObject("booking").get("startTime").toString());
       calcomBooking.setEndTime(jsonObject.getJSONObject("booking").get("endTime").toString());
       return calcomBooking;
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       return null;
     }
-
   }
+
+  public void cancelBooking(String bookingUid) {
+    JSONObject json = new JSONObject();
+    json.put("allRemainingBookings", false);
+    json.put("reason", "One of attendees of meeting deleted");
+    json.put("uid", bookingUid);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request = new HttpEntity<>(json.toString(), headers);
+
+    try {
+      restTemplate
+          .exchange(calcomUrl + "/api/cancel", HttpMethod.POST, request,
+              String.class);
+    } catch (Exception e) {
+        log.info(e.getMessage());
+    }
+  }
+
+
 }

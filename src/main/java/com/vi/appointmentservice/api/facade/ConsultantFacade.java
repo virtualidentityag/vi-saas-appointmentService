@@ -16,14 +16,15 @@ import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
-import com.vi.appointmentservice.api.service.calcom.CalComMembershipService;
 import com.vi.appointmentservice.api.service.calcom.CalComScheduleService;
 import com.vi.appointmentservice.api.service.calcom.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.AvailabilityRepository;
+import com.vi.appointmentservice.repository.CalcomRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
+import com.vi.appointmentservice.repository.MembershipsRepository;
 import com.vi.appointmentservice.repository.ScheduleRepository;
 import com.vi.appointmentservice.repository.UserRepository;
 import com.vi.appointmentservice.repository.WebhookRepository;
@@ -51,7 +52,7 @@ public class ConsultantFacade {
   private final @NonNull CalComUserService calComUserService;
   private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull CalComScheduleService calComScheduleService;
-  private final @NonNull CalComMembershipService calComMembershipService;
+  private final @NonNull MembershipsRepository calMembershipsRepository;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull UserService userService;
   private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
@@ -59,6 +60,7 @@ public class ConsultantFacade {
   private final @NonNull ScheduleRepository scheduleRepository;
   private final @NonNull EventTypeRepository eventTypeRepository;
   private final @NonNull WebhookRepository webhookRepository;
+  private final @NonNull CalcomRepository calcomRepository;
   private static final String DEFAULT_EVENT_DESCRIPTION =
       "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
           + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
@@ -239,7 +241,7 @@ public class ConsultantFacade {
     // Find associated user
     Long calcomUserId = this.getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
     // Delete team memberships
-    calComMembershipService.deleteAllMembershipsOfUser(calcomUserId);
+    calMembershipsRepository.deleteAllMembershipsOfUser(calcomUserId);
     // Delete personal event-types
     calComEventTypeService.deleteAllEventTypesOfUser(calcomUserId);
     // Delete schedules
@@ -248,6 +250,18 @@ public class ConsultantFacade {
     for (Integer scheduleId : deletedSchedules) {
       availabilityRepository.deleteAvailabilityByScheduleId(Long.valueOf(scheduleId));
     }
+
+    List<CalcomBooking> bookings = new ArrayList<>();
+    bookings.addAll(calcomRepository.getConsultantActiveBookings(calcomUserId));
+    bookings.addAll(calcomRepository.getConsultantCancelledBookings(calcomUserId));
+    bookings.addAll(calcomRepository.getConsultantExpiredBookings(calcomUserId));
+
+    bookings.forEach(booking -> {
+      calComBookingService.cancelBooking(booking.getUid());
+      calcomRepository.deleteBooking(booking.getId());
+      calcomRepository.deleteAttendeeWithoutBooking();
+    });
+
     // Delete user
     HttpStatus deleteResponseCode = calComUserService.deleteUser(calcomUserId);
     // Remove association
