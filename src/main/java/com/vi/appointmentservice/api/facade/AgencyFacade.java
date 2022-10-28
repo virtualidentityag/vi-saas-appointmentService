@@ -320,6 +320,13 @@ public class AgencyFacade {
     eventTypePayload.setRequiresConfirmation(false);
     eventTypePayload.setDisableGuests(true);
     eventTypePayload.setHideCalendarNotes(true);
+    eventTypePayload.setMinimumBookingNotice(240);
+    eventTypePayload.setBeforeEventBuffer(0);
+    eventTypePayload.setAfterEventBuffer(10);
+    eventTypePayload.setSlotInterval(15);
+    eventTypePayload.setPeriodDays(30);
+    eventTypePayload.setPeriodCountCalendarDays(true);
+
     eventTypePayload.setLocations(createDefaultLocations());
     JSONObject eventTypePayloadJson;
     try {
