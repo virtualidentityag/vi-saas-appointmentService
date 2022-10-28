@@ -760,10 +760,7 @@ components:
         locations:
           type: array
           items:
-            type: object
-            properties:
-              type:
-                type: string
+            $ref: '#/components/schemas/Location'
         metadata:
           type: object
         type:
@@ -844,10 +841,7 @@ components:
         locations:
           type: array
           items:
-            type: object
-            properties:
-              type:
-                type: string
+            $ref: '#/components/schemas/Location'
         metadata:
           type: object
         type:
@@ -1079,6 +1073,17 @@ components:
         consultantId:
           type: string
         consultantName:
+          type: string
+    Location:
+      type: object
+      properties:
+        type:
+          type: string
+        link:
+          type: string
+        hostPhoneNumber:
+          type: string
+        address:
           type: string
     ArrayOfTeamEventTypeConsultants:
       type: array

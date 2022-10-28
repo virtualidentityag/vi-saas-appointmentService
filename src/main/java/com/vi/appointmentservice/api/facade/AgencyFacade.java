@@ -12,9 +12,9 @@ import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
 import com.vi.appointmentservice.api.model.CalcomEventType;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
-import com.vi.appointmentservice.api.model.CalcomEventTypeDTOLocationsInner;
 import com.vi.appointmentservice.api.model.CalcomTeam;
 import com.vi.appointmentservice.api.model.CreateUpdateCalcomEventTypeDTO;
+import com.vi.appointmentservice.api.model.Location;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
@@ -116,14 +116,17 @@ public class AgencyFacade {
 
   public void agencyConsultantsSync(AgencyConsultantSyncRequestDTO request) {
     String consultantId = request.getConsultantId();
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository.findByConsultantId(consultantId);
-    if(calcomUserToConsultant.isPresent()) {
-      consultantFacade.updateUserDefaultEntities(calComUserService.getUserById(calcomUserToConsultant.get().getCalComUserId()));
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+        .findByConsultantId(consultantId);
+    if (calcomUserToConsultant.isPresent()) {
+      consultantFacade.updateUserDefaultEntities(
+          calComUserService.getUserById(calcomUserToConsultant.get().getCalComUserId()));
       List<Long> teamIds = request.getAgencies().stream()
           .filter(teamToAgencyRepository::existsByAgencyId)
           .map(agencyId -> teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid())
           .collect(Collectors.toList());
-      membershipsRepository.updateMemberShipsOfUser(calcomUserToConsultant.get().getCalComUserId(), teamIds);
+      membershipsRepository
+          .updateMemberShipsOfUser(calcomUserToConsultant.get().getCalComUserId(), teamIds);
       // Reset user teamEventTypeMemberships
       if (!teamIds.isEmpty()) {
         eventTypeRepository.removeTeamEventTypeMembershipsForUser(
@@ -138,6 +141,7 @@ public class AgencyFacade {
 
     }
   }
+
   public void agencyMasterDataSync(AgencyMasterDataSyncRequestDTO request) {
     Optional<TeamToAgency> teamToAgency = teamToAgencyRepository.findByAgencyId(request.getId());
     CalcomTeam createdOrUpdateTeam;
@@ -195,12 +199,29 @@ public class AgencyFacade {
     eventType.setMetadata("{defaultEventType: 'true'}");
     eventType.setSchedulingType("ROUND_ROBIN");
     eventType.setDescription(DEFAULT_EVENT_DESCRIPTION);
-    List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
-    CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
-    location.setType("integrations:daily");
-    locations.add(location);
-    eventType.setLocations(locations);
+    eventType.setLocations(createDefaultLocations());
     return eventType;
+  }
+
+  private List<Location> createDefaultLocations() {
+    List<Location> locations = new ArrayList<>();
+    Location customVideoLink = new Location();
+    customVideoLink.setType("customVideoLink");
+    customVideoLink.setLink(appBaseUrl);
+    locations.add(customVideoLink);
+    Location link = new Location();
+    link.setType("link");
+    link.setLink(appBaseUrl);
+    locations.add(link);
+    Location userPhone = new Location();
+    userPhone.setType("userPhone");
+    userPhone.setHostPhoneNumber(appBaseUrl);
+    locations.add(userPhone);
+    Location inPerson = new Location();
+    inPerson.setType("inPerson");
+    inPerson.setAddress("Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit");
+    locations.add(inPerson);
+    return locations;
   }
 
   public void deleteAgency(Long agencyId) {
@@ -299,6 +320,14 @@ public class AgencyFacade {
     eventTypePayload.setRequiresConfirmation(false);
     eventTypePayload.setDisableGuests(true);
     eventTypePayload.setHideCalendarNotes(true);
+    eventTypePayload.setMinimumBookingNotice(240);
+    eventTypePayload.setBeforeEventBuffer(0);
+    eventTypePayload.setAfterEventBuffer(10);
+    eventTypePayload.setSlotInterval(15);
+    eventTypePayload.setPeriodDays(30);
+    eventTypePayload.setPeriodCountCalendarDays(true);
+
+    eventTypePayload.setLocations(createDefaultLocations());
     JSONObject eventTypePayloadJson;
     try {
       eventTypePayloadJson = new JSONObject(objectMapper.writeValueAsString(eventTypePayload));

@@ -9,10 +9,10 @@ import com.vi.appointmentservice.api.exception.httpresponses.InternalServerError
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
-import com.vi.appointmentservice.api.model.CalcomEventTypeDTOLocationsInner;
 import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
+import com.vi.appointmentservice.api.model.Location;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -66,6 +67,8 @@ public class ConsultantFacade {
           + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
           + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!";
   private final @NonNull AvailabilityRepository availabilityRepository;
+  @Value("${app.base.url}")
+  private String appBaseUrl;
 
   public List<CalcomUser> initializeConsultantsHandler() {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -204,10 +207,23 @@ public class ConsultantFacade {
     eventType.setPeriodDays(30);
     eventType.setPeriodCountCalendarDays(true);
     eventType.setDescription(DEFAULT_EVENT_DESCRIPTION);
-    List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
-    CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
-    location.setType("integrations:daily");
-    locations.add(location);
+    List<Location> locations = new ArrayList<>();
+    Location customVideoLink = new Location();
+    customVideoLink.setType("customVideoLink");
+    customVideoLink.setLink(appBaseUrl);
+    locations.add(customVideoLink);
+    Location link = new Location();
+    link.setType("link");
+    link.setLink(appBaseUrl);
+    locations.add(link);
+    Location userPhone = new Location();
+    userPhone.setType("userPhone");
+    userPhone.setHostPhoneNumber(appBaseUrl);
+    locations.add(userPhone);
+    Location inPerson = new Location();
+    inPerson.setType("inPerson");
+    inPerson.setAddress("Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit");
+    locations.add(inPerson);
     eventType.setLocations(locations);
     return eventType;
   }
