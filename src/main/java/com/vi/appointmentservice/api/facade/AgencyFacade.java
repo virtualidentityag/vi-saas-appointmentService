@@ -196,9 +196,22 @@ public class AgencyFacade {
     eventType.setSchedulingType("ROUND_ROBIN");
     eventType.setDescription(DEFAULT_EVENT_DESCRIPTION);
     List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
-    CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
-    location.setType("integrations:daily");
-    locations.add(location);
+    CalcomEventTypeDTOLocationsInner customVideoLink = new CalcomEventTypeDTOLocationsInner();
+    customVideoLink.setType("customVideoLink");
+    customVideoLink.setLink(appBaseUrl);
+    locations.add(customVideoLink);
+    CalcomEventTypeDTOLocationsInner link = new CalcomEventTypeDTOLocationsInner();
+    link.setType("link");
+    link.setLink(appBaseUrl);
+    locations.add(link);
+    CalcomEventTypeDTOLocationsInner userPhone = new CalcomEventTypeDTOLocationsInner();
+    userPhone.setType("userPhone");
+    userPhone.setHostPhoneNumber(appBaseUrl);
+    locations.add(userPhone);
+    CalcomEventTypeDTOLocationsInner inPerson = new CalcomEventTypeDTOLocationsInner();
+    inPerson.setType("inPerson");
+    inPerson.setAddress("Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit");
+    locations.add(inPerson);
     eventType.setLocations(locations);
     return eventType;
   }

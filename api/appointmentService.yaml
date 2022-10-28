@@ -764,6 +764,12 @@ components:
             properties:
               type:
                 type: string
+              link:
+                type: string
+              hostPhoneNumber:
+                type: string
+              address:
+                type: string
         metadata:
           type: object
         type:

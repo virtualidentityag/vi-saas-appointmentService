@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -66,6 +67,8 @@ public class ConsultantFacade {
           + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
           + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!";
   private final @NonNull AvailabilityRepository availabilityRepository;
+  @Value("${app.base.url}")
+  private String appBaseUrl;
 
   public List<CalcomUser> initializeConsultantsHandler() {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -205,9 +208,22 @@ public class ConsultantFacade {
     eventType.setPeriodCountCalendarDays(true);
     eventType.setDescription(DEFAULT_EVENT_DESCRIPTION);
     List<CalcomEventTypeDTOLocationsInner> locations = new ArrayList<>();
-    CalcomEventTypeDTOLocationsInner location = new CalcomEventTypeDTOLocationsInner();
-    location.setType("integrations:daily");
-    locations.add(location);
+    CalcomEventTypeDTOLocationsInner customVideoLink = new CalcomEventTypeDTOLocationsInner();
+    customVideoLink.setType("customVideoLink");
+    customVideoLink.setLink(appBaseUrl);
+    locations.add(customVideoLink);
+    CalcomEventTypeDTOLocationsInner link = new CalcomEventTypeDTOLocationsInner();
+    link.setType("link");
+    link.setLink(appBaseUrl);
+    locations.add(link);
+    CalcomEventTypeDTOLocationsInner userPhone = new CalcomEventTypeDTOLocationsInner();
+    userPhone.setType("userPhone");
+    userPhone.setHostPhoneNumber(appBaseUrl);
+    locations.add(userPhone);
+    CalcomEventTypeDTOLocationsInner inPerson = new CalcomEventTypeDTOLocationsInner();
+    inPerson.setType("inPerson");
+    inPerson.setAddress("Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit");
+    locations.add(inPerson);
     eventType.setLocations(locations);
     return eventType;
   }
