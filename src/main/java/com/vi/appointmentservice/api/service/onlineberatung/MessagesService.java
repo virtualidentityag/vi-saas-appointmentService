@@ -22,6 +22,7 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.LaxRedirectStrategy;
@@ -58,7 +59,7 @@ public class MessagesService {
 
   private static String formatDate(String dateString){
     try {
-      return toFormat.format(fromFormat.parse(dateString));
+      return toFormat.format(DateUtils.addHours(fromFormat.parse(dateString),2));
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
