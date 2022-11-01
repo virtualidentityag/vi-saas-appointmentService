@@ -59,7 +59,7 @@ public class MessagesService {
 
   private static String formatDate(String dateString){
     try {
-      return toFormat.format(DateUtils.addHours(fromFormat.parse(dateString),2));
+      return toFormat.format(DateUtils.addHours(fromFormat.parse(dateString),1));
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
