@@ -24,8 +24,7 @@ public class CalcomRepositoryBookingMapper implements RowMapper<CalcomBooking> {
   }
 
   private String formatDate(String dateTime){
-    //TODO: this should be changed with frontend together
-    return LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).plusHours(4).toString();
+    return LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toString();
   }
 }
 
