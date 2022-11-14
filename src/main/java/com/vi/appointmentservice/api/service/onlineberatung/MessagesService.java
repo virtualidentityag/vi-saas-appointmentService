@@ -58,7 +58,7 @@ public class MessagesService {
 
   private static String formatDate(String dateString){
     try {
-      return toFormat.format(fromFormat.parse(dateString));
+      return toFormat.format(toFormatMinutesOnly.parse(dateString));
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
@@ -95,7 +95,7 @@ public class MessagesService {
     JSONObject messageContent = new JSONObject();
     messageContent.put("title", booking.getTitle());
     message.setMessageType(messageType);
-    messageContent.put("date", LocalDateTime.parse(formatDateWithoutSeconds(booking.getStartTime())));
+    messageContent.put("date", LocalDateTime.parse(formatDate(booking.getStartTime())));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(formatDateWithoutSeconds(booking.getStartTime())),
         LocalDateTime.parse(formatDateWithoutSeconds(booking.getEndTime()))));
