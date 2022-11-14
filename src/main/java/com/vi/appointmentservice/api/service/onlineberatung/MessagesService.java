@@ -99,7 +99,7 @@ public class MessagesService {
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(formatDateWithoutSeconds(booking.getStartTime())),
         LocalDateTime.parse(formatDateWithoutSeconds(booking.getEndTime()))));
-    messageContent.put("note", booking.getNote());
+    messageContent.put("note", booking.getDescription());
     message.setContent(messageContent.toString());
     return message;
   }
