@@ -601,8 +601,6 @@ components:
           type: string
         videoAppointmentId:
           type: string
-        note:
-          type: string
     ArrayOfCalcomBookings:
       type: array
       items:

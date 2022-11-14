@@ -113,24 +113,7 @@ public class CalComBookingService extends CalComService {
   }
 
   public CalcomBooking getBookingById(Long bookingId) {
-    try {
-    String response = restTemplate.getForObject(
-        String.format(this.buildUri("/v1/bookings/" + bookingId), calcomApiUrl, calcomApiKey),
-        String.class);
-    JSONObject jsonObject = new JSONObject(response);
-    log.debug(String.valueOf(jsonObject));
-    response = jsonObject.getJSONObject("booking").toString();
-    log.debug(response);
-    ObjectMapper mapper = new ObjectMapper();
-
-      CalcomBooking calcomBooking = mapper.readValue(response, CalcomBooking.class);
-      calcomBooking.setStartTime(jsonObject.getJSONObject("booking").get("startTime").toString());
-      calcomBooking.setEndTime(jsonObject.getJSONObject("booking").get("endTime").toString());
-      calcomBooking.setNote((jsonObject.getJSONObject("booking").get("description").toString()));
-      return calcomBooking;
-    } catch (Exception e) {
-      return null;
-    }
+    return calcomRepository.getBookingById(bookingId);
   }
 
   public void cancelBooking(String bookingUid) {

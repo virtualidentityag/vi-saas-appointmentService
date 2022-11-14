@@ -49,6 +49,13 @@ public class CalcomRepository {
             new CalcomRepositoryBookingMapper());
   }
 
+  public CalcomBooking getBookingById(Long bookingId) {
+    SqlParameterSource parameters = new MapSqlParameterSource("bookingId", bookingId);
+    return calcomDBNamedParamterTemplate
+        .queryForObject("select * from \"Booking\" where id = :bookingId", parameters,
+            new CalcomRepositoryBookingMapper());
+  }
+
   public List<CalcomBooking> getAskerActiveBookings(List<Long> bookingIds) {
     String QUERY = "SELECT * FROM \"Booking\" AS booking WHERE booking.status != 'cancelled' AND "
         + "booking.\"id\" in (:ids) AND now() < \"startTime\" order by \"startTime\" ASC";
