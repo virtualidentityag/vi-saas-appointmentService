@@ -46,7 +46,6 @@ public class MessagesService {
   @Value("${message.service.api.url}")
   private String messageServiceApiUrl;
 
-  private final static SimpleDateFormat fromFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   private final static SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
   private final static SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
@@ -59,14 +58,6 @@ public class MessagesService {
   private static String formatDate(String dateString){
     try {
       return toFormat.format(toFormatMinutesOnly.parse(dateString));
-    } catch (ParseException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private static String formatDateWithoutSeconds(String dateString){
-    try {
-      return toFormatMinutesOnly.format(fromFormat.parse(dateString));
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
@@ -97,8 +88,8 @@ public class MessagesService {
     message.setMessageType(messageType);
     messageContent.put("date", LocalDateTime.parse(formatDate(booking.getStartTime())));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
-        LocalDateTime.parse(formatDateWithoutSeconds(booking.getStartTime())),
-        LocalDateTime.parse(formatDateWithoutSeconds(booking.getEndTime()))));
+        LocalDateTime.parse(formatDate(booking.getStartTime())),
+        LocalDateTime.parse(formatDate(booking.getEndTime()))));
     messageContent.put("note", booking.getDescription());
     message.setContent(messageContent.toString());
     return message;
