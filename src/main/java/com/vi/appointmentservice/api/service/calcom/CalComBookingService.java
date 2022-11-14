@@ -126,6 +126,7 @@ public class CalComBookingService extends CalComService {
       CalcomBooking calcomBooking = mapper.readValue(response, CalcomBooking.class);
       calcomBooking.setStartTime(jsonObject.getJSONObject("booking").get("startTime").toString());
       calcomBooking.setEndTime(jsonObject.getJSONObject("booking").get("endTime").toString());
+      calcomBooking.setNote((jsonObject.getJSONObject("booking").get("description").toString()));
       return calcomBooking;
     } catch (Exception e) {
       return null;

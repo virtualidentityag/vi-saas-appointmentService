@@ -22,7 +22,6 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.LaxRedirectStrategy;
@@ -75,57 +74,32 @@ public class MessagesService {
 
   public void publishCancellationMessage(Long bookingId) {
     CalcomBooking booking = calComBookingService.getBookingById(bookingId);
-    AliasMessageDTO message = createCancellationMessage(booking);
+    AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_CANCELLED);
     sendMessage(booking, message);
   }
 
   public void publishNewAppointmentMessage(Long bookingId) {
     CalcomBooking booking = calComBookingService.getBookingById(bookingId);
-    AliasMessageDTO message = createNewAppointmentMessage(booking);
+    AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_SET);
     sendMessage(booking, message);
   }
 
   public void publishRescheduledAppointmentMessage(Long bookingId) {
     CalcomBooking booking = calComBookingService.getBookingById(bookingId);
-    AliasMessageDTO message = createRescheduleAppointmentMessage(booking);
+    AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_RESCHEDULED);
     sendMessage(booking, message);
   }
 
-  private AliasMessageDTO createRescheduleAppointmentMessage(CalcomBooking booking) {
+  private AliasMessageDTO createMessage(CalcomBooking booking, MessageType messageType) {
     AliasMessageDTO message = new AliasMessageDTO();
     JSONObject messageContent = new JSONObject();
     messageContent.put("title", booking.getTitle());
-    message.setMessageType(MessageType.APPOINTMENT_RESCHEDULED);
+    message.setMessageType(messageType);
     messageContent.put("date", LocalDateTime.parse(formatDate(booking.getStartTime())));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(formatDateWithoutSeconds(booking.getStartTime())),
         LocalDateTime.parse(formatDateWithoutSeconds(booking.getEndTime()))));
-    message.setContent(messageContent.toString());
-    return message;
-  }
-
-  private AliasMessageDTO createNewAppointmentMessage(CalcomBooking booking) {
-    AliasMessageDTO message = new AliasMessageDTO();
-    JSONObject messageContent = new JSONObject();
-    messageContent.put("title", booking.getTitle());
-    message.setMessageType(MessageType.APPOINTMENT_SET);
-    messageContent.put("date", LocalDateTime.parse(formatDate(booking.getStartTime())));
-    messageContent.put("duration", ChronoUnit.MINUTES.between(
-        LocalDateTime.parse(formatDateWithoutSeconds(booking.getStartTime())),
-        LocalDateTime.parse(formatDateWithoutSeconds(booking.getEndTime()))));
-    message.setContent(messageContent.toString());
-    return message;
-  }
-
-  private AliasMessageDTO createCancellationMessage(CalcomBooking booking) {
-    AliasMessageDTO message = new AliasMessageDTO();
-    JSONObject messageContent = new JSONObject();
-    messageContent.put("title", booking.getTitle());
-    messageContent.put("date", LocalDateTime.parse(formatDate(booking.getStartTime())));
-    messageContent.put("duration", ChronoUnit.MINUTES.between(
-        LocalDateTime.parse(formatDateWithoutSeconds(booking.getStartTime())),
-        LocalDateTime.parse(formatDateWithoutSeconds(booking.getEndTime()))));
-    message.setMessageType(MessageType.APPOINTMENT_CANCELLED);
+    messageContent.put("note", booking.getNote());
     message.setContent(messageContent.toString());
     return message;
   }
