@@ -95,7 +95,7 @@ public class MessagesService {
     JSONObject messageContent = new JSONObject();
     messageContent.put("title", booking.getTitle());
     message.setMessageType(messageType);
-    messageContent.put("date", LocalDateTime.parse(formatDate(booking.getStartTime())));
+    messageContent.put("date", LocalDateTime.parse(formatDateWithoutSeconds(booking.getStartTime())));
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(formatDateWithoutSeconds(booking.getStartTime())),
         LocalDateTime.parse(formatDateWithoutSeconds(booking.getEndTime()))));
