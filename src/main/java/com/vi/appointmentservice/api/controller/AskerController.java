@@ -2,6 +2,7 @@ package com.vi.appointmentservice.api.controller;
 
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.facade.AskerFacade;
+import com.vi.appointmentservice.api.model.AskerDTO;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.service.CalcomWebhookHandlerService;
 import com.vi.appointmentservice.generated.api.controller.AskersApi;
@@ -41,5 +42,15 @@ public class AskerController implements AskersApi {
   public ResponseEntity<Void> deleteAskerData(String askerId) {
     askerFacade.deleteAskerData(askerId);
     return new ResponseEntity<Void>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> updateAskerEmail(final String askerId, final AskerDTO askerDTO) {
+    if (authenticatedUser.getUserId().equals(askerId)) {
+      askerFacade.updateAskerEmail(askerDTO);
+      return new ResponseEntity<Void>(HttpStatus.OK);
+    } else {
+      throw new BadRequestException("Not authorized for given askerId");
+    }
   }
 }
