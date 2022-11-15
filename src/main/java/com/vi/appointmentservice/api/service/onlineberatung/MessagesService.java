@@ -3,6 +3,7 @@ package com.vi.appointmentservice.api.service.onlineberatung;
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.config.MessageApiClient;
 import com.vi.appointmentservice.messageservice.generated.web.MessageControllerApi;
@@ -13,12 +14,12 @@ import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
-import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.function.Function;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -47,7 +49,8 @@ public class MessagesService {
   private String messageServiceApiUrl;
 
   private final static SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-  private final static SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+  private final static SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat(
+      "yyyy-MM-dd'T'HH:mm");
 
   @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
@@ -55,7 +58,7 @@ public class MessagesService {
   @Value("${keycloakService.technical.password}")
   private String keycloakTechnicalPassword;
 
-  private static String formatDate(String dateString){
+  private static String formatDate(String dateString) {
     try {
       return toFormat.format(toFormatMinutesOnly.parse(dateString));
     } catch (ParseException e) {
@@ -69,10 +72,22 @@ public class MessagesService {
     sendMessage(booking, message);
   }
 
+  @Async
   public void publishNewAppointmentMessage(Long bookingId) {
-    CalcomBooking booking = calComBookingService.getBookingById(bookingId);
-    AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_SET);
-    sendMessage(booking, message);
+    for (var i = 0; i < 10; i++) {
+      try {
+        CalcomBooking booking = calComBookingService.getBookingById(bookingId);
+        AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_SET);
+        sendMessage(booking, message);
+        break;
+      } catch (Exception e) {
+        try {
+          Thread.sleep(2000);
+        } catch (InterruptedException e1) {
+          //
+        }
+      }
+    }
   }
 
   public void publishRescheduledAppointmentMessage(Long bookingId) {
@@ -104,7 +119,7 @@ public class MessagesService {
   private String getRocketChatGroupId(CalcomBooking booking) {
     Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
         .findByCalComUserId(Long.valueOf(booking.getUserId()));
-    if(calcomUserToConsultant.isPresent()){
+    if (calcomUserToConsultant.isPresent()) {
       String consultantId = calcomUserToConsultant.get().getConsultantId();
       Optional<CalcomBookingToAsker> byCalcomBookingId = calcomBookingToAskerRepository
           .findByCalcomBookingId(booking.getId());
@@ -134,7 +149,8 @@ public class MessagesService {
         .build();
     factory.setHttpClient(httpClient);
     restTemplate.setRequestFactory(factory);
-    com.vi.appointmentservice.messageservice.generated.ApiClient apiClient = new MessageApiClient(restTemplate);
+    com.vi.appointmentservice.messageservice.generated.ApiClient apiClient = new MessageApiClient(
+        restTemplate);
     apiClient.setBasePath(this.messageServiceApiUrl);
     return new MessageControllerApi(apiClient);
   }
