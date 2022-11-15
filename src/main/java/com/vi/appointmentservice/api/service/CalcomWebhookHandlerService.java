@@ -8,8 +8,8 @@ import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
-import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
+import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentService;
 import com.vi.appointmentservice.api.service.statistics.StatisticsService;
 import com.vi.appointmentservice.api.service.statistics.event.BookingCanceledStatisticsEvent;
 import com.vi.appointmentservice.api.service.statistics.event.BookingCreatedStatisticsEvent;
@@ -71,30 +71,22 @@ public class CalcomWebhookHandlerService {
     Appointment appointment = videoAppointmentService
         .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
     createBookingAskerRelation(payload, appointment.getId());
-    if (!isTeamEvent(payload)) {
-      messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
-    }
-  }
-
-  private boolean isTeamEvent(CalcomWebhookInputPayload payload) {
-    CalcomBooking booking = calComBookingService
-        .getBookingById(Long.valueOf(payload.getBookingId()));
-    CalcomEventTypeDTO eventType = calComEventTypeService
-        .getEventTypeById(Long.valueOf(booking.getEventTypeId()));
-    return eventType.getTeamId() != null;
+    messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
   }
 
   private String getConsultantId(Integer bookingId) {
     CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository.findByCalComUserId(
-        Long.valueOf(booking.getUserId()));
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository
+        .findByCalComUserId(
+            Long.valueOf(booking.getUserId()));
     if (calcomUserToConsultant.isPresent()) {
       String consultantId = calcomUserToConsultant.get().getConsultantId();
       com.vi.appointmentservice.useradminservice.generated.web.model.ConsultantDTO consultant = null;
       consultant = this.adminUserService.getConsultantById(consultantId);
       return consultant.getId();
     } else {
-      throw new InternalServerErrorException("Could not find calcomUserToConsultant for bookingId " + bookingId);
+      throw new InternalServerErrorException(
+          "Could not find calcomUserToConsultant for bookingId " + bookingId);
     }
   }
 
@@ -135,14 +127,18 @@ public class CalcomWebhookHandlerService {
   private void createStatisticsEvent(String eventType, CalcomWebhookInputPayload payload) {
     switch (eventType) {
       case "BOOKING_CREATED":
-        statisticsService.fireEvent(new BookingCreatedStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
+        statisticsService.fireEvent(new BookingCreatedStatisticsEvent(payload,
+            this.getConsultantId(payload.getBookingId())));
         break;
       case "BOOKING_RESCHEDULED":
-        statisticsService.fireEvent(new BookingRescheduledStatisticsEvent(payload, this.getConsultantId(payload.getBookingId())));
+        statisticsService.fireEvent(new BookingRescheduledStatisticsEvent(payload,
+            this.getConsultantId(payload.getBookingId())));
         break;
       case "BOOKING_CANCELLED":
         Integer bookingId = calcomRepository.getBookingIdByUid(payload.getUid());
-        statisticsService.fireEvent(new BookingCanceledStatisticsEvent(payload, this.getConsultantId(bookingId), bookingId));
+        statisticsService.fireEvent(
+            new BookingCanceledStatisticsEvent(payload, this.getConsultantId(bookingId),
+                bookingId));
         break;
       default:
         log.warn("Webhook event {} ignored for statistics", eventType);
