@@ -1,22 +1,35 @@
 package com.vi.appointmentservice.api.facade;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.vi.appointmentservice.api.model.AskerDTO;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomRepository;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AskerFacade {
 
+  @Value("${calcom.email.trash}")
+  private String trashEmail;
+  @Value("${identity.email-dummy-suffix}")
+  private String dummyEmailSuffix;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull CalcomRepository calcomRepository;
@@ -47,5 +60,24 @@ public class AskerFacade {
         calcomBookingToAskerRepository.deleteByCalcomBookingId(booking.getCalcomBookingId());
       }
     });
+  }
+
+  public void updateAskerEmail(final AskerDTO askerDTO) {
+    final String newEmail = resolveEmail(askerDTO);
+    if (calcomBookingToAskerRepository.existsByAskerId(askerDTO.getId())) {
+      List<Long> bookingIds = calcomBookingToAskerRepository.findByAskerId(askerDTO.getId()).stream()
+              .map(CalcomBookingToAsker::getCalcomBookingId)
+              .collect(Collectors.toList());
+      calcomRepository.updateAttendeeEmail(bookingIds, newEmail);
+    } else {
+      log.error("Asker with id: {} not existing in calcom repo", askerDTO.getId());
+    }
+  }
+
+  private String resolveEmail(final AskerDTO askerDTO) {
+    if (isBlank(askerDTO.getEmail()) || askerDTO.getEmail().endsWith(dummyEmailSuffix)) {
+      return trashEmail;
+    }
+    return askerDTO.getEmail();
   }
 }

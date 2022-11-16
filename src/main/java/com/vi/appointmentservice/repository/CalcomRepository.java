@@ -86,4 +86,11 @@ public class CalcomRepository {
     calcomDBNamedParamterTemplate.update(QUERY, new MapSqlParameterSource());
   }
 
+  public void updateAttendeeEmail(final List<Long> bookingIds, final String email) {
+    String QUERY = "UPDATE \"Attendee\" SET \"email\"=:email WHERE \"bookingId\" IN (:bookingIds)";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+            .addValue("bookingIds", bookingIds)
+            .addValue("email", email);
+    calcomDBNamedParamterTemplate.update(QUERY, parameters);
+  }
 }
