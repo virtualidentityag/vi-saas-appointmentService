@@ -88,6 +88,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
         .antMatchers(HttpMethod.GET, "/askers", "/askers/**")
         .hasAnyAuthority(AuthorityValue.USER_DEFAULT)
+        .antMatchers(HttpMethod.PATCH, "/askers/**")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT)
 
         .antMatchers(HttpMethod.GET, "/caldav/hasAccount")
         .hasAuthority(AuthorityValue.CONSULTANT_DEFAULT)
