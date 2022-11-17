@@ -1,12 +1,17 @@
 package com.vi.appointmentservice.api.facade;
 
+import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.api.model.NotificationSettingsDTO;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomRepository;
+import com.vi.appointmentservice.repository.NotificationSettingsRepository;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +25,7 @@ public class AskerFacade {
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull CalcomRepository calcomRepository;
+  private final @NonNull NotificationSettingsRepository notificationSettingsRepository;
 
   public List<CalcomBooking> getAskerActiveBookings(String askerId) {
     if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
@@ -47,5 +53,18 @@ public class AskerFacade {
         calcomBookingToAskerRepository.deleteByCalcomBookingId(booking.getCalcomBookingId());
       }
     });
+  }
+
+  public NotificationSettingsDTO getNotificationSettings(final String askerId) {
+    return notificationSettingsRepository.findById(askerId).map(notificationSettings -> {
+      NotificationSettingsDTO notificationSettingsDTO = new NotificationSettingsDTO();
+      notificationSettingsDTO.setShouldReceiveEmail(notificationSettings.isShouldReceiveCalcomEmail());
+      return notificationSettingsDTO;
+    }).orElseThrow(() -> new NotFoundException("Could not find notification settings for asker id %s", askerId));
+  }
+
+  public NotificationSettingsDTO updateNotificationSettings(final String askerId, final NotificationSettingsDTO notificationSettingsDTO) {
+//    notificationSettingsRepository.save()
+    return null;
   }
 }

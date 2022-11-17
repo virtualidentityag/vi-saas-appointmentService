@@ -7,4 +7,5 @@
 	<!-- The base changeset contains the database state when liquibase was added to the project -->
 	<include file="db/changelog/changeset/0001_initsql/initSql.xml"/>
 	<include file="db/changelog/changeset/0002_videoAppointmentId/0002_changeSet.xml"/>
+	<include file="db/changelog/changeset/0003_notificationSettings/0003_changeSet.xml"/>
 </databaseChangeLog>

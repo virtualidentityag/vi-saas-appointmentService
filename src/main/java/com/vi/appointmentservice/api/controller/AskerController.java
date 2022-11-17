@@ -3,11 +3,14 @@ package com.vi.appointmentservice.api.controller;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.facade.AskerFacade;
 import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.api.model.NotificationSettingsDTO;
 import com.vi.appointmentservice.api.service.CalcomWebhookHandlerService;
 import com.vi.appointmentservice.generated.api.controller.AskersApi;
 import com.vi.appointmentservice.helper.AuthenticatedUser;
 import io.swagger.annotations.Api;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,5 +44,23 @@ public class AskerController implements AskersApi {
   public ResponseEntity<Void> deleteAskerData(String askerId) {
     askerFacade.deleteAskerData(askerId);
     return new ResponseEntity<Void>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<NotificationSettingsDTO> getNotificationSettingsOfAsker(final String askerId) {
+    if (authenticatedUser.getUserId().equals(askerId)) {
+      return new ResponseEntity<>(askerFacade.getNotificationSettings(askerId), HttpStatus.OK);
+    } else {
+      throw new BadRequestException("Not authorized for given askerId");
+    }
+  }
+
+  @Override
+  public ResponseEntity<NotificationSettingsDTO> updateNotificationSettingsOfAsker(final String askerId, final NotificationSettingsDTO notificationSettingsDTO) {
+    if (authenticatedUser.getUserId().equals(askerId)) {
+      return new ResponseEntity<>(askerFacade.updateNotificationSettings(askerId, notificationSettingsDTO), HttpStatus.OK);
+    } else {
+      throw new BadRequestException("Not authorized for given askerId");
+    }
   }
 }

@@ -516,6 +516,52 @@ paths:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
       security:
         - Bearer: [ ]
+  /askers/{askerId}/notificationSettings:
+    get:
+      tags:
+        - asker
+      summary: Get appointment settings of an asker
+      operationId: getNotificationSettingsOfAsker
+      parameters:
+        - name: askerId
+          in: path
+          description: ID of onber asker
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettingsDTO'
+    put:
+      tags:
+        - asker
+      summary: update settings of an asker
+      operationId: updateNotificationSettingsOfAsker
+      parameters:
+        - name: askerId
+          in: path
+          description: ID of onber asker
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: new appointment settings to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationSettingsDTO'
+      responses:
+        '200':
+          description: successfull operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettingsDTO'
   /askers/{askerId}:
     delete:
       tags:
@@ -1105,4 +1151,9 @@ components:
       type: object
       properties:
         hasCalDavAccount:
+          type: boolean
+    NotificationSettingsDTO:
+      type: object
+      properties:
+        shouldReceiveEmail:
           type: boolean
