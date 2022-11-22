@@ -5,6 +5,7 @@ import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.NotificationSettingsDTO;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
+import com.vi.appointmentservice.model.NotificationSettings;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.CalcomRepository;
 import com.vi.appointmentservice.repository.NotificationSettingsRepository;
@@ -17,6 +18,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.lang.Boolean.TRUE;
 
 @Component
 @RequiredArgsConstructor
@@ -64,7 +67,13 @@ public class AskerFacade {
   }
 
   public NotificationSettingsDTO updateNotificationSettings(final String askerId, final NotificationSettingsDTO notificationSettingsDTO) {
-//    notificationSettingsRepository.save()
-    return null;
+    return notificationSettingsRepository.findById(askerId).map(notificationSettings -> {
+      notificationSettings.setShouldReceiveCalcomEmail(TRUE.equals(notificationSettingsDTO.getShouldReceiveEmail()));
+      final NotificationSettings updatedNotificationSettings  = notificationSettingsRepository.save(notificationSettings);
+
+      final NotificationSettingsDTO updatedNotificationSettingsDTO = new NotificationSettingsDTO();
+      updatedNotificationSettingsDTO.setShouldReceiveEmail(updatedNotificationSettings.isShouldReceiveCalcomEmail());
+      return updatedNotificationSettingsDTO;
+    }).orElseThrow(() -> new NotFoundException("Could not find notification settings for asker id %s", askerId));
   }
 }
