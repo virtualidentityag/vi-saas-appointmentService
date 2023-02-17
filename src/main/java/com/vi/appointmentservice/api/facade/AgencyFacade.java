@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vi.appointmentservice.api.calcom.CalComVIAdapter;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
@@ -25,7 +26,7 @@ import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import com.vi.appointmentservice.repository.EventTypeRepository;
 import com.vi.appointmentservice.repository.MembershipsRepository;
-import com.vi.appointmentservice.repository.TeamRepository;
+import com.vi.appointmentservice.api.calcom.repository.TeamRepository;
 import com.vi.appointmentservice.repository.TeamToAgencyRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -43,6 +45,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AgencyFacade {
 
   @NonNull
@@ -63,6 +66,8 @@ public class AgencyFacade {
   private final CalComUserService calComUserService;
   @NonNull
   private final ConsultantFacade consultantFacade;
+  @NonNull
+  private final CalComVIAdapter calComVIAdapter;
 
   private static final String DEFAULT_EVENT_DESCRIPTION =
       "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
@@ -99,20 +104,16 @@ public class AgencyFacade {
   }
 
   public MeetingSlug getMeetingSlugByAgencyId(Long agencyId) {
-    this.checkIfAgencyTeamExists(agencyId);
-    MeetingSlug meetingSlug = new MeetingSlug();
-    meetingSlug.setSlug(calComTeamService.getTeamById(
-        teamToAgencyRepository.findByAgencyId(agencyId).get().getTeamid()).getSlug());
-    return meetingSlug;
-  }
-
-
-  private void checkIfAgencyTeamExists(Long agencyId) {
-    if (!teamToAgencyRepository.existsByAgencyId(agencyId)) {
-      throw new BadRequestException(
-          String.format("No calcom team associated to agency with id: %s", agencyId));
+    Optional<TeamToAgency> teamAgencyRelation = teamToAgencyRepository.findByAgencyId(agencyId);
+    if (teamAgencyRelation.isPresent()) {
+      MeetingSlug meetingSlug = new MeetingSlug();
+      Long teamId = teamAgencyRelation.get().getTeamid();
+      meetingSlug.setSlug(calComVIAdapter.getTeamById(teamId).getSlug());
+      return meetingSlug;
     }
+    throw new NotFoundException("Calcom Team doesn't exist for given agency");
   }
+
 
   public void agencyConsultantsSync(AgencyConsultantSyncRequestDTO request) {
     String consultantId = request.getConsultantId();

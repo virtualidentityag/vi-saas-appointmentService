@@ -925,12 +925,6 @@ components:
         slug:
           type: string
           format: nullable
-        logo:
-          type: string
-          format: nullable
-        bio:
-          type: string
-          format: nullable
         hideBranding:
           type: boolean
           format: nullable
