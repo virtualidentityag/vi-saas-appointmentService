@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.repository;
+package com.vi.appointmentservice.api.calcom.repository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,15 +13,13 @@ public class MembershipsRepository {
 
   private final @NotNull JdbcTemplate jdbcTemplate;
 
-  public void updateMemberShipsOfUser(Long calcomUserIds, List<Long> teamIds) {
+  public void updateMemberShipsOfUser(Long calcomUserIds, Long teamId) {
     String DELETE_QUERY = "delete from \"Membership\" where \"userId\"=" + calcomUserIds;
     jdbcTemplate.update(DELETE_QUERY);
-    teamIds.forEach(teamId -> {
-      String INSERT_QUERY = "insert into \"Membership\" (\"teamId\", \"userId\", \"accepted\", \"role\") values ($teamIdParam, $userIdParam, true, 'MEMBER')";
-      INSERT_QUERY = INSERT_QUERY.replace("$teamIdParam", teamId.toString())
-          .replace("$userIdParam", calcomUserIds.toString());
-      jdbcTemplate.update(INSERT_QUERY);
-    });
+    String INSERT_QUERY = "insert into \"Membership\" (\"teamId\", \"userId\", \"accepted\", \"role\") values ($teamIdParam, $userIdParam, true, 'MEMBER')";
+    INSERT_QUERY = INSERT_QUERY.replace("$teamIdParam", teamId.toString())
+        .replace("$userIdParam", calcomUserIds.toString());
+    jdbcTemplate.update(INSERT_QUERY);
   }
 
   public void deleteTeamMemeberships(Long teamId) {

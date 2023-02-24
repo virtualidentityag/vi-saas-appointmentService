@@ -7,7 +7,7 @@ import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomRepository;
+import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,7 +28,7 @@ import org.springframework.web.client.RestTemplate;
 public class CalComBookingService extends CalComService {
 
   private final @NonNull RescheduleHelper rescheduleHelper;
-  private final @NonNull CalcomRepository calcomRepository;
+  private final @NonNull BookingRepository bookingRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private @Value("${calcom.url}") String calcomUrl;
 
@@ -36,11 +36,11 @@ public class CalComBookingService extends CalComService {
   public CalComBookingService(RestTemplate restTemplate,
       @Value("${calcom.apiUrl}") String calcomApiUrl,
       @Value("${calcom.apiKey}") String calcomApiKey, @NonNull RescheduleHelper rescheduleHelper,
-      CalcomRepository calcomRepository,
+      BookingRepository bookingRepository,
       CalcomBookingToAskerRepository calcomBookingToAskerRepository) {
     super(restTemplate, calcomApiUrl, calcomApiKey);
     this.rescheduleHelper = rescheduleHelper;
-    this.calcomRepository = calcomRepository;
+    this.bookingRepository = bookingRepository;
     this.calcomBookingToAskerRepository = calcomBookingToAskerRepository;
   }
 
@@ -61,15 +61,15 @@ public class CalComBookingService extends CalComService {
   }
 
   public List<CalcomBooking> getConsultantActiveBookings(Long consultantId) {
-    return enrichConsultantResultSet(calcomRepository.getConsultantActiveBookings(consultantId));
+    return enrichConsultantResultSet(bookingRepository.getConsultantActiveBookings(consultantId));
   }
 
   public List<CalcomBooking> getConsultantExpiredBookings(Long consultantId) {
-    return enrichConsultantResultSet(calcomRepository.getConsultantExpiredBookings(consultantId));
+    return enrichConsultantResultSet(bookingRepository.getConsultantExpiredBookings(consultantId));
   }
 
   public List<CalcomBooking> getConsultantCancelledBookings(Long consultantId) {
-    return enrichConsultantResultSet(calcomRepository.getConsultantCancelledBookings(consultantId));
+    return enrichConsultantResultSet(bookingRepository.getConsultantCancelledBookings(consultantId));
   }
 
   private List<CalcomBooking> enrichConsultantResultSet(List<CalcomBooking> bookings) {
@@ -91,7 +91,7 @@ public class CalComBookingService extends CalComService {
   }
 
   public List<CalcomBooking> getAskerActiveBookings(List<Long> bookingIds) {
-    return enrichAskerResultSet(calcomRepository.getAskerActiveBookings(bookingIds));
+    return enrichAskerResultSet(bookingRepository.getAskerActiveBookings(bookingIds));
   }
 
   List<CalcomBooking> enrichAskerResultSet(List<CalcomBooking> bookings) {
@@ -113,7 +113,7 @@ public class CalComBookingService extends CalComService {
   }
 
   public CalcomBooking getBookingById(Long bookingId) {
-    return calcomRepository.getBookingById(bookingId);
+    return bookingRepository.getBookingById(bookingId);
   }
 
   public void cancelBooking(String bookingUid) {

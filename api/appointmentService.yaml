@@ -63,10 +63,7 @@ paths:
       responses:
         '200':
           description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomUser'
+
   /consultants/token:
     get:
       tags:
@@ -105,10 +102,6 @@ paths:
       responses:
         '200':
           description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomUser'
       security:
         - Bearer: [ ]
     delete:
@@ -235,58 +228,7 @@ paths:
           description: successful operation
       security:
         - Bearer: [ ]
-  /agencies:
-    post:
-      tags:
-        - agency
-      summary: Add an new team to cal.com based on an agency
-      operationId: createAgency
-      requestBody:
-        description: Agency object for which a team needs to be added to cal.com
-        content:
-          application/json:
-            schema:
-              $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomTeam'
-      security:
-        - Bearer: [ ]
   /agencies/{agencyId}:
-    put:
-      tags:
-        - agency
-      summary: Update agency team with an agency object
-      operationId: updateAgency
-      parameters:
-        - name: agencyId
-          in: path
-          description: ID of onber agency
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        description: Agency object for which a team needs to be updated in cal.com
-        content:
-          application/json:
-            schema:
-              $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomTeam'
-      security:
-        - Bearer: [ ]
     delete:
       tags:
         - agency
@@ -727,11 +669,6 @@ components:
         length:
           type: integer
           format: int32
-        hidden:
-          type: boolean
-        position:
-          type: integer
-          format: int32
         userId:
           type: integer
           format: int32
@@ -882,25 +819,10 @@ components:
         title:
           type: string
           example: 30 Min Meeting
-        slug:
-          type: string
-          example: 30minMeet
         length:
           type: integer
           format: int32
           example: 30
-        minimumBookingNotice:
-          type: integer
-          format: int32
-          example: 120
-        beforeEventBuffer:
-          type: integer
-          format: int32
-          example: 0
-        afterEventBuffer:
-          type: integer
-          format: int32
-          example: 0
         description:
           type: string
           format: nullable

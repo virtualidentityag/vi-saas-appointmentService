@@ -13,13 +13,12 @@ import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import com.vi.appointmentservice.repository.UserToConsultantRepository;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +40,7 @@ public class MessagesService {
 
   private final @NonNull UserService userService;
   private final @NonNull CalComBookingService calComBookingService;
-  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+  private final @NonNull UserToConsultantRepository userToConsultantRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
@@ -117,7 +116,7 @@ public class MessagesService {
   }
 
   private String getRocketChatGroupId(CalcomBooking booking) {
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = userToConsultantRepository
         .findByCalComUserId(Long.valueOf(booking.getUserId()));
     if (calcomUserToConsultant.isPresent()) {
       String consultantId = calcomUserToConsultant.get().getConsultantId();

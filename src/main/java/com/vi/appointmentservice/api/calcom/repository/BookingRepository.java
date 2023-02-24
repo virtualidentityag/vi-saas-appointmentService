@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.repository;
+package com.vi.appointmentservice.api.calcom.repository;
 
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import java.util.List;
@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CalcomRepository {
+public class BookingRepository {
+
   private @Autowired
   NamedParameterJdbcTemplate calcomDBNamedParamterTemplate;
 

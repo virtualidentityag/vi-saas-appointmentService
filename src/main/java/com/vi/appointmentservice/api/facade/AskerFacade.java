@@ -13,7 +13,7 @@ import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomRepository;
+import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class AskerFacade {
   private String dummyEmailSuffix;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull CalComBookingService calComBookingService;
-  private final @NonNull CalcomRepository calcomRepository;
+  private final @NonNull BookingRepository bookingRepository;
 
   public List<CalcomBooking> getAskerActiveBookings(String askerId) {
     if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
@@ -55,8 +55,8 @@ public class AskerFacade {
           .getBookingById(booking.getCalcomBookingId());
       if (calcomBooking != null) {
         calComBookingService.cancelBooking(calcomBooking.getUid());
-        calcomRepository.deleteBooking(booking.getCalcomBookingId());
-        calcomRepository.deleteAttendeeWithoutBooking();
+        bookingRepository.deleteBooking(booking.getCalcomBookingId());
+        bookingRepository.deleteAttendeeWithoutBooking();
         calcomBookingToAskerRepository.deleteByCalcomBookingId(booking.getCalcomBookingId());
       }
     });
@@ -68,7 +68,7 @@ public class AskerFacade {
       List<Long> bookingIds = calcomBookingToAskerRepository.findByAskerId(askerDTO.getId()).stream()
               .map(CalcomBookingToAsker::getCalcomBookingId)
               .collect(Collectors.toList());
-      calcomRepository.updateAttendeeEmail(bookingIds, newEmail);
+      bookingRepository.updateAttendeeEmail(bookingIds, newEmail);
     } else {
       log.error("Asker with id: {} not existing in calcom repo", askerDTO.getId());
     }

@@ -5,20 +5,16 @@ import com.vi.appointmentservice.api.facade.ConsultantFacade;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomToken;
-import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.helper.AuthenticatedUser;
 import io.swagger.annotations.Api;
 import java.util.List;
-import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,19 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConsultantController implements ConsultantsApi {
 
   private final @NonNull AuthenticatedUser authenticatedUser;
+
   private final @NonNull ConsultantFacade consultantFacade;
 
-
-  @GetMapping(value = "/consultants/initialize", produces = {"application/json"})
-  ResponseEntity<String> initializeConsultants() {
-    return new ResponseEntity<>(this.consultantFacade.initializeConsultantsHandler().toString(),
-        HttpStatus.OK);
-  }
-
   @Override
-  public ResponseEntity<CalcomUser> createConsultant(ConsultantDTO consultant) {
-    return new ResponseEntity<>(this.consultantFacade.createOrUpdateCalcomUserHandler(consultant),
-        HttpStatus.OK);
+  public ResponseEntity<Void> createConsultant(ConsultantDTO consultant) {
+    this.consultantFacade.createUser(consultant);
+    return new ResponseEntity<Void>(HttpStatus.OK);
   }
 
   @Override
@@ -52,16 +42,10 @@ public class ConsultantController implements ConsultantsApi {
   }
 
   @Override
-  public ResponseEntity<CalcomUser> updateConsultant(String consultantId,
+  public ResponseEntity<Void> updateConsultant(String consultantId,
       ConsultantDTO consultant) {
-    if (Objects.equals(consultantId, consultant.getId())) {
-      return new ResponseEntity<>(this.consultantFacade.createOrUpdateCalcomUserHandler(consultant),
-          HttpStatus.OK);
-    } else {
-      throw new BadRequestException(
-          String.format("Route consultantId '%s' and user id '%s' from user object dont match",
-              consultantId, consultant.getId()));
-    }
+    this.consultantFacade.updateAppointmentUser(consultant);
+    return new ResponseEntity<Void>(HttpStatus.OK);
   }
 
   @Override
@@ -100,6 +84,7 @@ public class ConsultantController implements ConsultantsApi {
 
   @Override
   public ResponseEntity<CalcomToken> getToken() {
-    return new ResponseEntity<>(consultantFacade.getToken(authenticatedUser.getUserId()), HttpStatus.OK);
+    return new ResponseEntity<>(consultantFacade.getToken(authenticatedUser.getUserId()),
+        HttpStatus.OK);
   }
 }

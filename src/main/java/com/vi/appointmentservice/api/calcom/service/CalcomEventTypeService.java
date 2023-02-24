@@ -1,0 +1,159 @@
+package com.vi.appointmentservice.api.calcom.service;
+
+import com.vi.appointmentservice.api.calcom.model.EventType;
+import com.vi.appointmentservice.api.calcom.repository.EventTypeRepository;
+import com.vi.appointmentservice.api.facade.AppointmentType;
+import com.vi.appointmentservice.api.model.Location;
+import com.vi.appointmentservice.api.calcom.repository.MembershipsRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class CalcomEventTypeService {
+
+  @NonNull
+  private final EventTypeRepository eventTypeRepository;
+
+  private final MembershipsRepository membershipsRepository;
+
+  @Value("${app.base.url}")
+  private String appBaseUrl;
+
+
+  public EventType getEventTypeById(Number eventTypeId){
+    var eventType = eventTypeRepository.getEventTypeById(eventTypeId);
+    List<Long> userIdsOfEventTypeMembers = eventTypeRepository
+        .getUserIdsOfEventTypeMembers(eventType.getId());
+    eventType.setMemberIds(userIdsOfEventTypeMembers);
+    return eventType;
+  }
+
+  public EventType createEventType(Number teamId, AppointmentType appointmentType) {
+    EventType eventType = this.buildEventType(appointmentType);
+    eventType.setTitle(appointmentType.getTitle());
+    eventType.setTeamId(teamId);
+    EventType eventTypeDB = eventTypeRepository.createEventType(eventType);
+    eventTypeRepository.markAsRoundRobin(eventTypeDB.getId());
+    return eventTypeDB;
+  }
+
+  public void markAsDefaultEventType(EventType eventType) {
+    eventTypeRepository.markAsDefaultEventType(eventType.getId());
+  }
+
+  public void createEventType(com.vi.appointmentservice.api.calcom.model.CalcomUser calcomUser,
+      AppointmentType appointmentType,
+      Long defaultScheduleId) {
+    EventType eventType = this.buildEventType(appointmentType);
+    eventType.setTitle(appointmentType.getTitle() + " " + calcomUser.getName());
+    eventType.setUserId(Math.toIntExact(calcomUser.getId()));
+    EventType createdEventType = eventTypeRepository.createEventType(eventType);
+    eventTypeRepository.addUserEventTypeRelation(createdEventType.getId(), calcomUser.getId());
+    //TODO: this can be one call to DB
+    eventTypeRepository.updateEventTypeScheduleId(eventType.getId(), defaultScheduleId);
+  }
+
+  public EventType buildEventType(AppointmentType appointmentType) {
+    EventType eventType = new EventType();
+    eventType.setDescription(appointmentType.getDescription());
+    eventType.setLength(appointmentType.getLength());
+    eventType.setMinimumBookingNotice(appointmentType.getMinimumBookingNotice());
+    eventType.setBeforeEventBuffer(appointmentType.getBeforeEventBuffer());
+    eventType.setAfterEventBuffer(appointmentType.getAfterEventBuffer());
+    eventType.setSlotInterval(appointmentType.getSlotInterval());
+    eventType.setSlug(UUID.randomUUID().toString());
+    eventType.setHidden(false);
+    eventType.setEventName(appointmentType.getTitle() + " {ATTENDEE} mit {HOST}");
+    eventType.setRequiresConfirmation(false);
+    eventType.setDisableGuests(true);
+    eventType.setHideCalendarNotes(true);
+    eventType.setPeriodDays(30);
+    eventType.setPeriodCountCalendarDays(true);
+    //TODO: do we need this
+    eventType.setPeriodType("rolling");
+
+    //TODO: leave this for now, since it is to complex
+    //    eventType.setLocations(createDefaultLocations());
+    return eventType;
+  }
+
+  public EventType updateEventType(EventType eventType){
+    eventTypeRepository.updateEventType(eventType);
+    eventTypeRepository.removeTeamEventTypeMembershipsForEventType(eventType.getId());
+    eventType.getMemberIds().forEach(calcomUser -> addUser2Event(calcomUser, eventType.getId()));
+    return getEventTypeById(eventType.getId());
+  }
+
+  public EventType getDefaultEventTypeOfTeam(Long teamId) {
+    List<EventType> eventTypes4Team = eventTypeRepository.getEventTypes4Team(teamId);
+    Optional<EventType> defaultEventType = eventTypes4Team.stream().filter(eventType ->
+        eventType.getMetadata().contains("defaultEventType")
+    ).findFirst();
+
+    if (defaultEventType.isEmpty()) {
+      throw new IllegalStateException("No default team event type found for team: " + teamId);
+    }
+
+    return defaultEventType.get();
+  }
+
+
+  public void cleanUserMemberships(Long calcomUserId, List<Long> teamIds) {
+    eventTypeRepository.removeTeamEventTypeMembershipsForUser(
+        calcomUserId, teamIds);
+  }
+
+  public void addUser2Team(Long calComUserId, Long teamId) {
+    eventTypeRepository.removeTeamEventTypeHostsForUser(
+        calComUserId);
+    EventType eventType = getDefaultEventTypeOfTeam(teamId);
+    eventTypeRepository.addUserEventTypeRelation(Long.valueOf(eventType.getId()), calComUserId);
+    eventTypeRepository.addRoundRobinHosts(eventType.getId(), calComUserId);
+    membershipsRepository.updateMemberShipsOfUser(calComUserId, teamId);
+  }
+
+  public void addUser2Event(Long calComUserId, Number eventTypeId) {
+    eventTypeRepository.removeTeamEventTypeHostsForUser(
+        calComUserId);
+    eventTypeRepository.addUserEventTypeRelation(eventTypeId, calComUserId);
+    eventTypeRepository.addRoundRobinHosts(eventTypeId, calComUserId);
+  }
+
+  private List<Location> createDefaultLocations() {
+    List<Location> locations = new ArrayList<>();
+    Location customVideoLink = new Location();
+    customVideoLink.setType("customVideoLink");
+    customVideoLink.setLink(appBaseUrl);
+    locations.add(customVideoLink);
+    Location link = new Location();
+    link.setType("link");
+    link.setLink(appBaseUrl);
+    locations.add(link);
+    Location userPhone = new Location();
+    userPhone.setType("userPhone");
+    userPhone.setHostPhoneNumber(appBaseUrl);
+    locations.add(userPhone);
+    Location inPerson = new Location();
+    inPerson.setType("inPerson");
+    inPerson.setAddress("Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit");
+    locations.add(inPerson);
+    return locations;
+  }
+
+  public List<EventType> getAllEventTypesOfTeam(Long teamid) {
+    var eventTypes = eventTypeRepository.getEventTypes4Team(teamid);
+    eventTypes.forEach(eventType -> {
+      List<Long> userIdsOfEventTypeMembers = eventTypeRepository
+          .getUserIdsOfEventTypeMembers(eventType.getId());
+      eventType.setMemberIds(userIdsOfEventTypeMembers);
+    });
+    return eventTypes;
+  }
+}

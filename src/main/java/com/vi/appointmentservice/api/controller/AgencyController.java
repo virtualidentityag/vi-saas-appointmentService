@@ -1,29 +1,23 @@
 package com.vi.appointmentservice.api.controller;
 
+import com.vi.appointmentservice.api.calcom.model.EventType;
 import com.vi.appointmentservice.api.facade.AgencyFacade;
 import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
-import com.vi.appointmentservice.api.model.AgencyResponseDTO;
 import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
-import com.vi.appointmentservice.api.model.CalcomTeam;
 import com.vi.appointmentservice.api.model.CreateUpdateCalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import com.vi.appointmentservice.generated.api.controller.AgenciesApi;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,42 +29,35 @@ public class AgencyController implements AgenciesApi {
   @NonNull
   private final AgencyFacade agencyFacade;
 
-  // Agency CRUD
   @Override
-  public ResponseEntity<CalcomTeam> createAgency(AgencyResponseDTO agencyResponseDTO) {
-    return AgenciesApi.super.createAgency(agencyResponseDTO);
+  public ResponseEntity<Void> agencyMasterDataSync(
+      @Valid AgencyMasterDataSyncRequestDTO agencyMasterDataSyncRequestDTO) {
+    agencyFacade.agencyMasterDataSync(agencyMasterDataSyncRequestDTO);
+    return new ResponseEntity<Void>(HttpStatus.OK);
   }
 
-  @Override
-  public ResponseEntity<Void> deleteAgency(Long agencyId) {
-    agencyFacade.deleteAgency(agencyId);
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  @Override
-  public ResponseEntity<CalcomTeam> updateAgency(Long agencyId,
-      AgencyResponseDTO agencyResponseDTO) {
-    return AgenciesApi.super.updateAgency(agencyId, agencyResponseDTO);
-  }
-
-  // Event Types
   @Override
   public ResponseEntity<List<CalcomEventTypeDTO>> getAllEventTypesOfAgency(Long agencyId) {
-    List<CalcomEventTypeDTO> eventTypes;
-    eventTypes = this.agencyFacade.getAgencyEventTypes(agencyId);
+    List<CalcomEventTypeDTO> eventTypes = this.agencyFacade.getAgencyEventTypes(agencyId).stream()
+        .map(el -> asEventTypeDTO(el)).collect(
+            Collectors.toList());
     return new ResponseEntity<>(eventTypes, HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<CalcomEventTypeDTO> getAgencyEventTypeById(Long agencyId, Long eventTypeId) {
-    return new ResponseEntity<>(this.agencyFacade.getAgencyEventTypeById(eventTypeId),
+  public ResponseEntity<CalcomEventTypeDTO> getAgencyEventTypeById(Long agencyId,
+      Long eventTypeId) {
+    //TODO: agencyId is not needed. rename this method. needs to be in sync with frontend
+    return new ResponseEntity<>(
+        asEventTypeDTO(this.agencyFacade.getAgencyEventTypeById(eventTypeId)),
         HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<CalcomEventTypeDTO> addEventTypeToAgency(Long agencyId,
       CreateUpdateCalcomEventTypeDTO teamEventType) {
-    return new ResponseEntity<>(this.agencyFacade.addAgencyEventType(agencyId, teamEventType),
+    return new ResponseEntity<>(
+        asEventTypeDTO(this.agencyFacade.createAgencyEventType(agencyId, teamEventType)),
         HttpStatus.OK);
   }
 
@@ -78,7 +65,8 @@ public class AgencyController implements AgenciesApi {
   public ResponseEntity<CalcomEventTypeDTO> updateAgencyEventType(Long agencyId, Long eventTypeId,
       CreateUpdateCalcomEventTypeDTO createUpdateCalcomEventTypeDTO) {
     return new ResponseEntity<>(
-        this.agencyFacade.updateAgencyEventType(eventTypeId, createUpdateCalcomEventTypeDTO),
+        asEventTypeDTO(
+            this.agencyFacade.updateAgencyEventType(eventTypeId, createUpdateCalcomEventTypeDTO)),
         HttpStatus.OK);
   }
 
@@ -88,8 +76,6 @@ public class AgencyController implements AgenciesApi {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
-
-  // Consultants
   @Override
   public ResponseEntity<List<TeamEventTypeConsultant>> getAllConsultantsOfAgency(Long agencyId) {
     List<TeamEventTypeConsultant> availableConsultants;
@@ -105,15 +91,25 @@ public class AgencyController implements AgenciesApi {
 
   @Override
   public ResponseEntity<Void> agencyConsultantsSync(
-      @Valid AgencyConsultantSyncRequestDTO agencyConsultantSyncRequestDTO) {
-    agencyFacade.agencyConsultantsSync(agencyConsultantSyncRequestDTO);
+      @Valid AgencyConsultantSyncRequestDTO req) {
+    agencyFacade.assignConsultant2AppointmentTeams(req.getConsultantId(), req.getAgencies());
     return new ResponseEntity<Void>(HttpStatus.OK);
   }
 
-  @Override
-  public ResponseEntity<Void> agencyMasterDataSync(
-      @Valid AgencyMasterDataSyncRequestDTO agencyMasterDataSyncRequestDTO) {
-    agencyFacade.agencyMasterDataSync(agencyMasterDataSyncRequestDTO);
-    return new ResponseEntity<Void>(HttpStatus.OK);
+  private CalcomEventTypeDTO asEventTypeDTO(EventType eventType) {
+    CalcomEventTypeDTO calcomEventType = new CalcomEventTypeDTO();
+    calcomEventType.setTitle(eventType.getTitle());
+    calcomEventType.setId(eventType.getId());
+    calcomEventType.setLength(eventType.getLength());
+    calcomEventType.setDescription(eventType.getDescription());
+    calcomEventType.setConsultants(eventType.getConsultants());
+    return calcomEventType;
   }
+
+  @Override
+  public ResponseEntity<Void> deleteAgency(Long agencyId) {
+    agencyFacade.deleteAgency(agencyId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
 }

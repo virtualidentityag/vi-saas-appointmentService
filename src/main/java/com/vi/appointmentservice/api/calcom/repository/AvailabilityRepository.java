@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.repository;
+package com.vi.appointmentservice.api.calcom.repository;
 
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

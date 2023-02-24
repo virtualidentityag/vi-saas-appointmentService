@@ -1,17 +1,17 @@
 package com.vi.appointmentservice.helper;
 
+import com.vi.appointmentservice.api.calcom.model.CalcomTeam;
+import com.vi.appointmentservice.api.calcom.model.CalcomUser;
+import com.vi.appointmentservice.api.calcom.model.EventType;
+import com.vi.appointmentservice.api.calcom.service.CalcomEventTypeService;
+import com.vi.appointmentservice.api.calcom.service.CalComTeamService;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
-import com.vi.appointmentservice.api.model.CalcomTeam;
-import com.vi.appointmentservice.api.model.CalcomUser;
-import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
-import com.vi.appointmentservice.api.service.calcom.CalComUserService;
-import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
+import com.vi.appointmentservice.api.calcom.service.CalComUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import com.vi.appointmentservice.repository.UserToConsultantRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,14 +26,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RescheduleHelper {
 
-  private final @NonNull CalComEventTypeService eventTypeService;
   private final @NonNull CalComUserService calComUserService;
-
   private final @NonNull AdminUserService adminUserService;
-  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+  private final @NonNull UserToConsultantRepository userToConsultantRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
-  private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull CalComTeamService calComTeamService;
+  private final @NonNull CalcomEventTypeService calcomEventTypeService;
 
   public CalcomBooking attachRescheduleLink(CalcomBooking calcomBooking) {
     CalcomUser registeredCalcomUser = this.calComUserService
@@ -47,7 +45,7 @@ public class RescheduleHelper {
       slug = registeredCalcomUser.getUsername();
     }
 
-    String eventTypeSlug = this.eventTypeService.getEventTypeById(
+    String eventTypeSlug = this.calcomEventTypeService.getEventTypeById(
         Long.valueOf(calcomBooking.getEventTypeId())).getSlug();
     calcomBooking.setRescheduleLink(
         "/" + slug + "/" + eventTypeSlug + "?rescheduleUid=" + calcomBooking.getUid());
@@ -56,15 +54,15 @@ public class RescheduleHelper {
   }
 
   private Integer getTeamIdForBooking(CalcomBooking calcomBooking) {
-    CalcomEventTypeDTO eventType = calComEventTypeService
+    EventType eventType = calcomEventTypeService
         .getEventTypeById(Long.valueOf(calcomBooking.getEventTypeId()));
-    return eventType.getTeamId();
+    return eventType.getTeamId().intValue();
   }
 
   public void attachConsultantName(List<CalcomBooking> bookings) {
     Map<Integer, String> bookingUserIdConsultantId = new HashMap<>();
     bookings.stream().forEach(booking -> {
-      Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository
+      Optional<CalcomUserToConsultant> calcomUserToConsultant = this.userToConsultantRepository
           .findByCalComUserId(
               Long.valueOf(booking.getUserId()));
       if (calcomUserToConsultant.isPresent()) {

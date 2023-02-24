@@ -2,11 +2,9 @@ package com.vi.appointmentservice.api.service;
 
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
-import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
 import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentService;
@@ -18,8 +16,8 @@ import com.vi.appointmentservice.appointmentservice.generated.web.model.Appointm
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomRepository;
-import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
+import com.vi.appointmentservice.repository.UserToConsultantRepository;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,12 +35,11 @@ public class CalcomWebhookHandlerService {
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull MessagesService messagesService;
   private final @NonNull CalComBookingService calComBookingService;
-  private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull VideoAppointmentService videoAppointmentService;
   private final @NonNull StatisticsService statisticsService;
-  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+  private final @NonNull UserToConsultantRepository userToConsultantRepository;
   private final @NonNull AdminUserService adminUserService;
-  private final @NonNull CalcomRepository calcomRepository;
+  private final @NonNull BookingRepository bookingRepository;
 
   @Transactional
   public void handlePayload(CalcomWebhookInput input) {
@@ -76,7 +73,7 @@ public class CalcomWebhookHandlerService {
 
   private String getConsultantId(Integer bookingId) {
     CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = this.userToConsultantRepository
         .findByCalComUserId(
             Long.valueOf(booking.getUserId()));
     if (calcomUserToConsultant.isPresent()) {
@@ -135,7 +132,7 @@ public class CalcomWebhookHandlerService {
             this.getConsultantId(payload.getBookingId())));
         break;
       case "BOOKING_CANCELLED":
-        Integer bookingId = calcomRepository.getBookingIdByUid(payload.getUid());
+        Integer bookingId = bookingRepository.getBookingIdByUid(payload.getUid());
         statisticsService.fireEvent(
             new BookingCanceledStatisticsEvent(payload, this.getConsultantId(bookingId),
                 bookingId));
