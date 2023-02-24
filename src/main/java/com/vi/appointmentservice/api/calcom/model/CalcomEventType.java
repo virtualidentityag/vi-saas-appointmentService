@@ -77,9 +77,10 @@ public class CalcomEventType {
   public static CalcomEventType asInstance(Map<String, Object> params) {
     CalcomEventType eventType = new CalcomEventType();
     eventType.setId((Integer) params.get("id"));
-    eventType.setMetadata((String)params.get("metadata"));
+    eventType
+        .setMetadata(params.get("metadata") != null ? params.get("metadata").toString() : null);
     eventType.setTeamId((Integer) params.get("teamId"));
-    eventType.setTitle((String)params.get("title"));
+    eventType.setTitle((String) params.get("title"));
     eventType.setDescription((String) params.get("description"));
     eventType.setLength((Integer) params.get("length"));
     return eventType;
