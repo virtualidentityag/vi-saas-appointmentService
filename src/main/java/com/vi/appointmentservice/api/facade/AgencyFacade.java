@@ -220,7 +220,6 @@ public class AgencyFacade {
   }
 
   public void deleteAgencyEventType(Long eventTypeId) {
-//    calComEventTypeService.deleteEventType(eventTypeId);
-//    eventTypeRepository.removeTeamEventTypeMembershipsForEventType(eventTypeId);
+    calcomEventTypeService.deleteEventType(eventTypeId);
   }
 }

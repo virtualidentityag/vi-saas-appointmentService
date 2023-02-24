@@ -164,4 +164,9 @@ public class CalcomEventTypeService {
   public void deleteAllEventTypesOfUser(Long calcomUserId) {
     eventTypeRepository.deleteAllEventTypesOfUser(calcomUserId);
   }
+
+  public void deleteEventType(Long eventTypeId) {
+    eventTypeRepository.deleteEventType(eventTypeId);
+    eventTypeRepository.removeTeamEventTypeMembershipsForEventType(eventTypeId);
+  }
 }

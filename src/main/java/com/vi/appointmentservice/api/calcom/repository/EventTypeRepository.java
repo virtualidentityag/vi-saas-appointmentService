@@ -35,16 +35,6 @@ public class EventTypeRepository {
   //TODO: replace this with named
   private final @NotNull JdbcTemplate jdbcTemplate;
 
-  public List<CalcomEventType> getAllEventTypesOfTeam(Long teamId) {
-    String SELECT_TEAM = "SELECT * FROM \"EventType\" WHERE \"teamId\" = :teamId";
-    SqlParameterSource parameters = new MapSqlParameterSource("teamId", teamId);
-    var resultList = new ArrayList<CalcomEventType>();
-    db.queryForList(SELECT_TEAM, parameters).forEach((Map<String, Object> result) -> {
-      resultList.add(CalcomEventType.asInstance(result));
-    });
-    return resultList;
-  }
-
   public CalcomEventType getEventTypeById(Number eventTypeId) {
     String SELECT_EVENT = "SELECT * FROM \"EventType\" WHERE id = :eventTypeId";
     SqlParameterSource parameters = new MapSqlParameterSource("eventTypeId", eventTypeId);
@@ -173,10 +163,7 @@ public class EventTypeRepository {
         .addValue("beforeEventBuffer", eventType.getBeforeEventBuffer())
         .addValue("hideCalendarNotes", eventType.getHideCalendarNotes());
     db.update(INSERT_EVENT_TYPE, parameters, generatedKeyHolder);
-    //todo: replace this with findbyId
-
-    eventType.setId(Integer.valueOf((Integer) generatedKeyHolder.getKeys().get("id")));
-    return eventType;
+    return getEventTypeById(Integer.valueOf((Integer) generatedKeyHolder.getKeys().get("id")));
 
   }
 
@@ -198,7 +185,6 @@ public class EventTypeRepository {
         .addValue("eventTypeId", eventTypeId)
         .addValue("userId", calComUserId);
     db.update(INSERT_HOSTS, parameters);
-
   }
 
   public void removeTeamEventTypeHostsForUser(Number calComUserId) {
@@ -212,5 +198,11 @@ public class EventTypeRepository {
     SqlParameterSource parameters = new MapSqlParameterSource("userId", calcomUserId);
     db.update(QUERY, parameters);
 
+  }
+
+  public void deleteEventType(Long eventTypeId) {
+    String QUERY = "DELETE FROM \"EventType\" WHERE id = :eventTypeId";
+    SqlParameterSource parameters = new MapSqlParameterSource("eventTypeId", eventTypeId);
+    db.update(QUERY, parameters);
   }
 }
