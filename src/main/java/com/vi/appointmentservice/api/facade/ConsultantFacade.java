@@ -1,6 +1,11 @@
 package com.vi.appointmentservice.api.facade;
 
-import com.vi.appointmentservice.api.calcom.CalComVIAdapter;
+import com.vi.appointmentservice.api.calcom.model.CalcomUser;
+import com.vi.appointmentservice.api.calcom.repository.AvailabilityRepository;
+import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
+import com.vi.appointmentservice.api.calcom.repository.MembershipsRepository;
+import com.vi.appointmentservice.api.calcom.repository.ScheduleRepository;
+import com.vi.appointmentservice.api.calcom.service.CalComBookingService;
 import com.vi.appointmentservice.api.calcom.service.CalComUserService;
 import com.vi.appointmentservice.api.calcom.service.CalcomEventTypeService;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
@@ -8,23 +13,16 @@ import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
-import com.vi.appointmentservice.api.model.EventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
-import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
+import com.vi.appointmentservice.api.service.AppointmentService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
-import com.vi.appointmentservice.api.calcom.repository.AvailabilityRepository;
-import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
-import com.vi.appointmentservice.api.calcom.repository.MembershipsRepository;
-import com.vi.appointmentservice.api.calcom.repository.ScheduleRepository;
 import com.vi.appointmentservice.repository.UserToConsultantRepository;
-import com.vi.appointmentservice.api.calcom.repository.WebhookRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,27 +34,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConsultantFacade {
 
   private final @NonNull CalComUserService calComUserService;
-  private final @NonNull MembershipsRepository calMembershipsRepository;
   private final @NonNull CalComBookingService calComBookingService;
-  private final @NonNull UserToConsultantRepository userToConsultantRepository;
-  private final @NonNull ScheduleRepository scheduleRepository;
-  private final @NonNull WebhookRepository webhookRepository;
-  private final @NonNull BookingRepository bookingRepository;
-  private final @NonNull CalComVIAdapter calComVIAdapter;
   private final @NonNull CalcomEventTypeService calComEventTypeService;
+  private final @NonNull AppointmentService appointmentService;
+  private final @NonNull UserToConsultantRepository userToConsultantRepository;
 
-
-  private static final String DEFAULT_EVENT_DESCRIPTION =
-      "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
-          + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
-          + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!";
+  private final @NonNull MembershipsRepository calMembershipsRepository;
+  private final @NonNull ScheduleRepository scheduleRepository;
+  private final @NonNull BookingRepository bookingRepository;
   private final @NonNull AvailabilityRepository availabilityRepository;
-  @Value("${app.base.url}")
-  private String appBaseUrl;
-
 
   public void createUser(ConsultantDTO consultant) {
-    com.vi.appointmentservice.api.calcom.model.CalcomUser calcomUser = calComUserService
+    CalcomUser calcomUser = calComUserService
         .createUser(consultant.getFirstname() + " " + consultant.getLastname(),
             consultant.getEmail());
     linkConsultantToAppointmentUser(calcomUser, consultant);
@@ -67,34 +56,23 @@ public class ConsultantFacade {
     var name = consultant.getFirstname() + " " + consultant.getLastname();
     Optional<CalcomUserToConsultant> userConsultant = userToConsultantRepository
         .findByConsultantId(consultant.getId());
-    calComUserService.updateUser(userConsultant.get().getCalComUserId(), name);
+    calComUserService.updateUser(userConsultant.get().getCalComUserId(), name, consultant.getEmail());
   }
 
   private void linkConsultantToAppointmentUser(
-      com.vi.appointmentservice.api.calcom.model.CalcomUser calcomUser, ConsultantDTO consultant) {
+      CalcomUser calcomUser, ConsultantDTO consultant) {
     userToConsultantRepository.save(
         new CalcomUserToConsultant(consultant.getId(), calcomUser.getId(),
             calcomUser.getPlainPassword()));
   }
 
-  void setupDefaultScheduleAndEventType(
-      com.vi.appointmentservice.api.calcom.model.CalcomUser calcomUser) {
-    webhookRepository.updateUserWebhook(calcomUser.getId());
+  void setupDefaultScheduleAndEventType(CalcomUser calcomUser) {
     Long defaultScheduleId = scheduleRepository.createDefaultSchedule(calcomUser.getId());
+    AppointmentType defaultAppointmentType = appointmentService.createDefaultAppointmentType();
+    defaultAppointmentType.setTitle("Beratung mit");
     calComEventTypeService
-        .createEventType(calcomUser, createDefaultAppointmentType(), defaultScheduleId);
-  }
-
-  private AppointmentType createDefaultAppointmentType() {
-    AppointmentType appointmentType = new AppointmentType();
-    appointmentType.setAfterEventBuffer(10);
-    appointmentType.setBeforeEventBuffer(0);
-    appointmentType.setDescription(DEFAULT_EVENT_DESCRIPTION);
-    appointmentType.setLength(50);
-    appointmentType.setMinimumBookingNotice(240);
-    appointmentType.setSlotInterval(15);
-    appointmentType.setTitle("Beratung mit");
-    return appointmentType;
+        .createEventType(calcomUser, appointmentService.createDefaultAppointmentType(),
+            defaultScheduleId);
   }
 
   public HttpStatus deleteConsultantHandler(String consultantId) {
@@ -103,7 +81,7 @@ public class ConsultantFacade {
     // Delete team memberships
     calMembershipsRepository.deleteAllMembershipsOfUser(calcomUserId);
     // Delete personal event-types
-    calComVIAdapter.deleteAllEventTypesOfUser(calcomUserId);
+    calComEventTypeService.deleteAllEventTypesOfUser(calcomUserId);
     // Delete schedules
     List<Integer> deletedSchedules = scheduleRepository.deleteUserSchedules(calcomUserId);
     // Delete availabilities for schedules
@@ -145,12 +123,6 @@ public class ConsultantFacade {
   public List<CalcomBooking> getConsultantExpiredBookings(String consultantId) {
     Long calcomUserId = getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
     return calComBookingService.getConsultantExpiredBookings(calcomUserId);
-  }
-
-  public List<EventTypeDTO> getAllEventTypesOfConsultantHandler(String consultantId) {
-    getCalcomUserToConsultantIfExists(consultantId);
-    return calComVIAdapter
-        .getAllEventTypesOfUser(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId());
   }
 
   public MeetingSlug getConsultantMeetingSlugHandler(String consultantId) {

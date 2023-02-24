@@ -1,6 +1,6 @@
 package com.vi.appointmentservice.api.controller;
 
-import com.vi.appointmentservice.api.calcom.model.EventType;
+import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
 import com.vi.appointmentservice.api.facade.AgencyFacade;
 import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
@@ -95,7 +95,7 @@ public class AgencyController implements AgenciesApi {
     return new ResponseEntity<Void>(HttpStatus.OK);
   }
 
-  private EventTypeDTO asEventTypeDTO(EventType eventType) {
+  private EventTypeDTO asEventTypeDTO(CalcomEventType eventType) {
     EventTypeDTO calcomEventType = new EventTypeDTO();
     calcomEventType.setTitle(eventType.getTitle());
     calcomEventType.setId(eventType.getId());

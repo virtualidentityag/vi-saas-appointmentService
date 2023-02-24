@@ -33,10 +33,8 @@ public class CalComUserService {
     return userRepository.creatUser(calcomUser);
   }
 
-  public CalcomUser updateUser(Long userId, String name) {
-    CalcomUser userDB = getUserById(userId);
-    userDB.setName(name);
-    return userRepository.updateUser(userDB);
+  public CalcomUser updateUser(Long userId, String name, String email) {
+    return userRepository.updateUser(userId, name, email);
   }
 
   public HttpStatus deleteUser(Long userId) {

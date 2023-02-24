@@ -1,6 +1,6 @@
 package com.vi.appointmentservice.api.calcom.repository;
 
-import com.vi.appointmentservice.api.calcom.model.EventType;
+import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.UserToConsultantRepository;
@@ -35,36 +35,28 @@ public class EventTypeRepository {
   //TODO: replace this with named
   private final @NotNull JdbcTemplate jdbcTemplate;
 
-  public List<EventType> getAllEventTypesOfTeam(Long teamId) {
+  public List<CalcomEventType> getAllEventTypesOfTeam(Long teamId) {
     String SELECT_TEAM = "SELECT * FROM \"EventType\" WHERE \"teamId\" = :teamId";
     SqlParameterSource parameters = new MapSqlParameterSource("teamId", teamId);
-    var resultList = new ArrayList<EventType>();
+    var resultList = new ArrayList<CalcomEventType>();
     db.queryForList(SELECT_TEAM, parameters).forEach((Map<String, Object> result) -> {
-      resultList.add(EventType.asInstance(result));
+      resultList.add(CalcomEventType.asInstance(result));
     });
     return resultList;
   }
 
-  public EventType getEventTypeById(Number eventTypeId) {
+  public CalcomEventType getEventTypeById(Number eventTypeId) {
     String SELECT_EVENT = "SELECT * FROM \"EventType\" WHERE id = :eventTypeId";
     SqlParameterSource parameters = new MapSqlParameterSource("eventTypeId", eventTypeId);
     Map<String, Object> result = db.queryForMap(SELECT_EVENT, parameters);
-    return EventType.asInstance(result);
+    return CalcomEventType.asInstance(result);
   }
 
-  public List<EventType> getEventTypes4Team(Number teamId) {
+  public List<CalcomEventType> getEventTypes4Team(Number teamId) {
     String SELECT_EVENT = "SELECT * FROM \"EventType\" WHERE \"teamId\" = :teamId";
     SqlParameterSource parameters = new MapSqlParameterSource("teamId", teamId);
     List<Map<String, Object>> result = db.queryForList(SELECT_EVENT, parameters);
-    return result.stream().map(el -> EventType.asInstance(el)).collect(Collectors.toList());
-  }
-
-  public List<EventType> getAllEventTypesOfUser(Long userId) {
-    throw new UnsupportedOperationException();
-  }
-
-  public void deleteAllEventTypesOfUser(Long userId) {
-    throw new UnsupportedOperationException();
+    return result.stream().map(el -> CalcomEventType.asInstance(el)).collect(Collectors.toList());
   }
 
   //TODO: move out this repository from here
@@ -150,7 +142,7 @@ public class EventTypeRepository {
     jdbcTemplate.update(UPDATE_QUERY);
   }
 
-  public EventType createEventType(EventType eventType) {
+  public CalcomEventType createEventType(CalcomEventType eventType) {
     GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
     String INSERT_EVENT_TYPE = "INSERT INTO \"EventType\""
         + "(title,slug,description,length,hidden,\"userId\",\"eventName\",\"periodCountCalendarDays\",\"periodDays\",\"periodEndDate\",\"periodStartDate\",\"requiresConfirmation\""
@@ -188,7 +180,7 @@ public class EventTypeRepository {
 
   }
 
-  public void updateEventType(EventType eventType) {
+  public void updateEventType(CalcomEventType eventType) {
     String UPDATE_QUERY =
         "update \"EventType\" set description = :description, title = :title, length = :length  where \"id\" = :id";
     SqlParameterSource parameters = new MapSqlParameterSource()
@@ -213,5 +205,12 @@ public class EventTypeRepository {
     String QUERY = "DELETE FROM \"Host\" WHERE \"userId\"= :userId";
     SqlParameterSource parameters = new MapSqlParameterSource("userId", calComUserId);
     db.update(QUERY, parameters);
+  }
+
+  public void deleteAllEventTypesOfUser(Long calcomUserId) {
+    String QUERY = "DELETE FROM \"EventType\" WHERE \"userId\"= :userId";
+    SqlParameterSource parameters = new MapSqlParameterSource("userId", calcomUserId);
+    db.update(QUERY, parameters);
+
   }
 }

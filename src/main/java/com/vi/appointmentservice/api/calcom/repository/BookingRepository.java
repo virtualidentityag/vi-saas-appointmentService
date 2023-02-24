@@ -43,13 +43,6 @@ public class BookingRepository {
         .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
   }
 
-  public List<CalcomBooking> getByIds(List<Long> bookingIds) {
-    SqlParameterSource parameters = new MapSqlParameterSource("ids", bookingIds);
-    return calcomDBNamedParamterTemplate
-        .query("select * from \"Booking\" where id in (:ids)", parameters,
-            new CalcomRepositoryBookingMapper());
-  }
-
   public CalcomBooking getBookingById(Long bookingId) {
     SqlParameterSource parameters = new MapSqlParameterSource("bookingId", bookingId);
     return calcomDBNamedParamterTemplate
@@ -90,8 +83,22 @@ public class BookingRepository {
   public void updateAttendeeEmail(final List<Long> bookingIds, final String email) {
     String QUERY = "UPDATE \"Attendee\" SET \"email\"=:email WHERE \"bookingId\" IN (:bookingIds)";
     SqlParameterSource parameters = new MapSqlParameterSource()
-            .addValue("bookingIds", bookingIds)
-            .addValue("email", email);
+        .addValue("bookingIds", bookingIds)
+        .addValue("email", email);
+    calcomDBNamedParamterTemplate.update(QUERY, parameters);
+  }
+
+  public CalcomBooking getBookingByUid(String bookingUid) {
+    SqlParameterSource parameters = new MapSqlParameterSource("bookingUid", bookingUid);
+    return calcomDBNamedParamterTemplate
+        .queryForObject("select * from \"Booking\" where uid = :bookingUid", parameters,
+            new CalcomRepositoryBookingMapper());
+  }
+
+  public void cancelBooking(String bookingUid) {
+    String QUERY = "UPDATE \"Booking\" SET status='cancelled' WHERE uid = :bookingUid";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("bookingUid", bookingUid);
     calcomDBNamedParamterTemplate.update(QUERY, parameters);
   }
 }

@@ -10,7 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CalComCalcomEventTypeServiceTest {
+public class CalComCalcomCalcomEventTypeServiceTest {
 
   @Mock
   private RestTemplate restTemplate;

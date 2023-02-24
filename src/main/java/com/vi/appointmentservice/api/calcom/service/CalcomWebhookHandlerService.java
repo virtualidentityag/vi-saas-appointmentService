@@ -1,10 +1,11 @@
-package com.vi.appointmentservice.api.service;
+package com.vi.appointmentservice.api.calcom.service;
 
+import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
-import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
+import com.vi.appointmentservice.api.calcom.service.CalComBookingService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
 import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentService;
@@ -16,11 +17,9 @@ import com.vi.appointmentservice.appointmentservice.generated.web.model.Appointm
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
 import com.vi.appointmentservice.repository.UserToConsultantRepository;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -101,15 +100,7 @@ public class CalcomWebhookHandlerService {
   }
 
   private void handleCancelEvent(CalcomWebhookInputPayload payload) {
-    //TODO: replace with call to DB, and try catch will also disappear
-    try {
-      var bookingId = calComBookingService.getAllBookings().stream()
-          .filter(el -> el.getUid().equals(payload.getUid())).collect(
-              Collectors.toList()).get(0).getId();
-      messagesService.publishCancellationMessage(bookingId);
-    } catch (Exception e) {
-      log.error(String.valueOf(e));
-    }
+    messagesService.publishCancellationMessage(payload.getUid());
   }
 
   private void createBookingAskerRelation(CalcomWebhookInputPayload payload,

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vi.appointmentservice.api.model.AskerDTO;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
+import com.vi.appointmentservice.api.calcom.service.CalComBookingService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.api.calcom.repository.BookingRepository;

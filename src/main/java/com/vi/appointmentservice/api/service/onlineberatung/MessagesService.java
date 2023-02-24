@@ -3,7 +3,7 @@ package com.vi.appointmentservice.api.service.onlineberatung;
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
+import com.vi.appointmentservice.api.calcom.service.CalComBookingService;
 import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.config.MessageApiClient;
 import com.vi.appointmentservice.messageservice.generated.web.MessageControllerApi;
@@ -65,8 +65,8 @@ public class MessagesService {
     }
   }
 
-  public void publishCancellationMessage(Long bookingId) {
-    CalcomBooking booking = calComBookingService.getBookingById(bookingId);
+  public void publishCancellationMessage(String bookingUid) {
+    CalcomBooking booking = calComBookingService.getBookingByUid(bookingUid);
     AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_CANCELLED);
     sendMessage(booking, message);
   }

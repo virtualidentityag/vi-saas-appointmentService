@@ -39,8 +39,6 @@ public class CalComTeamService {
   public void deleteTeam(Long teamId) {
     membershipsRepository.deleteTeamMemeberships(teamId);
     teamRepository.deleteTeam(teamId);
-    // TODO: Delete event-types?
-    // TODO: Cancel Bookings?
   }
 
   public List<Long> getTeamMembers(Long teamId) {

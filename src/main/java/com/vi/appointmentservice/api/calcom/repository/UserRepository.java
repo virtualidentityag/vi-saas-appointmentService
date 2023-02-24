@@ -51,19 +51,14 @@ public class UserRepository {
     return user;
   }
 
-  public CalcomUser updateUser(CalcomUser user) {
-    Long userId = user.getId();
-    String name = user.getName();
-    Boolean isAway = false;
-    String email = user.getEmail();
-    String UPDATE_USER_QUERY =
-        "update \"users\" set \"name\" = $nameParam, \"away\" = $awayParam, \"email\" = $emailParam where \"id\" = "
-            + userId;
-    UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$nameParam", "'" + name + "'")
-        .replace("$awayParam", isAway.toString())
-        .replace("$emailParam", "'" + email + "'");
-    jdbcTemplate.update(UPDATE_USER_QUERY);
-    return getUserById(user.getId());
+  public CalcomUser updateUser(Long userId, String name, String email) {
+    String UPDATE_USER_QUERY = "UPDATE \"users\" SET \"name\" = :name, \"email\" = :email WHERE \"id\" = :id";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("name", name)
+        .addValue("email", email)
+        .addValue("id", userId);
+    db.update(UPDATE_USER_QUERY, parameters);
+    return getUserById(userId);
   }
 
   public void setDefaultScheduleId(Long calcomUserId, Long defaultScheduleId) {

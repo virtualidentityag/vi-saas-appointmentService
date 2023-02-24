@@ -8,7 +8,7 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
-public class EventType {
+public class CalcomEventType {
 
   private Integer id;
 
@@ -74,8 +74,8 @@ public class EventType {
 
   private List<Long> memberIds = new ArrayList<>();
 
-  public static EventType asInstance(Map<String, Object> params) {
-    EventType eventType = new EventType();
+  public static CalcomEventType asInstance(Map<String, Object> params) {
+    CalcomEventType eventType = new CalcomEventType();
     eventType.setId((Integer) params.get("id"));
     eventType.setMetadata(params.get("metadata").toString());
     eventType.setTeamId((Integer) params.get("teamId"));

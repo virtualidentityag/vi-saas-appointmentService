@@ -2,7 +2,7 @@ package com.vi.appointmentservice.helper;
 
 import com.vi.appointmentservice.api.calcom.model.CalcomTeam;
 import com.vi.appointmentservice.api.calcom.model.CalcomUser;
-import com.vi.appointmentservice.api.calcom.model.EventType;
+import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
 import com.vi.appointmentservice.api.calcom.service.CalcomEventTypeService;
 import com.vi.appointmentservice.api.calcom.service.CalComTeamService;
 import com.vi.appointmentservice.api.model.CalcomBooking;
@@ -54,7 +54,7 @@ public class RescheduleHelper {
   }
 
   private Number getTeamIdForBooking(CalcomBooking calcomBooking) {
-    EventType eventType = calcomEventTypeService
+    CalcomEventType eventType = calcomEventTypeService
         .getEventTypeById(Long.valueOf(calcomBooking.getEventTypeId()));
     return eventType.getTeamId();
   }

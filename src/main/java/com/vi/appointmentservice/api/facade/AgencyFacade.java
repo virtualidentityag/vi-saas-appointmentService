@@ -1,6 +1,6 @@
 package com.vi.appointmentservice.api.facade;
 
-import com.vi.appointmentservice.api.calcom.model.EventType;
+import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
 import com.vi.appointmentservice.api.calcom.service.CalComUserService;
 import com.vi.appointmentservice.api.calcom.service.CalcomEventTypeService;
 import com.vi.appointmentservice.api.calcom.service.CalComTeamService;
@@ -9,6 +9,7 @@ import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
 import com.vi.appointmentservice.api.model.CreateUpdateEventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
+import com.vi.appointmentservice.api.service.AppointmentService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.model.TeamToAgency;
 import com.vi.appointmentservice.repository.UserToConsultantRepository;
@@ -44,10 +45,8 @@ public class AgencyFacade {
   @NonNull
   private final CalcomEventTypeService calcomEventTypeService;
 
-  private static final String DEFAULT_EVENT_DESCRIPTION =
-      "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
-          + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
-          + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!";
+  @NonNull
+  private final AppointmentService appointmentService;
 
   public void agencyMasterDataSync(AgencyMasterDataSyncRequestDTO request) {
     if (appointmentTeamExist(request.getId())) {
@@ -67,27 +66,16 @@ public class AgencyFacade {
   }
 
   private void createTeam(Long agencyId, String agencyName) {
-    AppointmentType defaultAppointmentType = buildDefaultAppointmentType();
+    AppointmentType defaultAppointmentType = appointmentService.createDefaultAppointmentType();
     var calTeam = calComTeamService.createTeam(agencyName);
     defaultAppointmentType.setTitle("Erstbefragung " + calTeam.getName());
-    EventType eventType = calcomEventTypeService
+    CalcomEventType eventType = calcomEventTypeService
         .createEventType(calTeam.getId(), defaultAppointmentType);
     calcomEventTypeService.markAsDefaultEventType(eventType);
     TeamToAgency appointmentTeam = new TeamToAgency();
     appointmentTeam.setTeamid(calTeam.getId());
     appointmentTeam.setAgencyId(agencyId);
     teamToAgencyRepository.save(appointmentTeam);
-  }
-
-  private AppointmentType buildDefaultAppointmentType() {
-    AppointmentType appointmentType = new AppointmentType();
-    appointmentType.setAfterEventBuffer(10);
-    appointmentType.setBeforeEventBuffer(0);
-    appointmentType.setDescription(DEFAULT_EVENT_DESCRIPTION);
-    appointmentType.setLength(50);
-    appointmentType.setMinimumBookingNotice(240);
-    appointmentType.setSlotInterval(15);
-    return appointmentType;
   }
 
   private List<Long> getAppointmentTeams4Agencies(List<Long> agencyIds) {
@@ -100,7 +88,6 @@ public class AgencyFacade {
     });
     return appointmentTeamsIds;
   }
-
 
   public void assignConsultant2AppointmentTeams(String consultantId, List<Long> agencyIds) {
     Optional<CalcomUserToConsultant> appointmentUser = user2ConsultantRepo
@@ -143,7 +130,7 @@ public class AgencyFacade {
     teamToAgencyRepository.delete(teamAgency);
   }
 
-  public List<EventType> getAgencyEventTypes(Long agencyId) {
+  public List<CalcomEventType> getAgencyEventTypes(Long agencyId) {
     var teamId = toTeamId(agencyId);
     var eventTypes = calcomEventTypeService.getAllEventTypesOfTeam(teamId);
     eventTypes.forEach(eventType -> {
@@ -165,7 +152,7 @@ public class AgencyFacade {
     return team2Agency.get();
   }
 
-  private EventType attachConsultantsInformationToEventType(EventType eventType) {
+  private CalcomEventType attachConsultantsInformationToEventType(CalcomEventType eventType) {
     List<TeamEventTypeConsultant> consultants = new ArrayList<>();
     eventType.getMemberIds().forEach(member -> {
       Optional<CalcomUserToConsultant> calomUserToConsultant = user2ConsultantRepo
@@ -179,14 +166,14 @@ public class AgencyFacade {
     return eventType;
   }
 
-  public EventType getAgencyEventTypeById(Long eventTypeId) {
-    EventType eventType = calcomEventTypeService.getEventTypeById(eventTypeId);
+  public CalcomEventType getAgencyEventTypeById(Long eventTypeId) {
+    CalcomEventType eventType = calcomEventTypeService.getEventTypeById(eventTypeId);
     attachConsultantsInformationToEventType(eventType);
     attachFullSlugToEventType(eventType);
     return eventType;
   }
 
-  public EventType attachFullSlugToEventType(EventType calcomEventType) {
+  public CalcomEventType attachFullSlugToEventType(CalcomEventType calcomEventType) {
     String eventTypeSlug = calcomEventType.getSlug();
     String teamSlug = calComTeamService.getTeamById(calcomEventType.getTeamId())
         .getSlug();
@@ -194,14 +181,14 @@ public class AgencyFacade {
     return calcomEventType;
   }
 
-  public EventType createAgencyEventType(Long agencyId,
+  public CalcomEventType createAgencyEventType(Long agencyId,
       CreateUpdateEventTypeDTO eventType) {
     Long teamid = toTeamId(agencyId);
-    AppointmentType appointmentType = buildDefaultAppointmentType();
+    AppointmentType appointmentType = appointmentService.createDefaultAppointmentType();
     appointmentType.setTitle(eventType.getTitle());
     appointmentType.setLength(eventType.getLength());
     appointmentType.setDescription(eventType.getDescription());
-    EventType eventType1 = calcomEventTypeService.createEventType(teamid, appointmentType);
+    CalcomEventType eventType1 = calcomEventTypeService.createEventType(teamid, appointmentType);
     eventType.getConsultants().forEach(consultant -> {
       List<Long> agencies = new ArrayList<>();
       agencies.add(agencyId);
@@ -212,10 +199,10 @@ public class AgencyFacade {
     return eventType1;
   }
 
-  public EventType updateAgencyEventType(Long eventTypeId,
+  public CalcomEventType updateAgencyEventType(Long eventTypeId,
       CreateUpdateEventTypeDTO eventType) {
 
-    EventType eventTypeDB = calcomEventTypeService.getEventTypeById(eventTypeId);
+    CalcomEventType eventTypeDB = calcomEventTypeService.getEventTypeById(eventTypeId);
     eventTypeDB.setTitle(eventType.getTitle());
     eventTypeDB.setLength(eventType.getLength());
     eventTypeDB.setDescription(eventType.getDescription());

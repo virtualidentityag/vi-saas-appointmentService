@@ -15,7 +15,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -72,8 +71,8 @@ public class ConsultantController implements ConsultantsApi {
   @Override
   public ResponseEntity<List<EventTypeDTO>> getAllEventTypesOfConsultant(
       String consultantId) {
-    return new ResponseEntity<>(consultantFacade.getAllEventTypesOfConsultantHandler(consultantId),
-        HttpStatus.OK);
+    //TODO: remove this method
+    return null;
   }
 
   @Override
