@@ -18,7 +18,7 @@ public class CalComUserService {
   private UserRepository userRepository;
 
   public CalcomUser createUser(String name, String email) {
-    com.vi.appointmentservice.api.calcom.model.CalcomUser calcomUser = new CalcomUser();
+    CalcomUser calcomUser = new CalcomUser();
     calcomUser.setName(name);
     calcomUser.setUsername(UUID.randomUUID().toString());
     calcomUser.setEmail(StringUtils.lowerCase(email));

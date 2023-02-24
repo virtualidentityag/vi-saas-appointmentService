@@ -3,9 +3,9 @@ package com.vi.appointmentservice.api.controller;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.facade.ConsultantFacade;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
+import com.vi.appointmentservice.api.model.EventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.helper.AuthenticatedUser;
@@ -70,7 +70,7 @@ public class ConsultantController implements ConsultantsApi {
   }
 
   @Override
-  public ResponseEntity<List<CalcomEventTypeDTO>> getAllEventTypesOfConsultant(
+  public ResponseEntity<List<EventTypeDTO>> getAllEventTypesOfConsultant(
       String consultantId) {
     return new ResponseEntity<>(consultantFacade.getAllEventTypesOfConsultantHandler(consultantId),
         HttpStatus.OK);

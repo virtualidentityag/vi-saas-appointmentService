@@ -1,12 +1,9 @@
 package com.vi.appointmentservice.api.calcom.repository;
 
-import com.vi.appointmentservice.api.calcom.model.CalcomTeam;
-import com.vi.appointmentservice.api.model.CalcomUser;
+import com.vi.appointmentservice.api.calcom.model.CalcomUser;
 import java.util.Map;
-import java.util.UUID;
 import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -27,15 +24,15 @@ public class UserRepository {
     this.jdbcTemplate = jdbcTemplate;
   }
 
-  public com.vi.appointmentservice.api.calcom.model.CalcomUser getUserById(Long userId){
+  public CalcomUser getUserById(Long userId) {
     String SELECT_USER = "SELECT * FROM users WHERE id = :userId";
     SqlParameterSource parameters = new MapSqlParameterSource("userId", userId);
     Map<String, Object> result = db.queryForMap(SELECT_USER, parameters);
-    return com.vi.appointmentservice.api.calcom.model.CalcomUser.asInstance(result);
+    return CalcomUser.asInstance(result);
   }
 
-  public com.vi.appointmentservice.api.calcom.model.CalcomUser creatUser(
-      com.vi.appointmentservice.api.calcom.model.CalcomUser user) {
+  public CalcomUser creatUser(
+      CalcomUser user) {
     GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
     String INSERT_USER =
         "INSERT INTO users(username,name,email,password,\"timeZone\",\"weekStart\",locale,\"timeFormat\") "
@@ -54,7 +51,7 @@ public class UserRepository {
     return user;
   }
 
-  public com.vi.appointmentservice.api.calcom.model.CalcomUser updateUser(com.vi.appointmentservice.api.calcom.model.CalcomUser user) {
+  public CalcomUser updateUser(CalcomUser user) {
     Long userId = user.getId();
     String name = user.getName();
     Boolean isAway = false;

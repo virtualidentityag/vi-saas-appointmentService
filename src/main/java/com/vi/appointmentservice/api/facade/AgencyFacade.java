@@ -6,7 +6,7 @@ import com.vi.appointmentservice.api.calcom.service.CalcomEventTypeService;
 import com.vi.appointmentservice.api.calcom.service.CalComTeamService;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
-import com.vi.appointmentservice.api.model.CreateUpdateCalcomEventTypeDTO;
+import com.vi.appointmentservice.api.model.CreateUpdateEventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
@@ -195,7 +195,7 @@ public class AgencyFacade {
   }
 
   public EventType createAgencyEventType(Long agencyId,
-      CreateUpdateCalcomEventTypeDTO eventType) {
+      CreateUpdateEventTypeDTO eventType) {
     Long teamid = toTeamId(agencyId);
     AppointmentType appointmentType = buildDefaultAppointmentType();
     appointmentType.setTitle(eventType.getTitle());
@@ -213,7 +213,7 @@ public class AgencyFacade {
   }
 
   public EventType updateAgencyEventType(Long eventTypeId,
-      CreateUpdateCalcomEventTypeDTO eventType) {
+      CreateUpdateEventTypeDTO eventType) {
 
     EventType eventTypeDB = calcomEventTypeService.getEventTypeById(eventTypeId);
     eventTypeDB.setTitle(eventType.getTitle());

@@ -33,6 +33,7 @@ public class CalcomUser {
   public static CalcomUser asInstance(Map<String, Object> result) {
     CalcomUser user = new CalcomUser();
     user.setName(result.get("name").toString());
+    user.setUsername(result.get("username").toString());
     return user;
   }
 }

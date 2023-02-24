@@ -4,8 +4,8 @@ import com.vi.appointmentservice.api.calcom.model.EventType;
 import com.vi.appointmentservice.api.facade.AgencyFacade;
 import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
-import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
-import com.vi.appointmentservice.api.model.CreateUpdateCalcomEventTypeDTO;
+import com.vi.appointmentservice.api.model.CreateUpdateEventTypeDTO;
+import com.vi.appointmentservice.api.model.EventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import com.vi.appointmentservice.generated.api.controller.AgenciesApi;
@@ -37,33 +37,32 @@ public class AgencyController implements AgenciesApi {
   }
 
   @Override
-  public ResponseEntity<List<CalcomEventTypeDTO>> getAllEventTypesOfAgency(Long agencyId) {
-    List<CalcomEventTypeDTO> eventTypes = this.agencyFacade.getAgencyEventTypes(agencyId).stream()
+  public ResponseEntity<List<EventTypeDTO>> getAllEventTypesOfAgency(Long agencyId) {
+    List<EventTypeDTO> eventTypes = this.agencyFacade.getAgencyEventTypes(agencyId).stream()
         .map(el -> asEventTypeDTO(el)).collect(
             Collectors.toList());
     return new ResponseEntity<>(eventTypes, HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<CalcomEventTypeDTO> getAgencyEventTypeById(Long agencyId,
+  public ResponseEntity<EventTypeDTO> getAgencyEventTypeById(Long agencyId,
       Long eventTypeId) {
-    //TODO: agencyId is not needed. rename this method. needs to be in sync with frontend
     return new ResponseEntity<>(
         asEventTypeDTO(this.agencyFacade.getAgencyEventTypeById(eventTypeId)),
         HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<CalcomEventTypeDTO> addEventTypeToAgency(Long agencyId,
-      CreateUpdateCalcomEventTypeDTO teamEventType) {
+  public ResponseEntity<EventTypeDTO> addEventTypeToAgency(Long agencyId,
+      CreateUpdateEventTypeDTO teamEventType) {
     return new ResponseEntity<>(
         asEventTypeDTO(this.agencyFacade.createAgencyEventType(agencyId, teamEventType)),
         HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<CalcomEventTypeDTO> updateAgencyEventType(Long agencyId, Long eventTypeId,
-      CreateUpdateCalcomEventTypeDTO createUpdateCalcomEventTypeDTO) {
+  public ResponseEntity<EventTypeDTO> updateAgencyEventType(Long agencyId, Long eventTypeId,
+      CreateUpdateEventTypeDTO createUpdateCalcomEventTypeDTO) {
     return new ResponseEntity<>(
         asEventTypeDTO(
             this.agencyFacade.updateAgencyEventType(eventTypeId, createUpdateCalcomEventTypeDTO)),
@@ -96,8 +95,8 @@ public class AgencyController implements AgenciesApi {
     return new ResponseEntity<Void>(HttpStatus.OK);
   }
 
-  private CalcomEventTypeDTO asEventTypeDTO(EventType eventType) {
-    CalcomEventTypeDTO calcomEventType = new CalcomEventTypeDTO();
+  private EventTypeDTO asEventTypeDTO(EventType eventType) {
+    EventTypeDTO calcomEventType = new EventTypeDTO();
     calcomEventType.setTitle(eventType.getTitle());
     calcomEventType.setId(eventType.getId());
     calcomEventType.setLength(eventType.getLength());

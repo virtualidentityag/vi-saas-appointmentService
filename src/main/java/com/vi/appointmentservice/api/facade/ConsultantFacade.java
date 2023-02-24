@@ -6,9 +6,9 @@ import com.vi.appointmentservice.api.calcom.service.CalcomEventTypeService;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
+import com.vi.appointmentservice.api.model.EventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
@@ -147,7 +147,7 @@ public class ConsultantFacade {
     return calComBookingService.getConsultantExpiredBookings(calcomUserId);
   }
 
-  public List<CalcomEventTypeDTO> getAllEventTypesOfConsultantHandler(String consultantId) {
+  public List<EventTypeDTO> getAllEventTypesOfConsultantHandler(String consultantId) {
     getCalcomUserToConsultantIfExists(consultantId);
     return calComVIAdapter
         .getAllEventTypesOfUser(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId());
