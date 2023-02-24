@@ -4,6 +4,7 @@ import com.vi.appointmentservice.api.exception.httpresponses.InternalServerError
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
+import com.vi.appointmentservice.api.model.CalcomWebhookInputPayloadMetadata;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayloadOrganizerLanguage;
 import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
@@ -72,22 +73,31 @@ public class CalcomWebhookHandlerService {
   }
 
   void handleCreateEvent(CalcomWebhookInputPayload payload) {
+    assertPayloadMetadataIsPresent(payload);
     Appointment appointment = videoAppointmentService
         .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
     createBookingAskerRelation(payload, appointment.getId());
-
     createRocketchatRoomForInitialAppointment(payload);
     messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
   }
 
   private void createRocketchatRoomForInitialAppointment(CalcomWebhookInputPayload payload) {
-    if (Boolean.TRUE.equals(payload.getMetadata().getIsInitialAppointment())) {
+    CalcomWebhookInputPayloadMetadata metadata = payload.getMetadata();
+
+    if (Boolean.TRUE.equals(metadata.getIsInitialAppointment())) {
       EnquiryAppointmentDTO enquiryAppointmentDTO = getEnquiryAppointmentDTO(
           payload);
       userService.getUserAppointmentApi()
-          .createEnquiryAppointment(Long.valueOf(payload.getMetadata().getSessionId()),
-              payload.getMetadata().getRcToken(), payload.getMetadata().getRcUserId(),
+          .createEnquiryAppointment(Long.valueOf(metadata.getSessionId()),
+              metadata.getRcToken(), metadata.getRcUserId(),
               enquiryAppointmentDTO);
+    }
+  }
+
+  private void assertPayloadMetadataIsPresent(CalcomWebhookInputPayload payload) {
+    if (payload.getMetadata() == null) {
+      log.error("Payload metadata not set. Skipping creation of initial rocket chat rooms");
+      throw new IllegalStateException("Payload metadata not set");
     }
   }
 

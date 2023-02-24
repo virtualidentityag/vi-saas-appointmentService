@@ -1,5 +1,6 @@
 package com.vi.appointmentservice.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -79,5 +80,15 @@ class CalcomWebhookHandlerServiceTest {
     verify(videoAppointmentService).createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
     verify(userAppointmentControllerApi, Mockito.never()).createEnquiryAppointment(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
         Mockito.any(EnquiryAppointmentDTO.class));
+  }
+
+  @Test
+  void handleCreateEvent_Should_CallUserServiceAndThrowExceptionIfPayloadMetadataIsNotSet() {
+    // given
+    CalcomWebhookInputPayload payload = new CalcomWebhookInputPayload().bookingId(1).organizer(
+        new CalcomWebhookInputPayloadOrganizer().email("email"));
+    // when, then
+    assertThrows(IllegalStateException.class,
+        () -> calcomWebhookHandlerService.handleCreateEvent(payload));
   }
 }
