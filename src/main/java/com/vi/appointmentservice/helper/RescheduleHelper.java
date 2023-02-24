@@ -39,7 +39,7 @@ public class RescheduleHelper {
     var teamId = getTeamIdForBooking(calcomBooking);
     String slug = null;
     if (teamId != null) {
-      CalcomTeam team = calComTeamService.getTeamById(Long.valueOf(teamId));
+      CalcomTeam team = calComTeamService.getTeamById(teamId);
       slug = "team/" + team.getSlug();
     } else {
       slug = registeredCalcomUser.getUsername();
@@ -53,10 +53,10 @@ public class RescheduleHelper {
     return calcomBooking;
   }
 
-  private Integer getTeamIdForBooking(CalcomBooking calcomBooking) {
+  private Number getTeamIdForBooking(CalcomBooking calcomBooking) {
     EventType eventType = calcomEventTypeService
         .getEventTypeById(Long.valueOf(calcomBooking.getEventTypeId()));
-    return eventType.getTeamId().intValue();
+    return eventType.getTeamId();
   }
 
   public void attachConsultantName(List<CalcomBooking> bookings) {
