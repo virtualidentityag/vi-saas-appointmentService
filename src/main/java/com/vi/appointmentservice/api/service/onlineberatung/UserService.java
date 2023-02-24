@@ -91,4 +91,10 @@ public class UserService {
     apiClient.setBasePath(this.userServiceApiUrl);
     return new UserControllerApi(apiClient);
   }
+
+  public com.vi.appointmentservice.userservice.generated.web.AppointmentControllerApi getUserAppointmentApi() {
+    ApiClient apiClient = new UserApiClient(restTemplate);
+    apiClient.setBasePath(this.userServiceApiUrl);
+    return new com.vi.appointmentservice.userservice.generated.web.AppointmentControllerApi(apiClient);
+  }
 }

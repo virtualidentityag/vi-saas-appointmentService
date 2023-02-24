@@ -1042,6 +1042,12 @@ components:
                   type: long
                 isInitialAppointment:
                   type: boolean
+                sessionId:
+                  type: string
+                rcUserId:
+                  type: string
+                rcToken:
+                  type: string
 
     CalcomSchedule:
       type: object

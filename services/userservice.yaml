@@ -1795,6 +1795,55 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /appointments/sessions/{sessionId}/enquiry/new:
+      post:
+        tags:
+          - appointment-controller
+        summary: 'Create enquiry appointment for a user [Authorization: Role: user]'
+        operationId: createEnquiryAppointment
+        parameters:
+          - name: sessionId
+            in: path
+            description: Session Id
+            required: true
+            schema:
+              type: integer
+              format: int64
+          - name: RCToken
+            in: header
+            required: true
+            schema:
+              type: string
+          - name: RCUserId
+            in: header
+            required: true
+            schema:
+              type: string
+        requestBody:
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/EnquiryAppointmentDTO'
+          required: true
+        responses:
+          201:
+            description: CREATED - enquiry appointment has been created
+            content:
+              'application/json':
+                schema:
+                  $ref: '#/components/schemas/CreateEnquiryMessageResponseDTO'
+          400:
+            description: BAD REQUEST - invalid/incomplete request or body object
+          401:
+            description: UNAUTHORIZED - no/invalid Keycloak token
+          403:
+            description: FORBIDDEN - no/invalid role/authorization or CSRF token
+          409:
+            description: CONFLICT - message already saved for enquiry
+          500:
+            description: INTERNAL SERVER ERROR - server encountered unexpected condition
+        security:
+          - Bearer: [ ]
 components:
   schemas:
     UserDTO:
@@ -2896,6 +2945,19 @@ components:
         - DAILY_ENQUIRY
         - NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER
         - NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER
+
+    EnquiryAppointmentDTO:
+      type: object
+      required:
+        - counselorEmail
+      properties:
+        counselorEmail:
+          type: string
+          example: sucht.consultant@email.com
+        language:
+          $ref: '#/components/schemas/LanguageCode'
+        t:
+          type: string
 
   securitySchemes:
     Bearer:
