@@ -35,10 +35,11 @@ public class TeamRepository {
 
   public CalcomTeam createTeam(CalcomTeam calcomTeam) {
     GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
-    String INSERT_TEAM = "INSERT INTO \"Team\"(name,slug,\"hideBranding\") VALUES (:name,:slug,:hideBranding)";
+    String INSERT_TEAM = "INSERT INTO \"Team\"(name,slug,\"hideBranding\",\"hideBookATeamMember\") VALUES (:name,:slug,:hideBranding,:hideBookATeamMember)";
     SqlParameterSource parameters = new MapSqlParameterSource("name", calcomTeam.getName())
         .addValue("slug", calcomTeam.getSlug())
-        .addValue("hideBranding", true);
+        .addValue("hideBranding", true)
+        .addValue("hideBookATeamMember", true);
     db.update(INSERT_TEAM, parameters, generatedKeyHolder);
     return getTeamById(Long.valueOf((Integer) generatedKeyHolder.getKeys().get("id")));
   }
