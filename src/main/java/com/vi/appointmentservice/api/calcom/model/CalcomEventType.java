@@ -82,6 +82,7 @@ public class CalcomEventType {
     eventType.setTeamId((Integer) params.get("teamId"));
     eventType.setTitle((String) params.get("title"));
     eventType.setDescription((String) params.get("description"));
+    eventType.setSlug((String) params.get("slug"));
     eventType.setLength((Integer) params.get("length"));
     return eventType;
   }
