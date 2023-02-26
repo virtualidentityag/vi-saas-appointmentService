@@ -35,8 +35,8 @@ public class UserRepository {
       CalcomUser user) {
     GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
     String INSERT_USER =
-        "INSERT INTO users(username,name,email,password,\"timeZone\",\"weekStart\",locale,\"timeFormat\") "
-            + "VALUES (:username,:name,:email,:password,:timeZone,:weekStart,:locale,:timeFormat)";
+        "INSERT INTO users(username,name,email,password,\"timeZone\",\"weekStart\",locale,\"timeFormat\",\"completedOnboarding\") "
+            + "VALUES (:username,:name,:email,:password,:timeZone,:weekStart,:locale,:timeFormat,:completedOnboarding)";
     SqlParameterSource parameters = new MapSqlParameterSource()
         .addValue("username", user.getUsername())
         .addValue("name", user.getName())
@@ -45,7 +45,8 @@ public class UserRepository {
         .addValue("timeZone", user.getTimeZone())
         .addValue("weekStart", user.getWeekStart())
         .addValue("locale", user.getLocale())
-        .addValue("timeFormat", user.getTimeFormat());
+        .addValue("timeFormat", user.getTimeFormat())
+        .addValue("completedOnboarding", true);
     db.update(INSERT_USER, parameters, generatedKeyHolder);
     user.setId(Long.valueOf((Integer) generatedKeyHolder.getKeys().get("id")));
     return user;
