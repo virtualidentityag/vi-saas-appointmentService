@@ -6,10 +6,7 @@ import com.vi.appointmentservice.config.UserApiClient;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.userservice.generated.ApiClient;
 import com.vi.appointmentservice.userservice.generated.web.UserControllerApi;
-import com.vi.appointmentservice.userservice.generated.web.model.ConsultantSearchResultDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -67,15 +64,16 @@ public class UserService {
     return new UserControllerApi(apiClient);
   }
 
-  private void addDefaultHeaders(ApiClient apiClient) {
-    var headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
+  private void addDefaultHeaders(ApiClient apiClient, String authenticatedUserToken) {
+    HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(authenticatedUserToken);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 
-  public com.vi.appointmentservice.userservice.generated.web.AppointmentControllerApi getUserAppointmentApi() {
+  public com.vi.appointmentservice.userservice.generated.web.AppointmentControllerApi getUserAppointmentApi(
+      String authenticatedUserToken) {
     ApiClient apiClient = new UserApiClient(restTemplate);
     apiClient.setBasePath(this.userServiceApiUrl);
-    addDefaultHeaders(apiClient);
+    addDefaultHeaders(apiClient, authenticatedUserToken);
     return new com.vi.appointmentservice.userservice.generated.web.AppointmentControllerApi(apiClient);
   }
 }

@@ -36,12 +36,6 @@ public class SecurityHeaderSupplier {
     return header;
   }
 
-  public HttpHeaders getKeycloakAndCsrfHttpHeaders() {
-    var header = getCsrfHttpHeaders();
-    this.addKeycloakAuthorizationHeader(header, authenticatedUser.getAccessToken());
-    return header;
-  }
-
   public HttpHeaders getCsrfHttpHeaders() {
     var httpHeaders = new HttpHeaders();
 

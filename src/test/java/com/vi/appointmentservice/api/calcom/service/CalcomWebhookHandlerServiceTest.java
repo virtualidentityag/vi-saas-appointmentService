@@ -57,8 +57,8 @@ class CalcomWebhookHandlerServiceTest {
   void handleCreateEvent_Should_CallUserServiceAndCreateRocketchatRoomsIfInitialAppointmentEvent() {
     // given
     CalcomWebhookInputPayload payload = new CalcomWebhookInputPayload().bookingId(1).organizer(
-        new CalcomWebhookInputPayloadOrganizer().email("email")).metadata(new CalcomWebhookInputPayloadMetadata().rcUserId("rcUserId").isInitialAppointment(true).sessionId("1520"));
-    when(userService.getUserAppointmentApi()).thenReturn(userAppointmentControllerApi);
+        new CalcomWebhookInputPayloadOrganizer().email("email")).metadata(new CalcomWebhookInputPayloadMetadata().rcUserId("rcUserId").isInitialAppointment(true).userToken("a token").sessionId("1520"));
+    when(userService.getUserAppointmentApi(Mockito.anyString())).thenReturn(userAppointmentControllerApi);
     when(videoAppointmentService.createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime())).thenReturn(new Appointment().id(
         UUID.randomUUID()));
     // when
@@ -76,7 +76,7 @@ class CalcomWebhookHandlerServiceTest {
   void handleCreateEvent_Should_CallUserServiceAndNotCreateRocketchatRoomsIfNotInitialAppointmentEvent() {
     // given
     CalcomWebhookInputPayload payload = new CalcomWebhookInputPayload().bookingId(1).organizer(
-        new CalcomWebhookInputPayloadOrganizer().email("email")).metadata(new CalcomWebhookInputPayloadMetadata().rcUserId("rcUserId").isInitialAppointment(false).sessionId("1520"));
+        new CalcomWebhookInputPayloadOrganizer().email("email")).metadata(new CalcomWebhookInputPayloadMetadata().rcUserId("rcUserId").userToken("a token").isInitialAppointment(false).sessionId("1520"));
     when(videoAppointmentService.createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime())).thenReturn(new Appointment().id(
         UUID.randomUUID()));
     // when

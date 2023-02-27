@@ -83,7 +83,7 @@ public class CalcomWebhookHandlerService {
     if (Boolean.TRUE.equals(metadata.getIsInitialAppointment())) {
       EnquiryAppointmentDTO enquiryAppointmentDTO = getEnquiryAppointmentDTO(
           payload);
-      userService.getUserAppointmentApi()
+      userService.getUserAppointmentApi(metadata.getUserToken())
           .createEnquiryAppointment(Long.valueOf(metadata.getSessionId()),
               metadata.getRcToken(), metadata.getRcUserId(),
               enquiryAppointmentDTO);
@@ -93,6 +93,11 @@ public class CalcomWebhookHandlerService {
   private void assertPayloadMetadataIsPresent(CalcomWebhookInputPayload payload) {
     if (payload.getMetadata() == null) {
       log.error("Payload metadata not set. Skipping creation of initial rocket chat rooms");
+      throw new IllegalStateException("Payload metadata not set");
+    }
+
+    if (payload.getMetadata().getUserToken() == null) {
+      log.error("Payload not valid. Skipping creation of initial rocket chat rooms");
       throw new IllegalStateException("Payload metadata not set");
     }
   }

@@ -759,6 +759,8 @@ components:
                   type: string
                 rcToken:
                   type: string
+                userToken:
+                  type: string
 
     CalcomSchedule:
       type: object
