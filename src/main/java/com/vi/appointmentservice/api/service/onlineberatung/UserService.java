@@ -67,9 +67,15 @@ public class UserService {
     return new UserControllerApi(apiClient);
   }
 
+  private void addDefaultHeaders(ApiClient apiClient) {
+    var headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
+    headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  }
+
   public com.vi.appointmentservice.userservice.generated.web.AppointmentControllerApi getUserAppointmentApi() {
     ApiClient apiClient = new UserApiClient(restTemplate);
     apiClient.setBasePath(this.userServiceApiUrl);
+    addDefaultHeaders(apiClient);
     return new com.vi.appointmentservice.userservice.generated.web.AppointmentControllerApi(apiClient);
   }
 }
