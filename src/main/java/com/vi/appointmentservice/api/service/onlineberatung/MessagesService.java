@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,13 +73,51 @@ public class MessagesService {
 
   @Async
   public void publishNewAppointmentMessage(Long bookingId) {
+
+      new BookingCreationRepeater(5).tryRepeatCreateMessage(bookingId).orElseLogError();
+
+  }
+
+  @Data
+  class BookingCreationRepeater {
+
+    int attemptsLeft;
+    public static final int INTERVAL_BETWEEN_CALLS = 1000;
+
+    public BookingCreationRepeater(int maxAttempts) {
+      attemptsLeft = maxAttempts;
+    }
+
+    public BookingCreationRepeater tryRepeatCreateMessage(Long bookingId) {
+      while (!messageSuccessfullyCreated(bookingId) && attemptsLeft > 0) {
+        sleepGivenInterval();
+        attemptsLeft--;
+      }
+      return this;
+    }
+
+    private void sleepGivenInterval() {
+      try {
+        Thread.sleep(INTERVAL_BETWEEN_CALLS);
+      } catch (InterruptedException e) {
+        throw new IllegalStateException(e);
+      }
+    }
+
+    private boolean messageSuccessfullyCreated(Long bookingId) {
       try {
         CalcomBooking booking = calComBookingService.getBookingById(bookingId);
         AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_SET);
         sendMessage(booking, message);
+        return true;
       } catch (Exception e) {
-        log.error("Unable to publish new appointmentMessage. Reason: ", e);
+        return false;
       }
+    }
+
+    public void orElseLogError() {
+      log.error("Unable to publish new appointmentMessage. Reason: max attempts failed");
+    }
   }
 
   public void publishRescheduledAppointmentMessage(Long bookingId) {
