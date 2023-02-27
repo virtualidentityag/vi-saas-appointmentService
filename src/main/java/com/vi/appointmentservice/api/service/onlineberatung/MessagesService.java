@@ -44,12 +44,11 @@ public class MessagesService {
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
+  private  final SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat(
+      "yyyy-MM-dd'T'HH:mm");
+  private  final SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
   @Value("${message.service.api.url}")
   private String messageServiceApiUrl;
-
-  private final static SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-  private final static SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat(
-      "yyyy-MM-dd'T'HH:mm");
 
   @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
@@ -57,11 +56,11 @@ public class MessagesService {
   @Value("${keycloakService.technical.password}")
   private String keycloakTechnicalPassword;
 
-  private static String formatDate(String dateString) {
+  private String formatDate(String dateString) {
     try {
       return toFormat.format(toFormatMinutesOnly.parse(dateString));
     } catch (ParseException e) {
-      throw new RuntimeException(e);
+      throw new IllegalArgumentException(e);
     }
   }
 
@@ -73,20 +72,13 @@ public class MessagesService {
 
   @Async
   public void publishNewAppointmentMessage(Long bookingId) {
-    for (var i = 0; i < 10; i++) {
       try {
         CalcomBooking booking = calComBookingService.getBookingById(bookingId);
         AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_SET);
         sendMessage(booking, message);
-        break;
       } catch (Exception e) {
-        try {
-          Thread.sleep(2000);
-        } catch (InterruptedException e1) {
-          //
-        }
+        log.error("Unable to publish new appointmentMessage. Reason: ", e);
       }
-    }
   }
 
   public void publishRescheduledAppointmentMessage(Long bookingId) {
@@ -122,7 +114,7 @@ public class MessagesService {
       String consultantId = calcomUserToConsultant.get().getConsultantId();
       Optional<CalcomBookingToAsker> byCalcomBookingId = calcomBookingToAskerRepository
           .findByCalcomBookingId(booking.getId());
-      String askerId = byCalcomBookingId.get().getAskerId();
+      String askerId = byCalcomBookingId.orElseThrow().getAskerId();
       return userService
           .getRocketChatGroupId(consultantId, askerId);
     }
