@@ -1,14 +1,13 @@
-package com.vi.appointmentservice.api.service;
+package com.vi.appointmentservice.api.calcom.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayloadMetadata;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayloadOrganizer;
-import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
-import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
 import com.vi.appointmentservice.api.service.onlineberatung.UserService;
@@ -16,8 +15,7 @@ import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentServ
 import com.vi.appointmentservice.api.service.statistics.StatisticsService;
 import com.vi.appointmentservice.appointmentservice.generated.web.model.Appointment;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomRepository;
-import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import com.vi.appointmentservice.repository.UserToConsultantRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,15 +32,23 @@ class CalcomWebhookHandlerServiceTest {
   @Mock VideoAppointmentService videoAppointmentService;
   @Mock CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   @Mock MessagesService messagesService;
-  @Mock CalComBookingService calComBookingService;
-  @Mock CalComEventTypeService calComEventTypeService;
+
   @Mock StatisticsService statisticsService;
-  @Mock CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+
   @Mock AdminUserService adminUserService;
-  @Mock CalcomRepository calcomRepository;
+
   @Mock UserService userService;
   @Mock
   AppointmentControllerApi userAppointmentControllerApi;
+
+  @Mock
+  CalComBookingService calComBookingService;
+
+  @Mock
+  UserToConsultantRepository userToConsultantRepository;
+
+  @Mock
+  BookingRepository bookingRepository;
 
   @InjectMocks
   CalcomWebhookHandlerService calcomWebhookHandlerService;
