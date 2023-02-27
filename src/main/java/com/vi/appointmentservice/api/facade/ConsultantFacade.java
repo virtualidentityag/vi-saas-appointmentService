@@ -1,46 +1,29 @@
 package com.vi.appointmentservice.api.facade;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vi.appointmentservice.api.calcom.model.CalcomUser;
+import com.vi.appointmentservice.api.calcom.repository.AvailabilityRepository;
+import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
+import com.vi.appointmentservice.api.calcom.repository.MembershipsRepository;
+import com.vi.appointmentservice.api.calcom.repository.ScheduleRepository;
+import com.vi.appointmentservice.api.calcom.service.CalComBookingService;
+import com.vi.appointmentservice.api.calcom.service.CalComUserService;
+import com.vi.appointmentservice.api.calcom.service.CalcomEventTypeService;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
-import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomToken;
-import com.vi.appointmentservice.api.model.CalcomUser;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
-import com.vi.appointmentservice.api.model.Location;
 import com.vi.appointmentservice.api.model.MeetingSlug;
-import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
-import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
-import com.vi.appointmentservice.api.service.calcom.CalComScheduleService;
-import com.vi.appointmentservice.api.service.calcom.CalComUserService;
-import com.vi.appointmentservice.api.service.onlineberatung.UserService;
+import com.vi.appointmentservice.api.service.AppointmentService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
-import com.vi.appointmentservice.repository.AvailabilityRepository;
-import com.vi.appointmentservice.repository.CalcomRepository;
-import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
-import com.vi.appointmentservice.repository.EventTypeRepository;
-import com.vi.appointmentservice.repository.MembershipsRepository;
-import com.vi.appointmentservice.repository.ScheduleRepository;
-import com.vi.appointmentservice.repository.UserRepository;
-import com.vi.appointmentservice.repository.WebhookRepository;
+import com.vi.appointmentservice.repository.UserToConsultantRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,206 +34,45 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConsultantFacade {
 
   private final @NonNull CalComUserService calComUserService;
-  private final @NonNull CalComEventTypeService calComEventTypeService;
-  private final @NonNull CalComScheduleService calComScheduleService;
-  private final @NonNull MembershipsRepository calMembershipsRepository;
   private final @NonNull CalComBookingService calComBookingService;
-  private final @NonNull UserService userService;
-  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
-  private final @NonNull UserRepository userRepository;
+  private final @NonNull CalcomEventTypeService calComEventTypeService;
+  private final @NonNull AppointmentService appointmentService;
+  private final @NonNull UserToConsultantRepository userToConsultantRepository;
+
+  private final @NonNull MembershipsRepository calMembershipsRepository;
   private final @NonNull ScheduleRepository scheduleRepository;
-  private final @NonNull EventTypeRepository eventTypeRepository;
-  private final @NonNull WebhookRepository webhookRepository;
-  private final @NonNull CalcomRepository calcomRepository;
-  private static final String DEFAULT_EVENT_DESCRIPTION =
-      "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
-          + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
-          + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!";
+  private final @NonNull BookingRepository bookingRepository;
   private final @NonNull AvailabilityRepository availabilityRepository;
-  @Value("${app.base.url}")
-  private String appBaseUrl;
 
-  public List<CalcomUser> initializeConsultantsHandler() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    List<CalcomUser> createdOrUpdatedUsers = new ArrayList<>();
-    JSONArray consultantsArray = this.userService.getAllConsultants();
-    for (int i = 0; i < consultantsArray.length(); i++) {
-      ConsultantDTO consultant;
-      try {
-        consultant = objectMapper.readValue(consultantsArray.getJSONObject(i).toString(),
-            ConsultantDTO.class);
-      } catch (JsonProcessingException e) {
-        throw new CalComApiErrorException(
-            "Could not deserialize ConsultantDTO response from userService");
-      }
-      CalcomUser createdUser = this.createOrUpdateCalcomUserHandler(consultant);
-      if (createdUser != null) {
-        createdOrUpdatedUsers.add(createdUser);
-      }
-    }
-    log.info("Consultants created or updated in sync: {}", createdOrUpdatedUsers);
-    return createdOrUpdatedUsers;
+  public void createUser(ConsultantDTO consultant) {
+    CalcomUser calcomUser = calComUserService
+        .createUser(consultant.getFirstname() + " " + consultant.getLastname(),
+            consultant.getEmail());
+    linkConsultantToAppointmentUser(calcomUser, consultant);
+    setupDefaultScheduleAndEventType(calcomUser);
   }
 
-  private void createUserIdAssociation(CalcomUser createdUser, ConsultantDTO consultant) {
-    calcomUserToConsultantRepository.save(
-        new CalcomUserToConsultant(consultant.getId(), createdUser.getId(),
-            createdUser.getPassword()));
-  }
-
-  private CalcomUser createCalcomUser(ConsultantDTO consultant) {
-    if (calcomUserToConsultantRepository.existsByConsultantId(consultant.getId())) {
-      // Already exists, update user
-      return this.updateCalcomUser(consultant);
-    } else {
-      CalcomUser creationUser = new CalcomUser();
-      creationUser.setName(consultant.getFirstname() + " " + consultant.getLastname());
-      creationUser.setEmail(StringUtils.lowerCase(consultant.getEmail()));
-      // Default values
-      creationUser.setTimeZone("Europe/Berlin");
-      creationUser.setWeekStart("Monday");
-      creationUser.setLocale("de");
-      creationUser.setTimeFormat(24);
-      creationUser.setAllowDynamicBooking(true);
-      creationUser.setAway(consultant.getAbsent());
-      ObjectMapper objectMapper = new ObjectMapper();
-      // Ignore null values
-      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-      JSONObject userPayloadJson = null;
-      try {
-        userPayloadJson = new JSONObject(objectMapper.writeValueAsString(creationUser));
-      } catch (JsonProcessingException e) {
-        throw new InternalServerErrorException("Could not serialize createCalcomUser payload");
-      }
-      // Create association
-      String userPassword = UUID.randomUUID().toString();
-      CalcomUser createdUser = calComUserService.createUser(userPayloadJson);
-      userRepository.initUserAddExtraData(createdUser.getId(),
-          new BCryptPasswordEncoder().encode(userPassword));
-      var calcomUser = calComUserService.getUserById(createdUser.getId());
-      calcomUser.setPassword(userPassword);
-      return calcomUser;
-    }
-  }
-
-  public CalcomUser createOrUpdateCalcomUserHandler(ConsultantDTO consultant) {
-    CalcomUser createdOrUpdatedUser = null;
-    log.info("Creating or updating consultant: {}", consultant);
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+  public void updateAppointmentUser(ConsultantDTO consultant) {
+    var name = consultant.getFirstname() + " " + consultant.getLastname();
+    Optional<CalcomUserToConsultant> userConsultant = userToConsultantRepository
         .findByConsultantId(consultant.getId());
-    if (calcomUserToConsultant.isPresent()) {
-      Long calComUserId = calcomUserToConsultant.get().getCalComUserId();
-      CalcomUser foundUser = calComUserService.getUserById(calComUserId);
-      if (foundUser == null) {
-        createdOrUpdatedUser = this.createCalcomUser(consultant);
-      } else {
-        createdOrUpdatedUser = this.updateCalcomUser(consultant);
-      }
-      if (createdOrUpdatedUser != null) {
-        updateUserDefaultEntities(createdOrUpdatedUser);
-      }
-    } else {
-      createdOrUpdatedUser = this.createCalcomUser(consultant);
-      if (createdOrUpdatedUser != null) {
-        this.createUserIdAssociation(createdOrUpdatedUser, consultant);
-        updateUserDefaultEntities(createdOrUpdatedUser);
-      }
-    }
-    return createdOrUpdatedUser;
+    calComUserService.updateUser(userConsultant.get().getCalComUserId(), name, consultant.getEmail());
   }
 
-  void updateUserDefaultEntities(CalcomUser createdOrUpdatedUser) {
-    webhookRepository.updateUserWebhook(createdOrUpdatedUser.getId());
-    Long defaultScheduleId = scheduleRepository.createDefaultScheduleIfNoneExists(
-        createdOrUpdatedUser.getId());
-    // Add default eventTypes
-    if (calComEventTypeService.getAllEventTypesOfUser(createdOrUpdatedUser.getId()).isEmpty()) {
-      Long newDefaultEventTypeId = addDefaultEventTypeToUser(createdOrUpdatedUser);
-      eventTypeRepository.updateEventTypeScheduleId(newDefaultEventTypeId, defaultScheduleId);
-    }
+  private void linkConsultantToAppointmentUser(
+      CalcomUser calcomUser, ConsultantDTO consultant) {
+    userToConsultantRepository.save(
+        new CalcomUserToConsultant(consultant.getId(), calcomUser.getId(),
+            calcomUser.getPlainPassword()));
   }
 
-  private Long addDefaultEventTypeToUser(CalcomUser createdUser) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    // Ignore null values
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    CalcomEventTypeDTO eventType = this.getDefaultCalcomEventType(createdUser);
-    JSONObject eventTypeJson;
-    try {
-      eventTypeJson = new JSONObject(objectMapper.writeValueAsString(eventType));
-    } catch (JsonProcessingException e) {
-      throw new CalComApiErrorException("Could not serialize default event-type");
-    }
-    Long createdEventTypeId = Long
-        .valueOf(calComEventTypeService.createEventType(eventTypeJson).getId());
-    eventTypeRepository.addUserEventTypeRelation(createdEventTypeId, createdUser.getId());
-    eventTypeRepository.setPeriodType(createdEventTypeId);
-    return createdEventTypeId;
-
-  }
-
-  private CalcomEventTypeDTO getDefaultCalcomEventType(CalcomUser createdUser) {
-    CalcomEventTypeDTO eventType = new CalcomEventTypeDTO();
-    eventType.setUserId(Math.toIntExact(createdUser.getId()));
-    eventType.setTitle("Beratung mit " + createdUser.getName());
-    eventType.setSlug(UUID.randomUUID().toString());
-    eventType.setLength(50);
-    eventType.setHidden(false);
-    eventType.setEventName("Beratung {ATTENDEE} mit {HOST}");
-    eventType.setRequiresConfirmation(false);
-    eventType.setDisableGuests(true);
-    eventType.setHideCalendarNotes(true);
-    eventType.setMinimumBookingNotice(240);
-    eventType.setBeforeEventBuffer(0);
-    eventType.setAfterEventBuffer(10);
-    eventType.setSlotInterval(15);
-    eventType.setPeriodDays(30);
-    eventType.setPeriodCountCalendarDays(true);
-    eventType.setDescription(DEFAULT_EVENT_DESCRIPTION);
-    List<Location> locations = new ArrayList<>();
-    Location customVideoLink = new Location();
-    customVideoLink.setType("customVideoLink");
-    customVideoLink.setLink(appBaseUrl);
-    locations.add(customVideoLink);
-    Location link = new Location();
-    link.setType("link");
-    link.setLink(appBaseUrl);
-    locations.add(link);
-    Location userPhone = new Location();
-    userPhone.setType("userPhone");
-    userPhone.setHostPhoneNumber(appBaseUrl);
-    locations.add(userPhone);
-    Location inPerson = new Location();
-    inPerson.setType("inPerson");
-    inPerson.setAddress("Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit");
-    locations.add(inPerson);
-    eventType.setLocations(locations);
-    return eventType;
-  }
-
-  private CalcomUser updateCalcomUser(ConsultantDTO consultant) {
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
-        .findByConsultantId(consultant.getId());
-    if (calcomUserToConsultant.isPresent()) {
-      // Exists, update the user
-      Long calcomUserId = calcomUserToConsultant.get().getCalComUserId();
-      CalcomUser updateUser = new CalcomUser();
-      updateUser.setId(calcomUserId);
-      updateUser.setName(consultant.getFirstname() + " " + consultant.getLastname());
-      updateUser.setEmail(StringUtils.lowerCase(consultant.getEmail()));
-      // Default values
-      updateUser.setTimeZone("Europe/Berlin");
-      updateUser.setWeekStart("Monday");
-      updateUser.setLocale("de");
-      updateUser.setTimeFormat(24);
-      updateUser.setAllowDynamicBooking(true);
-      updateUser.setAway(consultant.getAbsent());
-      userRepository.updateUser(updateUser);
-      return calComUserService.getUserById(updateUser.getId());
-    } else {
-      // Doesn't exist, create the user
-      return this.createCalcomUser(consultant);
-    }
+  void setupDefaultScheduleAndEventType(CalcomUser calcomUser) {
+    Long defaultScheduleId = scheduleRepository.createDefaultSchedule(calcomUser.getId());
+    AppointmentType defaultAppointmentType = appointmentService.createDefaultAppointmentType();
+    defaultAppointmentType.setTitle("Beratung mit");
+    calComEventTypeService
+        .createEventType(calcomUser, appointmentService.createDefaultAppointmentType(),
+            defaultScheduleId);
   }
 
   public HttpStatus deleteConsultantHandler(String consultantId) {
@@ -261,28 +83,28 @@ public class ConsultantFacade {
     // Delete personal event-types
     calComEventTypeService.deleteAllEventTypesOfUser(calcomUserId);
     // Delete schedules
-    List<Integer> deletedSchedules = calComScheduleService.deleteAllSchedulesOfUser(calcomUserId);
+    List<Integer> deletedSchedules = scheduleRepository.deleteUserSchedules(calcomUserId);
     // Delete availabilities for schedules
     for (Integer scheduleId : deletedSchedules) {
       availabilityRepository.deleteAvailabilityByScheduleId(Long.valueOf(scheduleId));
     }
 
     List<CalcomBooking> bookings = new ArrayList<>();
-    bookings.addAll(calcomRepository.getConsultantActiveBookings(calcomUserId));
-    bookings.addAll(calcomRepository.getConsultantCancelledBookings(calcomUserId));
-    bookings.addAll(calcomRepository.getConsultantExpiredBookings(calcomUserId));
+    bookings.addAll(bookingRepository.getConsultantActiveBookings(calcomUserId));
+    bookings.addAll(bookingRepository.getConsultantCancelledBookings(calcomUserId));
+    bookings.addAll(bookingRepository.getConsultantExpiredBookings(calcomUserId));
 
     bookings.forEach(booking -> {
       calComBookingService.cancelBooking(booking.getUid());
-      calcomRepository.deleteBooking(booking.getId());
-      calcomRepository.deleteAttendeeWithoutBooking();
+      bookingRepository.deleteBooking(booking.getId());
+      bookingRepository.deleteAttendeeWithoutBooking();
     });
 
     // Delete user
     HttpStatus deleteResponseCode = calComUserService.deleteUser(calcomUserId);
     // Remove association
     if (deleteResponseCode == HttpStatus.OK) {
-      calcomUserToConsultantRepository.deleteByConsultantId(consultantId);
+      userToConsultantRepository.deleteByConsultantId(consultantId);
     }
     return deleteResponseCode;
 
@@ -303,12 +125,6 @@ public class ConsultantFacade {
     return calComBookingService.getConsultantExpiredBookings(calcomUserId);
   }
 
-  public List<CalcomEventTypeDTO> getAllEventTypesOfConsultantHandler(String consultantId) {
-    getCalcomUserToConsultantIfExists(consultantId);
-    return calComEventTypeService
-        .getAllEventTypesOfUser(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId());
-  }
-
   public MeetingSlug getConsultantMeetingSlugHandler(String consultantId) {
     getCalcomUserToConsultantIfExists(consultantId);
     MeetingSlug meetingSlug = new MeetingSlug();
@@ -319,7 +135,7 @@ public class ConsultantFacade {
   }
 
   private CalcomUserToConsultant getCalcomUserToConsultantIfExists(String consultantId) {
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = userToConsultantRepository
         .findByConsultantId(consultantId);
     if (calcomUserToConsultant.isPresent()) {
       return calcomUserToConsultant.get();
@@ -330,7 +146,7 @@ public class ConsultantFacade {
   }
 
   public CalcomToken getToken(String consultantId) {
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = userToConsultantRepository
         .findByConsultantId(consultantId);
     if (calcomUserToConsultant.isEmpty()) {
       throw new BadRequestException("Calcom user doesn't exist for given ID");

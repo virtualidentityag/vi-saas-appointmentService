@@ -3,7 +3,7 @@ package com.vi.appointmentservice.api.service.onlineberatung;
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
+import com.vi.appointmentservice.api.calcom.service.CalComBookingService;
 import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.config.MessageApiClient;
 import com.vi.appointmentservice.messageservice.generated.web.MessageControllerApi;
@@ -13,13 +13,12 @@ import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
+import com.vi.appointmentservice.repository.UserToConsultantRepository;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +40,7 @@ public class MessagesService {
 
   private final @NonNull UserService userService;
   private final @NonNull CalComBookingService calComBookingService;
-  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
+  private final @NonNull UserToConsultantRepository userToConsultantRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
@@ -66,8 +65,8 @@ public class MessagesService {
     }
   }
 
-  public void publishCancellationMessage(Long bookingId) {
-    CalcomBooking booking = calComBookingService.getBookingById(bookingId);
+  public void publishCancellationMessage(String bookingUid) {
+    CalcomBooking booking = calComBookingService.getBookingByUid(bookingUid);
     AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_CANCELLED);
     sendMessage(booking, message);
   }
@@ -117,7 +116,7 @@ public class MessagesService {
   }
 
   private String getRocketChatGroupId(CalcomBooking booking) {
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = userToConsultantRepository
         .findByCalComUserId(Long.valueOf(booking.getUserId()));
     if (calcomUserToConsultant.isPresent()) {
       String consultantId = calcomUserToConsultant.get().getConsultantId();

@@ -45,31 +45,6 @@ public class UserService {
 
   @Autowired RestTemplate restTemplate;
 
-  //TODO: why not return List<ConsultantDTO> ?
-  //TODO: usecase and naming of this method are misleading. you use it for the initial
-  // migration, but what if someone uses it for something else, but you fetch only 999 consultants
-  // i would give it a more specific name
-  public JSONArray getAllConsultants() {
-    var userControllerApi = getUserControllerApi();
-    addTechnicalUserHeaders(userControllerApi.getApiClient());
-    log.debug("Api Client: {}", userControllerApi.getApiClient().toString());
-    ConsultantSearchResultDTO consultantsResponse = userControllerApi.searchConsultants(
-        "*",
-        1,
-        999,
-        "FIRSTNAME",
-        "ASC"
-    );
-    JSONObject consultantSearchResultDTOJson = new JSONObject(consultantsResponse);
-    log.debug("consultantSearchResultDTOJson: {}", consultantSearchResultDTOJson);
-    JSONArray consultantsArray = consultantSearchResultDTOJson.getJSONArray("embedded");
-    JSONArray consultantsResult = new JSONArray();
-    for (int i = 0; i < consultantsArray.length(); i++) {
-      consultantsResult.put(consultantsArray.getJSONObject(i).getJSONObject("embedded"));
-    }
-    return consultantsResult;
-  }
-
   public String getRocketChatGroupId(String consultantId, String askerId) {
     var userControllerApi = getUserControllerApi();
     addTechnicalUserHeaders(userControllerApi.getApiClient());
