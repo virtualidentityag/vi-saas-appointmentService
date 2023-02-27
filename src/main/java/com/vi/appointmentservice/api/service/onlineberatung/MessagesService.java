@@ -44,9 +44,9 @@ public class MessagesService {
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-  private  final SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat(
+  private final SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat(
       "yyyy-MM-dd'T'HH:mm");
-  private  final SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+  private final SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
   @Value("${message.service.api.url}")
   private String messageServiceApiUrl;
 
