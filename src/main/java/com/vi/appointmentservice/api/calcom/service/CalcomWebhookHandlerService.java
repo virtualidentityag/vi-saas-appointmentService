@@ -5,9 +5,11 @@ import com.vi.appointmentservice.api.exception.httpresponses.InternalServerError
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
-import com.vi.appointmentservice.api.calcom.service.CalComBookingService;
+import com.vi.appointmentservice.api.model.CalcomWebhookInputPayloadMetadata;
+import com.vi.appointmentservice.api.model.CalcomWebhookInputPayloadOrganizerLanguage;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
+import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentService;
 import com.vi.appointmentservice.api.service.statistics.StatisticsService;
 import com.vi.appointmentservice.api.service.statistics.event.BookingCanceledStatisticsEvent;
@@ -18,6 +20,7 @@ import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.UserToConsultantRepository;
+import com.vi.appointmentservice.userservice.generated.web.model.EnquiryAppointmentDTO;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.NonNull;
@@ -39,6 +42,8 @@ public class CalcomWebhookHandlerService {
   private final @NonNull UserToConsultantRepository userToConsultantRepository;
   private final @NonNull AdminUserService adminUserService;
   private final @NonNull BookingRepository bookingRepository;
+
+  private final @NonNull UserService userService;
 
   @Transactional
   public void handlePayload(CalcomWebhookInput input) {
@@ -63,11 +68,44 @@ public class CalcomWebhookHandlerService {
     }
   }
 
-  private void handleCreateEvent(CalcomWebhookInputPayload payload) {
+  void handleCreateEvent(CalcomWebhookInputPayload payload) {
+    assertPayloadMetadataIsPresent(payload);
     Appointment appointment = videoAppointmentService
         .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
     createBookingAskerRelation(payload, appointment.getId());
+    createRocketchatRoomForInitialAppointment(payload);
     messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
+  }
+
+  private void createRocketchatRoomForInitialAppointment(CalcomWebhookInputPayload payload) {
+    CalcomWebhookInputPayloadMetadata metadata = payload.getMetadata();
+
+    if (Boolean.TRUE.equals(metadata.getIsInitialAppointment())) {
+      EnquiryAppointmentDTO enquiryAppointmentDTO = getEnquiryAppointmentDTO(
+          payload);
+      userService.getUserAppointmentApi()
+          .createEnquiryAppointment(Long.valueOf(metadata.getSessionId()),
+              metadata.getRcToken(), metadata.getRcUserId(),
+              enquiryAppointmentDTO);
+    }
+  }
+
+  private void assertPayloadMetadataIsPresent(CalcomWebhookInputPayload payload) {
+    if (payload.getMetadata() == null) {
+      log.error("Payload metadata not set. Skipping creation of initial rocket chat rooms");
+      throw new IllegalStateException("Payload metadata not set");
+    }
+  }
+
+  private EnquiryAppointmentDTO getEnquiryAppointmentDTO(CalcomWebhookInputPayload payload) {
+    EnquiryAppointmentDTO enquiryAppointmentDTO = new EnquiryAppointmentDTO();
+    var enquiryAppointment = enquiryAppointmentDTO;
+    enquiryAppointment.setCounselorEmail(payload.getOrganizer().getEmail());
+    CalcomWebhookInputPayloadOrganizerLanguage language = payload.getOrganizer().getLanguage();
+    enquiryAppointment.setLanguage(
+        com.vi.appointmentservice.userservice.generated.web.model.LanguageCode.fromValue(
+            language != null ? language.getLocale() : "de"));
+    return enquiryAppointmentDTO;
   }
 
   private String getConsultantId(Integer bookingId) {
