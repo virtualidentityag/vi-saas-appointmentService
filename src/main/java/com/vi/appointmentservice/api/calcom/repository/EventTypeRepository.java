@@ -1,13 +1,9 @@
 package com.vi.appointmentservice.api.calcom.repository;
 
 import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
-import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
-import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.UserToConsultantRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import javax.validation.constraints.NotNull;
@@ -81,25 +77,8 @@ public class EventTypeRepository {
     } catch (Exception e) {
       //do nothing in case relation existss
     }
-
   }
 
-  public void updateUsersOfEventType(Long eventTypeId,
-      List<TeamEventTypeConsultant> eventTypeConsultants) {
-    String DELETE_QUERY = "delete from \"_user_eventtype\" where \"A\"=" + eventTypeId;
-    jdbcTemplate.update(DELETE_QUERY);
-    eventTypeConsultants.forEach(eventTypeConsultant -> {
-      Optional<CalcomUserToConsultant> calcomUserToConsultant = userToConsultantRepository
-          .findByConsultantId(eventTypeConsultant.getConsultantId());
-      if (calcomUserToConsultant.isPresent()) {
-        Long calcomUserId = calcomUserToConsultant.get().getCalComUserId();
-        String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
-        INSERT_QUERY = INSERT_QUERY.replace("$eventTypeIdParam", eventTypeId.toString())
-            .replace("$userIdParam", calcomUserId.toString());
-        jdbcTemplate.update(INSERT_QUERY);
-      }
-    });
-  }
 
   public List<Long> getUserIdsOfEventTypeMembers(Number eventTypeId) {
     String QUERY = "SELECT \"B\" FROM \"_user_eventtype\" WHERE \"A\" = " + eventTypeId;
@@ -113,16 +92,16 @@ public class EventTypeRepository {
     jdbcTemplate.update(UPDATE_QUERY);
   }
 
-  @Deprecated
-  public void setPeriodType(Number eventTypeId) {
-    String UPDATE_QUERY = "update \"EventType\" set \"periodType\"='rolling' where \"id\" = eventTypeId";
+  public void markAsRoundRobin(Number eventTypeId) {
+    String UPDATE_QUERY = "update \"EventType\" set \"schedulingType\"='roundRobin' where \"id\" = eventTypeId";
     UPDATE_QUERY = UPDATE_QUERY.replace("eventTypeId", eventTypeId.toString());
     jdbcTemplate.update(UPDATE_QUERY);
   }
 
-  public void markAsRoundRobin(Number eventTypeId) {
-    String UPDATE_QUERY = "update \"EventType\" set \"schedulingType\"='roundRobin' where \"id\" = eventTypeId";
-    UPDATE_QUERY = UPDATE_QUERY.replace("eventTypeId", eventTypeId.toString());
+  public void updateLocations(Number eventTypeId, String locations) {
+    String UPDATE_QUERY = "update \"EventType\" set \"locations\"='locationsParam' where \"id\" = eventTypeId";
+    UPDATE_QUERY = UPDATE_QUERY.replace("eventTypeId", eventTypeId.toString())
+        .replace("locationsParam", locations);
     jdbcTemplate.update(UPDATE_QUERY);
   }
 
@@ -144,10 +123,10 @@ public class EventTypeRepository {
         .addValue("slug", eventType.getSlug())
         .addValue("description", eventType.getDescription())
         .addValue("length", eventType.getLength())
-        .addValue("hidden", eventType.getHidden())
+        .addValue("hidden", false)
         .addValue("userId", eventType.getUserId())
         .addValue("eventName", eventType.getEventName())
-        .addValue("periodCountCalendarDays", eventType.getPeriodCountCalendarDays())
+        .addValue("periodCountCalendarDays", true)
         .addValue("periodDays", eventType.getPeriodDays())
         .addValue("periodEndDate", eventType.getPeriodEndDate())
         .addValue("periodStartDate", eventType.getPeriodStartDate())
@@ -156,15 +135,17 @@ public class EventTypeRepository {
         .addValue("schedulingType", eventType.getSchedulingType())
         .addValue("teamId", eventType.getTeamId())
         .addValue("disableGuests", eventType.getDisableGuests())
-        .addValue("periodType", eventType.getPeriodType())
+        .addValue("periodType", "rolling")
         .addValue("slotInterval", eventType.getSlotInterval())
         .addValue("metadata", eventType.getMetadata())
         .addValue("afterEventBuffer", eventType.getAfterEventBuffer())
         .addValue("beforeEventBuffer", eventType.getBeforeEventBuffer())
         .addValue("hideCalendarNotes", eventType.getHideCalendarNotes());
-    db.update(INSERT_EVENT_TYPE, parameters, generatedKeyHolder);
-    return getEventTypeById(Integer.valueOf((Integer) generatedKeyHolder.getKeys().get("id")));
 
+    db.update(INSERT_EVENT_TYPE, parameters, generatedKeyHolder);
+    var eventTypeId = Integer.valueOf((Integer) generatedKeyHolder.getKeys().get("id"));
+    updateLocations(eventTypeId, eventType.getLocations());
+    return getEventTypeById(eventTypeId);
   }
 
   public void updateEventType(CalcomEventType eventType) {

@@ -74,7 +74,32 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
     httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
-        .anyRequest().permitAll();
+
+        .antMatchers(WHITE_LIST).permitAll()
+
+        .antMatchers(HttpMethod.GET, "/consultants/**/meetingSlug")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT)
+
+        .antMatchers(HttpMethod.GET, "/agencies/**/initialMeetingSlug")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT)
+
+        .antMatchers(HttpMethod.GET, "/consultants", "/consultants/**","/consultants/token")
+        .hasAnyAuthority(AuthorityValue.CONSULTANT_DEFAULT)
+
+        .antMatchers(HttpMethod.GET, "/askers", "/askers/**")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT)
+        .antMatchers(HttpMethod.PATCH, "/askers/**")
+        .hasAnyAuthority(AuthorityValue.USER_DEFAULT)
+
+        .antMatchers(HttpMethod.GET, "/caldav/hasAccount")
+        .hasAuthority(AuthorityValue.CONSULTANT_DEFAULT)
+
+        .antMatchers(HttpMethod.POST, "/askers/processBooking", "/processBooking")
+        .permitAll() // auth handeled via hmac in controller
+
+        .anyRequest()
+        .hasAnyAuthority(AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
+            AuthorityValue.TECHNICAL_DEFAULT);
   }
 
   /**

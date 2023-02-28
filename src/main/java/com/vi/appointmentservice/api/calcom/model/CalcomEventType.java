@@ -1,6 +1,5 @@
 package com.vi.appointmentservice.api.calcom.model;
 
-import com.vi.appointmentservice.api.model.Location;
 import com.vi.appointmentservice.api.model.TeamEventTypeConsultant;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,25 +17,17 @@ public class CalcomEventType {
 
   private Integer length;
 
-  private Boolean hidden;
-
   private Integer userId;
 
   private Number teamId;
 
   private String eventName;
 
-  private String timeZone;
-
-  private String periodType;
-
   private String periodStartDate;
 
   private String periodEndDate;
 
   private Integer periodDays;
-
-  private Boolean periodCountCalendarDays;
 
   private Boolean requiresConfirmation;
 
@@ -54,19 +45,13 @@ public class CalcomEventType {
 
   private String schedulingType;
 
-  private Integer price;
-
-  private String currency;
-
   private Integer slotInterval;
-
-  private String successRedirectUrl;
 
   private String description;
 
-  private List<Location> locations = null;
-
   private String metadata;
+
+  private String locations;
 
   private String type;
 

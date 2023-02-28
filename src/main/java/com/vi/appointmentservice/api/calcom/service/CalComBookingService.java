@@ -1,21 +1,15 @@
 package com.vi.appointmentservice.api.calcom.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
-import com.vi.appointmentservice.api.exception.httpresponses.CalComApiErrorException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
 import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,6 +20,7 @@ public class CalComBookingService {
   private final @NonNull RescheduleHelper rescheduleHelper;
   private final @NonNull BookingRepository bookingRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
+  private final @NonNull CalcomLocationsService calcomLocationsService;
 
   public List<CalcomBooking> getConsultantActiveBookings(Long consultantId) {
     return enrichConsultantResultSet(bookingRepository.getConsultantActiveBookings(consultantId));
@@ -52,6 +47,7 @@ public class CalComBookingService {
       CalcomBookingToAsker entity = calcomBookingAsker.get();
       booking.setVideoAppointmentId(entity.getVideoAppointmentId());
       booking.setAskerId(entity.getAskerId());
+      booking.setLocation(calcomLocationsService.resolveLocationType(booking));
       rescheduleHelper.attachRescheduleLink(booking);
     }
     rescheduleHelper.attachAskerNames(bookings);
@@ -73,6 +69,7 @@ public class CalComBookingService {
       }
       CalcomBookingToAsker entity = calcomBookingAsker.get();
       booking.setAskerId(entity.getAskerId());
+      booking.setLocation(calcomLocationsService.resolveLocationType(booking));
       booking.setVideoAppointmentId(entity.getVideoAppointmentId());
       rescheduleHelper.attachRescheduleLink(booking);
     }
