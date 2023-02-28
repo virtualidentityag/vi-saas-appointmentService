@@ -73,16 +73,14 @@ public class MessagesService {
 
   @Async
   public void publishNewAppointmentMessage(Long bookingId) {
-
-      new BookingCreationRepeater(5).tryRepeatCreateMessage(bookingId).orElseLogError();
-
+      new BookingCreationRepeater(10).tryRepeatCreateMessage(bookingId).orElseLogError();
   }
 
   @Data
   class BookingCreationRepeater {
 
     int attemptsLeft;
-    public static final int INTERVAL_BETWEEN_CALLS = 1000;
+    private static final int INTERVAL_BETWEEN_CALLS = 2000;
 
     public BookingCreationRepeater(int maxAttempts) {
       attemptsLeft = maxAttempts;
