@@ -5,8 +5,6 @@ import com.vi.appointmentservice.api.calcom.repository.EventTypeRepository;
 import com.vi.appointmentservice.api.calcom.repository.MembershipsRepository;
 import com.vi.appointmentservice.api.calcom.repository.WebhookRepository;
 import com.vi.appointmentservice.api.facade.AppointmentType;
-import com.vi.appointmentservice.api.model.Location;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +23,8 @@ public class CalcomEventTypeService {
   private final MembershipsRepository membershipsRepository;
 
   private final @NonNull WebhookRepository webhookRepository;
+
+  private final @NonNull CalcomLocationsService calcomLocationsService;
 
   @Value("${app.base.url}")
   private String appBaseUrl;
@@ -73,18 +73,12 @@ public class CalcomEventTypeService {
     eventType.setAfterEventBuffer(appointmentType.getAfterEventBuffer());
     eventType.setSlotInterval(appointmentType.getSlotInterval());
     eventType.setSlug(UUID.randomUUID().toString());
-    eventType.setHidden(false);
     eventType.setEventName(appointmentType.getTitle() + " {ATTENDEE} mit {HOST}");
     eventType.setRequiresConfirmation(false);
     eventType.setDisableGuests(true);
     eventType.setHideCalendarNotes(true);
     eventType.setPeriodDays(30);
-    eventType.setPeriodCountCalendarDays(true);
-    //TODO: do we need this
-    eventType.setPeriodType("rolling");
-
-    //TODO: leave this for now, since it is to complex
-    //    eventType.setLocations(createDefaultLocations());
+    eventType.setLocations(calcomLocationsService.buildCalcomLocations());
     return eventType;
   }
 
@@ -128,27 +122,6 @@ public class CalcomEventTypeService {
         calComUserId);
     eventTypeRepository.addUserEventTypeRelation(eventTypeId, calComUserId);
     eventTypeRepository.addRoundRobinHosts(eventTypeId, calComUserId);
-  }
-
-  private List<Location> createDefaultLocations() {
-    List<Location> locations = new ArrayList<>();
-    Location customVideoLink = new Location();
-    customVideoLink.setType("customVideoLink");
-    customVideoLink.setLink(appBaseUrl);
-    locations.add(customVideoLink);
-    Location link = new Location();
-    link.setType("link");
-    link.setLink(appBaseUrl);
-    locations.add(link);
-    Location userPhone = new Location();
-    userPhone.setType("userPhone");
-    userPhone.setHostPhoneNumber(appBaseUrl);
-    locations.add(userPhone);
-    Location inPerson = new Location();
-    inPerson.setType("inPerson");
-    inPerson.setAddress("Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit");
-    locations.add(inPerson);
-    return locations;
   }
 
   public List<CalcomEventType> getAllEventTypesOfTeam(Long teamid) {
