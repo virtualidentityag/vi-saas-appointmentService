@@ -81,9 +81,11 @@ public class MessagesService {
 
     int attemptsLeft;
     private static final int INTERVAL_BETWEEN_CALLS = 2000;
+    private boolean messageSuccessfullyCreated;
 
     public BookingCreationRepeater(int maxAttempts) {
       attemptsLeft = maxAttempts;
+      messageSuccessfullyCreated = false;
     }
 
     public BookingCreationRepeater tryRepeatCreateMessage(Long bookingId) {
@@ -107,14 +109,18 @@ public class MessagesService {
         CalcomBooking booking = calComBookingService.getBookingById(bookingId);
         AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_SET);
         sendMessage(booking, message);
+        this.messageSuccessfullyCreated = true;
         return true;
       } catch (Exception e) {
+        this.messageSuccessfullyCreated = false;
         return false;
       }
     }
 
     public void orElseLogError() {
-      log.error("Unable to publish new appointmentMessage. Reason: max attempts failed");
+      if (!messageSuccessfullyCreated) {
+        log.error("Unable to publish new appointmentMessage. Reason: max attempts failed");
+      }
     }
   }
 
