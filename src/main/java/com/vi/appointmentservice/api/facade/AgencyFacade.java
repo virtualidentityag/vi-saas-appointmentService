@@ -93,11 +93,9 @@ public class AgencyFacade {
     Optional<CalcomUserToConsultant> appointmentUser = user2ConsultantRepo
         .findByConsultantId(consultantId);
     var appointmentTeamsIds = getAppointmentTeams4Agencies(agencyIds);
-    var calcomUserId = appointmentUser.get().getCalComUserId();
+    var calcomUserId = appointmentUser.orElseThrow().getCalComUserId();
     calcomEventTypeService.cleanUserMemberships(calcomUserId, appointmentTeamsIds);
-    appointmentTeamsIds.forEach(teamId -> {
-      calcomEventTypeService.addUser2Team(calcomUserId, teamId);
-    });
+    appointmentTeamsIds.forEach(teamId -> calcomEventTypeService.addUser2Team(calcomUserId, teamId));
   }
 
   public List<TeamEventTypeConsultant> getAllConsultantsOfAgency(Long agencyId) {
@@ -184,10 +182,7 @@ public class AgencyFacade {
   public CalcomEventType createAgencyEventType(Long agencyId,
       CreateUpdateEventTypeDTO eventType) {
     Long teamid = toTeamId(agencyId);
-    AppointmentType appointmentType = appointmentService.createDefaultAppointmentType();
-    appointmentType.setTitle(eventType.getTitle());
-    appointmentType.setLength(eventType.getLength());
-    appointmentType.setDescription(eventType.getDescription());
+    AppointmentType appointmentType = getAppointmentType(eventType);
     CalcomEventType eventType1 = calcomEventTypeService.createEventType(teamid, appointmentType);
     eventType.getConsultants().forEach(consultant -> {
       List<Long> agencies = new ArrayList<>();
@@ -197,6 +192,14 @@ public class AgencyFacade {
     attachConsultantsInformationToEventType(eventType1);
     attachFullSlugToEventType(eventType1);
     return eventType1;
+  }
+
+  private AppointmentType getAppointmentType(CreateUpdateEventTypeDTO eventType) {
+    AppointmentType appointmentType = appointmentService.createDefaultAppointmentType();
+    appointmentType.setTitle(eventType.getTitle());
+    appointmentType.setLength(eventType.getLength());
+    appointmentType.setDescription(eventType.getDescription());
+    return appointmentType;
   }
 
   public CalcomEventType updateAgencyEventType(Long eventTypeId,
