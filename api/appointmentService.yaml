@@ -571,6 +571,8 @@ components:
           type: string
         location:
           type: string
+        cancellationReason:
+          type: string
     ArrayOfCalcomBookings:
       type: array
       items:

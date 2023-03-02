@@ -21,6 +21,7 @@ public class CalcomRepositoryBookingMapper implements RowMapper<CalcomBooking> {
     booking.setUid(rs.getString("uid"));
     booking.setDescription(rs.getString("description"));
     booking.setLocation(rs.getString("location"));
+    booking.setCancellationReason(rs.getString("cancellationReason"));
     return booking;
   }
 

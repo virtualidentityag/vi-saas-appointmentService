@@ -139,7 +139,11 @@ public class MessagesService {
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(formatDate(booking.getStartTime())),
         LocalDateTime.parse(formatDate(booking.getEndTime()))));
-    messageContent.put("note", booking.getDescription());
+    if(messageType.equals(MessageType.APPOINTMENT_SET)){
+      messageContent.put("note", booking.getDescription());
+    }else{
+      messageContent.put("note", booking.getCancellationReason());
+    }
     message.setContent(messageContent.toString());
     return message;
   }
