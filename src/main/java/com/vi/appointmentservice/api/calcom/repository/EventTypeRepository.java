@@ -45,9 +45,6 @@ public class EventTypeRepository {
     return result.stream().map(el -> CalcomEventType.asInstance(el)).collect(Collectors.toList());
   }
 
-  //TODO: move out this repository from here
-  private UserToConsultantRepository userToConsultantRepository;
-
   /**
    * A = eventTypeId B = userId
    */
@@ -178,7 +175,6 @@ public class EventTypeRepository {
     String QUERY = "DELETE FROM \"EventType\" WHERE \"userId\"= :userId";
     SqlParameterSource parameters = new MapSqlParameterSource("userId", calcomUserId);
     db.update(QUERY, parameters);
-
   }
 
   public void deleteEventType(Long eventTypeId) {
