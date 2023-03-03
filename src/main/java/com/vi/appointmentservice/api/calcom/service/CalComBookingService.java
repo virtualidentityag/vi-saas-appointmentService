@@ -1,7 +1,7 @@
 package com.vi.appointmentservice.api.calcom.service;
 
-import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
+import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
@@ -37,6 +37,9 @@ public class CalComBookingService {
 
   private List<CalcomBooking> enrichConsultantResultSet(List<CalcomBooking> bookings) {
     for (CalcomBooking booking : bookings) {
+      if (booking.getCancellationReason() != null) {
+        booking.setDescription(booking.getCancellationReason());
+      }
       Optional<CalcomBookingToAsker> calcomBookingAsker = calcomBookingToAskerRepository
           .findByCalcomBookingId(
               booking.getId());
@@ -60,6 +63,9 @@ public class CalComBookingService {
 
   List<CalcomBooking> enrichAskerResultSet(List<CalcomBooking> bookings) {
     for (CalcomBooking booking : bookings) {
+      if (booking.getCancellationReason() != null) {
+        booking.setDescription(booking.getCancellationReason());
+      }
       Optional<CalcomBookingToAsker> calcomBookingAsker = calcomBookingToAskerRepository
           .findByCalcomBookingId(
               booking.getId());

@@ -71,7 +71,7 @@ public class ConsultantFacade {
     AppointmentType defaultAppointmentType = appointmentService.createDefaultAppointmentType();
     defaultAppointmentType.setTitle("Beratung mit");
     calComEventTypeService
-        .createEventType(calcomUser, appointmentService.createDefaultAppointmentType(),
+        .createEventType(calcomUser, defaultAppointmentType,
             defaultScheduleId);
   }
 
