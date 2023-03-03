@@ -101,6 +101,12 @@ public class EventTypeRepository {
         .replace("locationsParam", locations);
     jdbcTemplate.update(UPDATE_QUERY);
   }
+  public void updateSlug(Number eventTypeId, String slug) {
+    String UPDATE_QUERY = "update \"EventType\" set slug='slugParam' where \"id\" = eventTypeId";
+    UPDATE_QUERY = UPDATE_QUERY.replace("eventTypeId", eventTypeId.toString())
+        .replace("slugParam", slug);
+    jdbcTemplate.update(UPDATE_QUERY);
+  }
 
   public void markAsDefaultEventType(Number eventTypeId) {
     String UPDATE_QUERY = "update \"EventType\" set \"metadata\"='{\"defaultEventType\": \"true\"}' where \"id\" = eventTypeId";
@@ -142,6 +148,8 @@ public class EventTypeRepository {
     db.update(INSERT_EVENT_TYPE, parameters, generatedKeyHolder);
     var eventTypeId = Integer.valueOf((Integer) generatedKeyHolder.getKeys().get("id"));
     updateLocations(eventTypeId, eventType.getLocations());
+    //TODO: needs to be called extra
+    updateSlug(eventTypeId, eventType.getSlug()+"1");
     return getEventTypeById(eventTypeId);
   }
 
