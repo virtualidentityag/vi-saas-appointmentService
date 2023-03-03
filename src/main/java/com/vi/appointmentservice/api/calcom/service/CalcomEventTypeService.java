@@ -60,8 +60,7 @@ public class CalcomEventTypeService {
     eventType.setUserId(Math.toIntExact(calcomUser.getId()));
     CalcomEventType createdEventType = eventTypeRepository.createEventType(eventType);
     eventTypeRepository.addUserEventTypeRelation(createdEventType.getId(), calcomUser.getId());
-    //TODO: this can be one call to DB
-    eventTypeRepository.updateEventTypeScheduleId(eventType.getId(), defaultScheduleId);
+    eventTypeRepository.updateEventTypeScheduleId(createdEventType.getId(), defaultScheduleId);
   }
 
   public CalcomEventType buildEventType(AppointmentType appointmentType) {
