@@ -720,6 +720,8 @@ components:
                         type: string
             location:
               type: string
+            cancellationReason:
+              type: string
             destinationCalendar:
               type: object
               properties:
