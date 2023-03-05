@@ -38,6 +38,10 @@ public class CalcomEventTypeService {
     return eventType;
   }
 
+  public CalcomEventType getEventTypeByUserId(Number userId) {
+    return eventTypeRepository.getEventTypeByUserId(userId);
+  }
+
   public CalcomEventType createEventType(Number teamId, AppointmentType appointmentType) {
     CalcomEventType eventType = this.buildEventType(appointmentType);
     eventType.setTitle(appointmentType.getTitle());

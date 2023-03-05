@@ -56,7 +56,8 @@ public class ConsultantFacade {
     var name = consultant.getFirstname() + " " + consultant.getLastname();
     Optional<CalcomUserToConsultant> userConsultant = userToConsultantRepository
         .findByConsultantId(consultant.getId());
-    calComUserService.updateUser(userConsultant.get().getCalComUserId(), name, consultant.getEmail());
+    calComUserService
+        .updateUser(userConsultant.get().getCalComUserId(), name, consultant.getEmail());
   }
 
   private void linkConsultantToAppointmentUser(
@@ -128,9 +129,12 @@ public class ConsultantFacade {
   public MeetingSlug getConsultantMeetingSlugHandler(String consultantId) {
     getCalcomUserToConsultantIfExists(consultantId);
     MeetingSlug meetingSlug = new MeetingSlug();
-    meetingSlug.setSlug(calComUserService
-        .getUserById(getCalcomUserToConsultantIfExists(consultantId).getCalComUserId())
-        .getUsername());
+    var calcomUserId = getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
+    var username = calComUserService
+        .getUserById(calcomUserId)
+        .getUsername();
+    var eventSlug = calComEventTypeService.getEventTypeByUserId(calcomUserId).getSlug();
+    meetingSlug.setSlug(username + "/" + eventSlug);
     return meetingSlug;
   }
 
