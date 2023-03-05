@@ -214,7 +214,6 @@ public class AgencyFacade {
 
   public CalcomEventType updateAgencyEventType(Long eventTypeId,
       CreateUpdateEventTypeDTO eventType) {
-
     CalcomEventType eventTypeDB = calcomEventTypeService.getEventTypeById(eventTypeId);
     eventTypeDB.setTitle(eventType.getTitle());
     eventTypeDB.setLength(eventType.getLength());

@@ -65,8 +65,11 @@ public class MessagesService {
     }
   }
 
-  public void publishCancellationMessage(String bookingUid) {
+  public void publishCancellationMessage(String bookingUid, String cancellationMessage) {
     CalcomBooking booking = calComBookingService.getBookingByUid(bookingUid);
+    // in case of cancellation event, the message is not saved to booking at the time this handler is called
+    // like it is done for creation and rescheduling
+    booking.setCancellationReason(cancellationMessage);
     AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_CANCELLED);
     sendMessage(booking, message);
   }

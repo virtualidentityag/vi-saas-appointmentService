@@ -143,7 +143,7 @@ public class CalcomWebhookHandlerService {
   }
 
   private void handleCancelEvent(CalcomWebhookInputPayload payload) {
-    messagesService.publishCancellationMessage(payload.getUid());
+    messagesService.publishCancellationMessage(payload.getUid(), payload.getCancellationReason());
   }
 
   private void createBookingAskerRelation(CalcomWebhookInputPayload payload,

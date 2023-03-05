@@ -88,6 +88,7 @@ public class CalcomEventTypeService {
   public CalcomEventType updateEventType(CalcomEventType eventType) {
     eventTypeRepository.updateEventType(eventType);
     eventTypeRepository.removeTeamEventTypeMembershipsForEventType(eventType.getId());
+    eventTypeRepository.removeTeamEventHostsForEventType(eventType.getId());
     eventType.getMemberIds().forEach(calcomUser -> addUser2Event(calcomUser, eventType.getId()));
     return getEventTypeById(eventType.getId());
   }
@@ -144,5 +145,6 @@ public class CalcomEventTypeService {
   public void deleteEventType(Long eventTypeId) {
     eventTypeRepository.deleteEventType(eventTypeId);
     eventTypeRepository.removeTeamEventTypeMembershipsForEventType(eventTypeId);
+    eventTypeRepository.removeTeamEventHostsForEventType(eventTypeId);
   }
 }

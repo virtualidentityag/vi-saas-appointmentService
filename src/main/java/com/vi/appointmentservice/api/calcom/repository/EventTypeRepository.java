@@ -72,6 +72,11 @@ public class EventTypeRepository {
     jdbcTemplate.update(DELETE_QUERY);
   }
 
+  public void removeTeamEventHostsForEventType(Number eventTypeId) {
+    String DELETE_QUERY = "delete from \"Host\" where \"eventTypeId\"=" + eventTypeId;
+    jdbcTemplate.update(DELETE_QUERY);
+  }
+
   public void addUserEventTypeRelation(Number eventTypeId, Number calcomUserId) {
     try {
       String INSERT_QUERY = "insert into \"_user_eventtype\" (\"A\", \"B\") values ($eventTypeIdParam, $userIdParam)";
