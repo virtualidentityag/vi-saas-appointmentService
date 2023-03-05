@@ -168,12 +168,13 @@ class AgencyFacadeTest {
     when(appointmentService.createDefaultAppointmentType()).thenReturn(appointmentType);
     when(calcomEventTypeService.createEventType(CALCOM_TEAM_ID, new AppointmentType())).thenReturn(new CalcomEventType());
     when(user2ConsultantRepo.findByConsultantId(CONSULTANT_ID)).thenReturn(Optional.of(giveCalcomUserToConsultant()));
-
+    when(calComUserService.getUserById(CALCOM_USER_ID)).thenReturn(new CalcomUser());
+    when(user2ConsultantRepo.findByCalComUserId(CALCOM_USER_ID)).thenReturn(Optional.of(giveCalcomUserToConsultant()));
     // when
     agencyFacade.createAgencyEventType(AGENCY_ID, new CreateUpdateEventTypeDTO().consultants(Lists.newArrayList(new TeamEventTypeConsultant().consultantId(CONSULTANT_ID))));
     // then
-    Mockito.verify(appointmentService).createDefaultAppointmentType();
-    Mockito.verify(calcomEventTypeService).createEventType(CALCOM_TEAM_ID, appointmentType);
+    verify(appointmentService).createDefaultAppointmentType();
+    verify(calcomEventTypeService).createEventType(CALCOM_TEAM_ID, appointmentType);
   }
 
 
@@ -187,7 +188,7 @@ class AgencyFacadeTest {
     agencyFacade.updateAgencyEventType(EVENT_TYPE_ID, new CreateUpdateEventTypeDTO().consultants(Lists.newArrayList(new TeamEventTypeConsultant().consultantId(CONSULTANT_ID))));
     // then
     ArgumentCaptor<CalcomEventType> captor = ArgumentCaptor.forClass(CalcomEventType.class);
-    Mockito.verify(calcomEventTypeService).updateEventType(captor.capture());
+    verify(calcomEventTypeService).updateEventType(captor.capture());
     assertThat(captor.getValue().getMemberIds()).contains(CALCOM_USER_ID);
   }
 
@@ -196,7 +197,7 @@ class AgencyFacadeTest {
     // when
     agencyFacade.deleteAgencyEventType(EVENT_TYPE_ID);
     // then
-    Mockito.verify(calcomEventTypeService).deleteEventType(EVENT_TYPE_ID);
+    verify(calcomEventTypeService).deleteEventType(EVENT_TYPE_ID);
   }
 
   @Test

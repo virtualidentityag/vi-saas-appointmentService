@@ -183,15 +183,25 @@ public class AgencyFacade {
       CreateUpdateEventTypeDTO eventType) {
     Long teamid = toTeamId(agencyId);
     AppointmentType appointmentType = getAppointmentType(eventType);
-    CalcomEventType eventType1 = calcomEventTypeService.createEventType(teamid, appointmentType);
+    CalcomEventType newlyCreatedEventType = calcomEventTypeService.createEventType(teamid, appointmentType);
+    updateEventMembers(eventType, newlyCreatedEventType);
+    attachConsultantsInformationToEventType(newlyCreatedEventType);
+    attachFullSlugToEventType(newlyCreatedEventType);
+    return newlyCreatedEventType;
+  }
+
+  private void updateEventMembers(CreateUpdateEventTypeDTO eventType,
+      CalcomEventType newlyCreatedEventType) {
+    List<Long> eventMembers = new ArrayList<>();
     eventType.getConsultants().forEach(consultant -> {
-      List<Long> agencies = new ArrayList<>();
-      agencies.add(agencyId);
-      assignConsultant2AppointmentTeams(consultant.getConsultantId(), agencies);
+      Optional<CalcomUserToConsultant> user = user2ConsultantRepo
+          .findByConsultantId(consultant.getConsultantId());
+      if (user.isPresent()) {
+        eventMembers.add(user.get().getCalComUserId());
+      }
     });
-    attachConsultantsInformationToEventType(eventType1);
-    attachFullSlugToEventType(eventType1);
-    return eventType1;
+    newlyCreatedEventType.setMemberIds(eventMembers);
+    calcomEventTypeService.updateEventType(newlyCreatedEventType);
   }
 
   private AppointmentType getAppointmentType(CreateUpdateEventTypeDTO eventType) {
