@@ -14,7 +14,7 @@ public class CalcomLocationsService {
 
   private static final String PHONE_CALL_MEETING_MESSAGE = "Die Telefonnummer teilt Ihnen ihr:e Berater:in im Chat mit";
 
-  private static final String VIDEO_CALL = "integrations:jitsi";
+  private static final String VIDEO_CALL = "integrations:daily";
 
   private static final String LINK = "suchtberatung.digital";
 
@@ -32,7 +32,7 @@ public class CalcomLocationsService {
   }
 
   public String buildCalcomLocations() {
-    return "[{\"type\": \"integrations:jitsi\"},"
+    return "[{\"type\": \"integrations:daily\"},"
         + "{\"type\": \"inPerson\",\"address\": \"" + IN_PERSON_MEETING_MESSAGE + "\"},"
         + "{\"link\": \"" + LINK + "\",\"type\": \"link\"},"
         + "{\"type\": \"userPhone\",\"hostPhoneNumber\": \"" + PHONE_CALL_MEETING_MESSAGE + "\"}]";
