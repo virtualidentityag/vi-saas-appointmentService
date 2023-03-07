@@ -4,7 +4,7 @@ import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserToConsultantRepository extends JpaRepository<CalcomUserToConsultant, String> {
+public interface CalcomUserToConsultantRepository extends JpaRepository<CalcomUserToConsultant, String> {
     Optional<CalcomUserToConsultant> findByConsultantId(String consultantId);
 
     Optional<CalcomUserToConsultant> findByCalComUserId(Long calComUserId);

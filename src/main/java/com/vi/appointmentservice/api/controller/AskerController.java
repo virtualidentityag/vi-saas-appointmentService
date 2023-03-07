@@ -4,7 +4,7 @@ import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException
 import com.vi.appointmentservice.api.facade.AskerFacade;
 import com.vi.appointmentservice.api.model.AskerDTO;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.calcom.service.CalcomWebhookHandlerService;
+import com.vi.appointmentservice.api.service.CalcomWebhookHandlerService;
 import com.vi.appointmentservice.generated.api.controller.AskersApi;
 import com.vi.appointmentservice.helper.AuthenticatedUser;
 import io.swagger.annotations.Api;

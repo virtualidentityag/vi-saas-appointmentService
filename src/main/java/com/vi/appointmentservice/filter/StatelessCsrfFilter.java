@@ -39,25 +39,25 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-//    if (requireCsrfProtectionMatcher.matches(request)) {
-//      final String csrfTokenValue = request.getHeader(csrfHeaderProperty);
-//      final Cookie[] cookies = request.getCookies();
-//
-//      String csrfCookieValue = null;
-//      if (cookies != null) {
-//        for (Cookie cookie : cookies) {
-//          if (cookie.getName().equals(csrfCookieProperty)) {
-//            csrfCookieValue = cookie.getValue();
-//          }
-//        }
-//      }
-//
-//      if (csrfTokenValue == null || !csrfTokenValue.equals(csrfCookieValue)) {
-//        accessDeniedHandler.handle(request, response,
-//            new AccessDeniedException("Missing or non-matching CSRF-token"));
-//        return;
-//      }
-//    }
+    if (requireCsrfProtectionMatcher.matches(request)) {
+      final String csrfTokenValue = request.getHeader(csrfHeaderProperty);
+      final Cookie[] cookies = request.getCookies();
+
+      String csrfCookieValue = null;
+      if (cookies != null) {
+        for (Cookie cookie : cookies) {
+          if (cookie.getName().equals(csrfCookieProperty)) {
+            csrfCookieValue = cookie.getValue();
+          }
+        }
+      }
+
+      if (csrfTokenValue == null || !csrfTokenValue.equals(csrfCookieValue)) {
+        accessDeniedHandler.handle(request, response,
+            new AccessDeniedException("Missing or non-matching CSRF-token"));
+        return;
+      }
+    }
     filterChain.doFilter(request, response);
   }
 

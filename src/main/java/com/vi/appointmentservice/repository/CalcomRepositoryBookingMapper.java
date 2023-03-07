@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.api.calcom.repository;
+package com.vi.appointmentservice.repository;
 
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import java.sql.ResultSet;
@@ -20,8 +20,6 @@ public class CalcomRepositoryBookingMapper implements RowMapper<CalcomBooking> {
     booking.setEventTypeId(rs.getInt("eventTypeId"));
     booking.setUid(rs.getString("uid"));
     booking.setDescription(rs.getString("description"));
-    booking.setLocation(rs.getString("location"));
-    booking.setCancellationReason(rs.getString("cancellationReason"));
     return booking;
   }
 

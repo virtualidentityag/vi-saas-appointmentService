@@ -1,17 +1,17 @@
 package com.vi.appointmentservice.helper;
 
-import com.vi.appointmentservice.api.calcom.model.CalcomTeam;
-import com.vi.appointmentservice.api.calcom.model.CalcomUser;
-import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
-import com.vi.appointmentservice.api.calcom.service.CalcomEventTypeService;
-import com.vi.appointmentservice.api.calcom.service.CalComTeamService;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.calcom.service.CalComUserService;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
+import com.vi.appointmentservice.api.model.CalcomTeam;
+import com.vi.appointmentservice.api.model.CalcomUser;
+import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
+import com.vi.appointmentservice.api.service.calcom.CalComUserService;
+import com.vi.appointmentservice.api.service.calcom.team.CalComTeamService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.UserToConsultantRepository;
+import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +26,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RescheduleHelper {
 
+  private final @NonNull CalComEventTypeService eventTypeService;
   private final @NonNull CalComUserService calComUserService;
+
   private final @NonNull AdminUserService adminUserService;
-  private final @NonNull UserToConsultantRepository userToConsultantRepository;
+  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
+  private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull CalComTeamService calComTeamService;
-  private final @NonNull CalcomEventTypeService calcomEventTypeService;
 
   public CalcomBooking attachRescheduleLink(CalcomBooking calcomBooking) {
     CalcomUser registeredCalcomUser = this.calComUserService
@@ -39,13 +41,13 @@ public class RescheduleHelper {
     var teamId = getTeamIdForBooking(calcomBooking);
     String slug = null;
     if (teamId != null) {
-      CalcomTeam team = calComTeamService.getTeamById(teamId);
+      CalcomTeam team = calComTeamService.getTeamById(Long.valueOf(teamId));
       slug = "team/" + team.getSlug();
     } else {
       slug = registeredCalcomUser.getUsername();
     }
 
-    String eventTypeSlug = this.calcomEventTypeService.getEventTypeById(
+    String eventTypeSlug = this.eventTypeService.getEventTypeById(
         Long.valueOf(calcomBooking.getEventTypeId())).getSlug();
     calcomBooking.setRescheduleLink(
         "/" + slug + "/" + eventTypeSlug + "?rescheduleUid=" + calcomBooking.getUid());
@@ -53,8 +55,8 @@ public class RescheduleHelper {
     return calcomBooking;
   }
 
-  private Number getTeamIdForBooking(CalcomBooking calcomBooking) {
-    CalcomEventType eventType = calcomEventTypeService
+  private Integer getTeamIdForBooking(CalcomBooking calcomBooking) {
+    CalcomEventTypeDTO eventType = calComEventTypeService
         .getEventTypeById(Long.valueOf(calcomBooking.getEventTypeId()));
     return eventType.getTeamId();
   }
@@ -62,7 +64,7 @@ public class RescheduleHelper {
   public void attachConsultantName(List<CalcomBooking> bookings) {
     Map<Integer, String> bookingUserIdConsultantId = new HashMap<>();
     bookings.stream().forEach(booking -> {
-      Optional<CalcomUserToConsultant> calcomUserToConsultant = this.userToConsultantRepository
+      Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository
           .findByCalComUserId(
               Long.valueOf(booking.getUserId()));
       if (calcomUserToConsultant.isPresent()) {

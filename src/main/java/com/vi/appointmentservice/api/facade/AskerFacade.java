@@ -10,10 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vi.appointmentservice.api.model.AskerDTO;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.calcom.service.CalComBookingService;
+import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
+import com.vi.appointmentservice.repository.CalcomRepository;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class AskerFacade {
   private String dummyEmailSuffix;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull CalComBookingService calComBookingService;
-  private final @NonNull BookingRepository bookingRepository;
+  private final @NonNull CalcomRepository calcomRepository;
 
   public List<CalcomBooking> getAskerActiveBookings(String askerId) {
     if (calcomBookingToAskerRepository.existsByAskerId(askerId)) {
@@ -55,8 +55,8 @@ public class AskerFacade {
           .getBookingById(booking.getCalcomBookingId());
       if (calcomBooking != null) {
         calComBookingService.cancelBooking(calcomBooking.getUid());
-        bookingRepository.deleteBooking(booking.getCalcomBookingId());
-        bookingRepository.deleteAttendeeWithoutBooking();
+        calcomRepository.deleteBooking(booking.getCalcomBookingId());
+        calcomRepository.deleteAttendeeWithoutBooking();
         calcomBookingToAskerRepository.deleteByCalcomBookingId(booking.getCalcomBookingId());
       }
     });
@@ -68,7 +68,7 @@ public class AskerFacade {
       List<Long> bookingIds = calcomBookingToAskerRepository.findByAskerId(askerDTO.getId()).stream()
               .map(CalcomBookingToAsker::getCalcomBookingId)
               .collect(Collectors.toList());
-      bookingRepository.updateAttendeeEmail(bookingIds, newEmail);
+      calcomRepository.updateAttendeeEmail(bookingIds, newEmail);
     } else {
       log.error("Asker with id: {} not existing in calcom repo", askerDTO.getId());
     }

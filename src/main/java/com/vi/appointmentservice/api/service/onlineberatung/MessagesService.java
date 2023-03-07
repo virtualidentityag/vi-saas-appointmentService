@@ -3,7 +3,7 @@ package com.vi.appointmentservice.api.service.onlineberatung;
 import com.vi.appointmentservice.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import com.vi.appointmentservice.api.exception.httpresponses.NotFoundException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
-import com.vi.appointmentservice.api.calcom.service.CalComBookingService;
+import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
 import com.vi.appointmentservice.api.service.securityheader.SecurityHeaderSupplier;
 import com.vi.appointmentservice.config.MessageApiClient;
 import com.vi.appointmentservice.messageservice.generated.web.MessageControllerApi;
@@ -13,13 +13,13 @@ import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.UserToConsultantRepository;
+import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import lombok.Data;
+import java.util.function.Function;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,15 +41,16 @@ public class MessagesService {
 
   private final @NonNull UserService userService;
   private final @NonNull CalComBookingService calComBookingService;
-  private final @NonNull UserToConsultantRepository userToConsultantRepository;
+  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-  private final SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat(
-      "yyyy-MM-dd'T'HH:mm");
-  private final SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
   @Value("${message.service.api.url}")
   private String messageServiceApiUrl;
+
+  private final static SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+  private final static SimpleDateFormat toFormatMinutesOnly = new SimpleDateFormat(
+      "yyyy-MM-dd'T'HH:mm");
 
   @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
@@ -57,72 +58,34 @@ public class MessagesService {
   @Value("${keycloakService.technical.password}")
   private String keycloakTechnicalPassword;
 
-  private String formatDate(String dateString) {
+  private static String formatDate(String dateString) {
     try {
       return toFormat.format(toFormatMinutesOnly.parse(dateString));
     } catch (ParseException e) {
-      throw new IllegalArgumentException(e);
+      throw new RuntimeException(e);
     }
   }
 
-  public void publishCancellationMessage(String bookingUid, String cancellationMessage) {
-    CalcomBooking booking = calComBookingService.getBookingByUid(bookingUid);
-    // in case of cancellation event, the message is not saved to booking at the time this handler is called
-    // like it is done for creation and rescheduling
-    booking.setCancellationReason(cancellationMessage);
+  public void publishCancellationMessage(Long bookingId) {
+    CalcomBooking booking = calComBookingService.getBookingById(bookingId);
     AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_CANCELLED);
     sendMessage(booking, message);
   }
 
   @Async
   public void publishNewAppointmentMessage(Long bookingId) {
-      new BookingCreationRepeater(10).tryRepeatCreateMessage(bookingId).orElseLogError();
-  }
-
-  @Data
-  class BookingCreationRepeater {
-
-    int attemptsLeft;
-    private static final int INTERVAL_BETWEEN_CALLS = 2000;
-    private boolean messageSuccessfullyCreated;
-
-    public BookingCreationRepeater(int maxAttempts) {
-      attemptsLeft = maxAttempts;
-      messageSuccessfullyCreated = false;
-    }
-
-    public BookingCreationRepeater tryRepeatCreateMessage(Long bookingId) {
-      while (!messageSuccessfullyCreated(bookingId) && attemptsLeft > 0) {
-        sleepGivenInterval();
-        attemptsLeft--;
-      }
-      return this;
-    }
-
-    private void sleepGivenInterval() {
-      try {
-        Thread.sleep(INTERVAL_BETWEEN_CALLS);
-      } catch (InterruptedException e) {
-        throw new IllegalStateException(e);
-      }
-    }
-
-    private boolean messageSuccessfullyCreated(Long bookingId) {
+    for (var i = 0; i < 10; i++) {
       try {
         CalcomBooking booking = calComBookingService.getBookingById(bookingId);
         AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_SET);
         sendMessage(booking, message);
-        this.messageSuccessfullyCreated = true;
-        return true;
+        break;
       } catch (Exception e) {
-        this.messageSuccessfullyCreated = false;
-        return false;
-      }
-    }
-
-    public void orElseLogError() {
-      if (!messageSuccessfullyCreated) {
-        log.error("Unable to publish new appointmentMessage. Reason: max attempts failed");
+        try {
+          Thread.sleep(2000);
+        } catch (InterruptedException e1) {
+          //
+        }
       }
     }
   }
@@ -142,11 +105,7 @@ public class MessagesService {
     messageContent.put("duration", ChronoUnit.MINUTES.between(
         LocalDateTime.parse(formatDate(booking.getStartTime())),
         LocalDateTime.parse(formatDate(booking.getEndTime()))));
-    if(messageType.equals(MessageType.APPOINTMENT_SET)){
-      messageContent.put("note", booking.getDescription());
-    }else{
-      messageContent.put("note", booking.getCancellationReason());
-    }
+    messageContent.put("note", booking.getDescription());
     message.setContent(messageContent.toString());
     return message;
   }
@@ -158,13 +117,13 @@ public class MessagesService {
   }
 
   private String getRocketChatGroupId(CalcomBooking booking) {
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = userToConsultantRepository
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = calcomUserToConsultantRepository
         .findByCalComUserId(Long.valueOf(booking.getUserId()));
     if (calcomUserToConsultant.isPresent()) {
       String consultantId = calcomUserToConsultant.get().getConsultantId();
       Optional<CalcomBookingToAsker> byCalcomBookingId = calcomBookingToAskerRepository
           .findByCalcomBookingId(booking.getId());
-      String askerId = byCalcomBookingId.orElseThrow().getAskerId();
+      String askerId = byCalcomBookingId.get().getAskerId();
       return userService
           .getRocketChatGroupId(consultantId, askerId);
     }

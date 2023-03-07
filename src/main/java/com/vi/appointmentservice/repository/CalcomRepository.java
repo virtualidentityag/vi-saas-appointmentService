@@ -1,4 +1,4 @@
-package com.vi.appointmentservice.api.calcom.repository;
+package com.vi.appointmentservice.repository;
 
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import java.util.List;
@@ -11,8 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class BookingRepository {
-
+public class CalcomRepository {
   private @Autowired
   NamedParameterJdbcTemplate calcomDBNamedParamterTemplate;
 
@@ -41,6 +40,13 @@ public class BookingRepository {
         .addValue("userId", userId);
     return calcomDBNamedParamterTemplate
         .query(QUERY, parameters, new CalcomRepositoryBookingMapper());
+  }
+
+  public List<CalcomBooking> getByIds(List<Long> bookingIds) {
+    SqlParameterSource parameters = new MapSqlParameterSource("ids", bookingIds);
+    return calcomDBNamedParamterTemplate
+        .query("select * from \"Booking\" where id in (:ids)", parameters,
+            new CalcomRepositoryBookingMapper());
   }
 
   public CalcomBooking getBookingById(Long bookingId) {
@@ -83,22 +89,8 @@ public class BookingRepository {
   public void updateAttendeeEmail(final List<Long> bookingIds, final String email) {
     String QUERY = "UPDATE \"Attendee\" SET \"email\"=:email WHERE \"bookingId\" IN (:bookingIds)";
     SqlParameterSource parameters = new MapSqlParameterSource()
-        .addValue("bookingIds", bookingIds)
-        .addValue("email", email);
-    calcomDBNamedParamterTemplate.update(QUERY, parameters);
-  }
-
-  public CalcomBooking getBookingByUid(String bookingUid) {
-    SqlParameterSource parameters = new MapSqlParameterSource("bookingUid", bookingUid);
-    return calcomDBNamedParamterTemplate
-        .queryForObject("select * from \"Booking\" where uid = :bookingUid", parameters,
-            new CalcomRepositoryBookingMapper());
-  }
-
-  public void cancelBooking(String bookingUid) {
-    String QUERY = "UPDATE \"Booking\" SET status='cancelled' WHERE uid = :bookingUid";
-    SqlParameterSource parameters = new MapSqlParameterSource()
-        .addValue("bookingUid", bookingUid);
+            .addValue("bookingIds", bookingIds)
+            .addValue("email", email);
     calcomDBNamedParamterTemplate.update(QUERY, parameters);
   }
 }

@@ -1,15 +1,14 @@
-package com.vi.appointmentservice.api.calcom.service;
+package com.vi.appointmentservice.api.service;
 
-import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.api.model.CalcomEventTypeDTO;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
 import com.vi.appointmentservice.api.model.CalcomWebhookInputPayload;
-import com.vi.appointmentservice.api.model.CalcomWebhookInputPayloadMetadata;
-import com.vi.appointmentservice.api.model.CalcomWebhookInputPayloadOrganizerLanguage;
+import com.vi.appointmentservice.api.service.calcom.CalComBookingService;
+import com.vi.appointmentservice.api.service.calcom.CalComEventTypeService;
 import com.vi.appointmentservice.api.service.onlineberatung.AdminUserService;
 import com.vi.appointmentservice.api.service.onlineberatung.MessagesService;
-import com.vi.appointmentservice.api.service.onlineberatung.UserService;
 import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentService;
 import com.vi.appointmentservice.api.service.statistics.StatisticsService;
 import com.vi.appointmentservice.api.service.statistics.event.BookingCanceledStatisticsEvent;
@@ -19,10 +18,11 @@ import com.vi.appointmentservice.appointmentservice.generated.web.model.Appointm
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
-import com.vi.appointmentservice.repository.UserToConsultantRepository;
-import com.vi.appointmentservice.userservice.generated.web.model.EnquiryAppointmentDTO;
+import com.vi.appointmentservice.repository.CalcomRepository;
+import com.vi.appointmentservice.repository.CalcomUserToConsultantRepository;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +37,12 @@ public class CalcomWebhookHandlerService {
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull MessagesService messagesService;
   private final @NonNull CalComBookingService calComBookingService;
+  private final @NonNull CalComEventTypeService calComEventTypeService;
   private final @NonNull VideoAppointmentService videoAppointmentService;
   private final @NonNull StatisticsService statisticsService;
-  private final @NonNull UserToConsultantRepository userToConsultantRepository;
+  private final @NonNull CalcomUserToConsultantRepository calcomUserToConsultantRepository;
   private final @NonNull AdminUserService adminUserService;
-  private final @NonNull BookingRepository bookingRepository;
-
-  private final @NonNull UserService userService;
+  private final @NonNull CalcomRepository calcomRepository;
 
   @Transactional
   public void handlePayload(CalcomWebhookInput input) {
@@ -68,54 +67,16 @@ public class CalcomWebhookHandlerService {
     }
   }
 
-  void handleCreateEvent(CalcomWebhookInputPayload payload) {
-    assertPayloadMetadataIsPresent(payload);
+  private void handleCreateEvent(CalcomWebhookInputPayload payload) {
     Appointment appointment = videoAppointmentService
         .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
     createBookingAskerRelation(payload, appointment.getId());
-    createRocketchatRoomForInitialAppointment(payload);
     messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
-  }
-
-  private void createRocketchatRoomForInitialAppointment(CalcomWebhookInputPayload payload) {
-    CalcomWebhookInputPayloadMetadata metadata = payload.getMetadata();
-
-    if (Boolean.TRUE.equals(metadata.getIsInitialAppointment())) {
-      EnquiryAppointmentDTO enquiryAppointmentDTO = getEnquiryAppointmentDTO(
-          payload);
-      userService.getUserAppointmentApi(metadata.getUserToken())
-          .createEnquiryAppointment(Long.valueOf(metadata.getSessionId()),
-              metadata.getRcToken(), metadata.getRcUserId(),
-              enquiryAppointmentDTO);
-    }
-  }
-
-  private void assertPayloadMetadataIsPresent(CalcomWebhookInputPayload payload) {
-    if (payload.getMetadata() == null) {
-      log.error("Payload metadata not set. Skipping creation of initial rocket chat rooms");
-      throw new IllegalStateException("Payload metadata not set");
-    }
-
-    if (payload.getMetadata().getUserToken() == null) {
-      log.error("Payload not valid. Skipping creation of initial rocket chat rooms");
-      throw new IllegalStateException("Payload metadata not set");
-    }
-  }
-
-  private EnquiryAppointmentDTO getEnquiryAppointmentDTO(CalcomWebhookInputPayload payload) {
-    EnquiryAppointmentDTO enquiryAppointmentDTO = new EnquiryAppointmentDTO();
-    var enquiryAppointment = enquiryAppointmentDTO;
-    enquiryAppointment.setCounselorEmail(payload.getOrganizer().getEmail());
-    CalcomWebhookInputPayloadOrganizerLanguage language = payload.getOrganizer().getLanguage();
-    enquiryAppointment.setLanguage(
-        com.vi.appointmentservice.userservice.generated.web.model.LanguageCode.fromValue(
-            language != null ? language.getLocale() : "de"));
-    return enquiryAppointmentDTO;
   }
 
   private String getConsultantId(Integer bookingId) {
     CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
-    Optional<CalcomUserToConsultant> calcomUserToConsultant = this.userToConsultantRepository
+    Optional<CalcomUserToConsultant> calcomUserToConsultant = this.calcomUserToConsultantRepository
         .findByCalComUserId(
             Long.valueOf(booking.getUserId()));
     if (calcomUserToConsultant.isPresent()) {
@@ -143,7 +104,15 @@ public class CalcomWebhookHandlerService {
   }
 
   private void handleCancelEvent(CalcomWebhookInputPayload payload) {
-    messagesService.publishCancellationMessage(payload.getUid(), payload.getCancellationReason());
+    //TODO: replace with call to DB, and try catch will also disappear
+    try {
+      var bookingId = calComBookingService.getAllBookings().stream()
+          .filter(el -> el.getUid().equals(payload.getUid())).collect(
+              Collectors.toList()).get(0).getId();
+      messagesService.publishCancellationMessage(bookingId);
+    } catch (Exception e) {
+      log.error(String.valueOf(e));
+    }
   }
 
   private void createBookingAskerRelation(CalcomWebhookInputPayload payload,
@@ -166,7 +135,7 @@ public class CalcomWebhookHandlerService {
             this.getConsultantId(payload.getBookingId())));
         break;
       case "BOOKING_CANCELLED":
-        Integer bookingId = bookingRepository.getBookingIdByUid(payload.getUid());
+        Integer bookingId = calcomRepository.getBookingIdByUid(payload.getUid());
         statisticsService.fireEvent(
             new BookingCanceledStatisticsEvent(payload, this.getConsultantId(bookingId),
                 bookingId));
