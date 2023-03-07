@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vi.appointmentservice.api.exception.httpresponses.BadRequestException;
 import com.vi.appointmentservice.api.exception.httpresponses.InternalServerErrorException;
 import com.vi.appointmentservice.api.model.CalcomWebhookInput;
-import com.vi.appointmentservice.api.service.CalcomWebhookHandlerService;
+import com.vi.appointmentservice.api.calcom.service.CalcomWebhookHandlerService;
 import com.vi.appointmentservice.generated.api.controller.ProcessBookingApi;
 import com.vi.appointmentservice.helper.HmacHelper;
 import io.swagger.annotations.Api;

@@ -81,6 +81,12 @@ public class DatabaseConnectionsConfiguration {
     return new NamedParameterJdbcTemplate(calcomDBDataSource);
   }
 
+  @Bean(name = "dbTemplate")
+  public NamedParameterJdbcTemplate dbTemplate(
+      @Qualifier("calcomDBDataSource") DataSource calcomDBDataSource) {
+    return new NamedParameterJdbcTemplate(calcomDBDataSource);
+  }
+
   @Bean(name = "caldavDBNamedParameterTemplate")
   public NamedParameterJdbcTemplate caldavDBNamedParameterTemplate(
       @Qualifier("caldavDBDataSource") DataSource caldavDBDataSource) {

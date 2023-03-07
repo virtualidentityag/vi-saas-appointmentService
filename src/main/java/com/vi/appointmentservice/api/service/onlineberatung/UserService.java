@@ -6,10 +6,7 @@ import com.vi.appointmentservice.config.UserApiClient;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import com.vi.appointmentservice.userservice.generated.ApiClient;
 import com.vi.appointmentservice.userservice.generated.web.UserControllerApi;
-import com.vi.appointmentservice.userservice.generated.web.model.ConsultantSearchResultDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -45,31 +42,6 @@ public class UserService {
 
   @Autowired RestTemplate restTemplate;
 
-  //TODO: why not return List<ConsultantDTO> ?
-  //TODO: usecase and naming of this method are misleading. you use it for the initial
-  // migration, but what if someone uses it for something else, but you fetch only 999 consultants
-  // i would give it a more specific name
-  public JSONArray getAllConsultants() {
-    var userControllerApi = getUserControllerApi();
-    addTechnicalUserHeaders(userControllerApi.getApiClient());
-    log.debug("Api Client: {}", userControllerApi.getApiClient().toString());
-    ConsultantSearchResultDTO consultantsResponse = userControllerApi.searchConsultants(
-        "*",
-        1,
-        999,
-        "FIRSTNAME",
-        "ASC"
-    );
-    JSONObject consultantSearchResultDTOJson = new JSONObject(consultantsResponse);
-    log.debug("consultantSearchResultDTOJson: {}", consultantSearchResultDTOJson);
-    JSONArray consultantsArray = consultantSearchResultDTOJson.getJSONArray("embedded");
-    JSONArray consultantsResult = new JSONArray();
-    for (int i = 0; i < consultantsArray.length(); i++) {
-      consultantsResult.put(consultantsArray.getJSONObject(i).getJSONObject("embedded"));
-    }
-    return consultantsResult;
-  }
-
   public String getRocketChatGroupId(String consultantId, String askerId) {
     var userControllerApi = getUserControllerApi();
     addTechnicalUserHeaders(userControllerApi.getApiClient());
@@ -90,5 +62,18 @@ public class UserService {
     ApiClient apiClient = new UserApiClient(restTemplate);
     apiClient.setBasePath(this.userServiceApiUrl);
     return new UserControllerApi(apiClient);
+  }
+
+  private void addDefaultHeaders(ApiClient apiClient, String authenticatedUserToken) {
+    HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(authenticatedUserToken);
+    headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  }
+
+  public com.vi.appointmentservice.userservice.generated.web.AppointmentControllerApi getUserAppointmentApi(
+      String authenticatedUserToken) {
+    ApiClient apiClient = new UserApiClient(restTemplate);
+    apiClient.setBasePath(this.userServiceApiUrl);
+    addDefaultHeaders(apiClient, authenticatedUserToken);
+    return new com.vi.appointmentservice.userservice.generated.web.AppointmentControllerApi(apiClient);
   }
 }
