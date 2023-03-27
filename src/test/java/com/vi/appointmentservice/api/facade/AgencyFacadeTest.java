@@ -39,6 +39,7 @@ class AgencyFacadeTest {
   private static final Long CALCOM_USER_ID = 5L;
   private static final String CALCOM_TEAM_SLUG = "slug";
   public static final long EVENT_TYPE_ID = 3L;
+  public static final long CALCOM_ADMIN_USER_ID = 1L;
   @InjectMocks
   AgencyFacade agencyFacade;
 
@@ -129,14 +130,17 @@ class AgencyFacadeTest {
   }
 
   @Test
-  void getAllConsultantsOfAgency_Should_GetAllConsultants() {
+  void getAllConsultantsOfAgency_Should_GetAllConsultantsAndExcludeCalcomAdminUser() {
     // given
     when(teamToAgencyRepository.findByAgencyId(AGENCY_ID)).thenReturn(Optional.of(giveTeamToAgency()));
-    when(calComTeamService.getTeamMembers(CALCOM_TEAM_ID)).thenReturn(Lists.newArrayList(CALCOM_USER_ID));
+    when(calComTeamService.getTeamMembers(CALCOM_TEAM_ID)).thenReturn(Lists.newArrayList(CALCOM_USER_ID,
+        CALCOM_ADMIN_USER_ID));
     CalcomUser calcomUser = new CalcomUser();
     calcomUser.setName("Calcom user name");
     when(calComUserService.getUserById(CALCOM_USER_ID)).thenReturn(calcomUser);
+    when(calComUserService.getUserById(CALCOM_ADMIN_USER_ID)).thenReturn(new CalcomUser());
     when(user2ConsultantRepo.findByCalComUserId(CALCOM_USER_ID)).thenReturn(Optional.of(giveCalcomUserToConsultant()));
+    when(user2ConsultantRepo.findByCalComUserId(CALCOM_ADMIN_USER_ID)).thenReturn(Optional.empty());
 
     // when
     List<TeamEventTypeConsultant> allConsultantsOfAgency = agencyFacade.getAllConsultantsOfAgency(
