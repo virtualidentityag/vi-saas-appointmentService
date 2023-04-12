@@ -108,7 +108,6 @@ public class AgencyFacade {
           .setConsultantName(calComUserService.getUserById(teamMember).getName());
       Optional<CalcomUserToConsultant> byCalComUserId = user2ConsultantRepo.findByCalComUserId(
           teamMember);
-
       if (byCalComUserId.isPresent()) {
         var consultantId = byCalComUserId.get()
             .getConsultantId();

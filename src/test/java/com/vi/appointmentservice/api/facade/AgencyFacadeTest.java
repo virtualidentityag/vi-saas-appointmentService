@@ -153,6 +153,24 @@ class AgencyFacadeTest {
   }
 
   @Test
+  void getAllConsultantsOfAgency_Should_GetAllConsultantsButSkipThoseThatAreMissingInUsers2ConsultantRepo() {
+    // given
+    when(teamToAgencyRepository.findByAgencyId(AGENCY_ID)).thenReturn(Optional.of(giveTeamToAgency()));
+    when(calComTeamService.getTeamMembers(CALCOM_TEAM_ID)).thenReturn(Lists.newArrayList(CALCOM_USER_ID));
+    CalcomUser calcomUser = new CalcomUser();
+    calcomUser.setName("Calcom user name");
+    when(calComUserService.getUserById(CALCOM_USER_ID)).thenReturn(calcomUser);
+    when(user2ConsultantRepo.findByCalComUserId(CALCOM_USER_ID)).thenReturn(Optional.empty());
+
+    // when
+    List<TeamEventTypeConsultant> allConsultantsOfAgency = agencyFacade.getAllConsultantsOfAgency(
+        AGENCY_ID);
+
+    // then
+    assertThat(allConsultantsOfAgency).isEmpty();
+  }
+
+  @Test
   void getMeetingSlugByAgencyId_Should_GetMeetingSlug() {
     // given
     when(teamToAgencyRepository.findByAgencyId(AGENCY_ID)).thenReturn(Optional.of(giveTeamToAgency()));

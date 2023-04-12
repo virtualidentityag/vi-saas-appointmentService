@@ -39,6 +39,7 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class MessagesService {
 
+  private static final int MAX_ATTEMPTS = 15;
   private final @NonNull UserService userService;
   private final @NonNull CalComBookingService calComBookingService;
   private final @NonNull UserToConsultantRepository userToConsultantRepository;
@@ -76,7 +77,7 @@ public class MessagesService {
 
   @Async
   public void publishNewAppointmentMessage(Long bookingId) {
-      new BookingCreationRepeater(10).tryRepeatCreateMessage(bookingId).orElseLogError();
+      new BookingCreationRepeater(MAX_ATTEMPTS).tryRepeatCreateMessage(bookingId).orElseLogError();
   }
 
   @Data
