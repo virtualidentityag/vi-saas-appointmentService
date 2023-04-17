@@ -1,10 +1,8 @@
 package com.vi.appointmentservice.config;
 
-import com.vi.appointmentservice.adapters.keycloak.config.KeycloakConfig;
 import com.vi.appointmentservice.api.authorization.RoleAuthorizationAuthorityMapper;
 import com.vi.appointmentservice.api.authorization.Authority.AuthorityValue;
 import com.vi.appointmentservice.filter.StatelessCsrfFilter;
-import com.vi.appointmentservice.helper.AuthenticatedUser;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -34,9 +32,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   public static final String[] WHITE_LIST =
-      new String[]{"/error", "/askers/processbooking", "/processbooking", "/caldav"};
-
-  private static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
+      new String[]{"/error", "/askers/processbooking", "/processbooking", "/caldav", "/actuator/health", "/actuator/health/**"};
 
   @SuppressWarnings("unused")
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
