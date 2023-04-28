@@ -31,7 +31,9 @@ public enum Authority {
           AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT)),
   USER_ADMIN(UserRole.USER_ADMIN, singletonList(AuthorityValue.USER_ADMIN)),
   SINGLE_TENANT_ADMIN(UserRole.SINGLE_TENANT_ADMIN, singletonList(AuthorityValue.SINGLE_TENANT_ADMIN)),
-  TENANT_ADMIN(UserRole.TENANT_ADMIN, singletonList(AuthorityValue.TENANT_ADMIN));
+  TENANT_ADMIN(UserRole.TENANT_ADMIN, singletonList(AuthorityValue.TENANT_ADMIN)),
+  RESTRICTED_AGENCY_ADMIN(
+      UserRole.RESTRICTED_AGENCY_ADMIN, singletonList(AuthorityValue.RESTRICTED_AGENCY_ADMIN));
 
   private final UserRole userRole;
   private final List<String> grantedAuthorities;
@@ -81,6 +83,9 @@ public enum Authority {
     public static final String UPDATE_CHAT = PREFIX + "UPDATE_CHAT";
     public static final String USER_ADMIN = PREFIX + "USER_ADMIN";
     public static final String SINGLE_TENANT_ADMIN = PREFIX + "SINGLE_TENANT_ADMIN";
+
+    public static final String RESTRICTED_AGENCY_ADMIN = PREFIX + "RESTRICTED_AGENCY_ADMIN";
+
     public static final String TENANT_ADMIN = PREFIX + "TENANT_ADMIN";
   }
 
