@@ -114,6 +114,7 @@ public class MessagesService {
         AliasMessageDTO message = createMessage(booking, MessageType.APPOINTMENT_SET);
         sendMessage(booking, message);
         this.messageSuccessfullyCreated = true;
+        log.info("Successfully published new appointmentMessage for bookingId {}", bookingId);
         return true;
       } catch (Exception e) {
         this.messageSuccessfullyCreated = false;

@@ -74,6 +74,7 @@ public class CalcomWebhookHandlerService {
         .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
     createBookingAskerRelation(payload, appointment.getId());
     createRocketchatRoomForInitialAppointment(payload);
+    log.info("Creating appointment with id {}", appointment.getId());
     messagesService.publishNewAppointmentMessage(Long.valueOf(payload.getBookingId()));
   }
 
@@ -83,10 +84,12 @@ public class CalcomWebhookHandlerService {
     if (Boolean.TRUE.equals(metadata.getIsInitialAppointment())) {
       EnquiryAppointmentDTO enquiryAppointmentDTO = getEnquiryAppointmentDTO(
           payload);
+      log.info("Creating initial appointment for booking id {}", payload.getBookingId());
       userService.getUserAppointmentApi(metadata.getUserToken())
           .createEnquiryAppointment(Long.valueOf(metadata.getSessionId()),
               metadata.getRcToken(), metadata.getRcUserId(),
               enquiryAppointmentDTO);
+      log.info("Created initial appointment for booking id {}", payload.getBookingId());
     }
   }
 
@@ -152,7 +155,10 @@ public class CalcomWebhookHandlerService {
     String askerId = payload.getMetadata().getUser();
     CalcomBookingToAsker calcomBookingToAskerEntity = new CalcomBookingToAsker(newBookingId,
         askerId, appointmentId.toString());
+    log.info("Creating calcomBookingToAskerEntity {}", calcomBookingToAskerEntity);
     calcomBookingToAskerRepository.save(calcomBookingToAskerEntity);
+    log.info("CalcomBookingToAskerEntity created");
+
   }
 
   private void createStatisticsEvent(String eventType, CalcomWebhookInputPayload payload) {
