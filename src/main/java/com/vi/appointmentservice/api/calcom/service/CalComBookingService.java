@@ -1,11 +1,14 @@
 package com.vi.appointmentservice.api.calcom.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
 import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +46,7 @@ public class CalComBookingService {
       Optional<CalcomBookingToAsker> calcomBookingAsker = calcomBookingToAskerRepository
           .findByCalcomBookingId(
               booking.getId());
+
       if (!calcomBookingAsker.isPresent()) {
         log.error("Inconsistent data. Asker not found for booking + " + booking.getId());
         continue;

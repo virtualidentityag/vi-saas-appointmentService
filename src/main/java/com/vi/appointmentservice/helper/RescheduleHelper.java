@@ -89,13 +89,19 @@ public class RescheduleHelper {
   }
 
   public void attachAskerNames(List<CalcomBooking> calcomBookings) {
-    Map<Long, String> bookingIdAskerId = new HashMap<Long, String>();
+    Map<Long, String> bookingIdAskerId = new HashMap<>();
     calcomBookings.stream().forEach(booking -> {
       Optional<CalcomBookingToAsker> byCalcomBookingId = this.calcomBookingToAskerRepository
           .findByCalcomBookingId(
               booking.getId());
       if (byCalcomBookingId.isPresent()) {
           bookingIdAskerId.put(booking.getId(), byCalcomBookingId.get().getAskerId());
+      } else {
+        if (booking.getMetadataUserId() != null) {
+          bookingIdAskerId.put(booking.getId(), booking.getMetadataUserId());
+        } else {
+          log.info("No asker found for bookingId " + booking.getId());
+        }
       }
     });
 
