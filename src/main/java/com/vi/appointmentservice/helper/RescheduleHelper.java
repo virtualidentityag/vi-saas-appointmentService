@@ -108,13 +108,18 @@ public class RescheduleHelper {
     Map<String, String> askerUserNamesForIds = this.adminUserService
         .getAskerUserNamesForIds(bookingIdAskerId.values());
     calcomBookings.stream().forEach(booking ->{
-      if (askerUserNamesForIds.get(booking.getAskerId()) != null) {
-        booking.setAskerName(askerUserNamesForIds.get(booking.getAskerId()));
+      String askerId = getAskerId(booking);
+      if (askerUserNamesForIds.get(askerId) != null) {
+        booking.setAskerName(askerUserNamesForIds.get(askerId));
       } else {
         booking.setAskerName("Unknown name");
       }
     });
 
+  }
+
+  private String getAskerId(CalcomBooking booking) {
+    return booking.getAskerId() == null ? booking.getMetadataUserId() : booking.getAskerId();
   }
 
 }
