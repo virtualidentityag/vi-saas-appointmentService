@@ -9,6 +9,7 @@ import com.vi.appointmentservice.appointmentservice.generated.web.model.Appointm
 import com.vi.appointmentservice.config.VideoAppointmentsApiClient;
 import com.vi.appointmentservice.port.out.IdentityClient;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +41,23 @@ public class VideoAppointmentService {
   private String videoAppointmentServiceApiUrl;
 
 
-  public Appointment createAppointment(String consultantEmail, OffsetDateTime startTime) {
+  public Optional<Appointment> findAppointmentByBookingId(Integer bookingId) {
+    var appointmentControllerApi = getAppointmentControllerApi();
+    addTechnicalUserHeaders(appointmentControllerApi.getApiClient());
+    try {
+      return Optional.of(appointmentControllerApi.getAppointmentByBookingId(bookingId));
+    } catch (Exception e) {
+      log.error("Error while fetching appointment by bookingId: {}", bookingId, e);
+      return Optional.empty();
+    }
+  }
+
+  public Appointment createAppointment(String consultantEmail, OffsetDateTime startTime, Integer bookingId) {
     Appointment appointment = new Appointment();
     appointment.setConsultantEmail(consultantEmail);
     appointment.setStatus(AppointmentStatus.CREATED);
     appointment.setDatetime(startTime);
+    appointment.setBookingId(bookingId);
     var appointmentControllerApi = getAppointmentControllerApi();
     addTechnicalUserHeaders(appointmentControllerApi.getApiClient());
     return appointmentControllerApi.createAppointment(appointment);

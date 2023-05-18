@@ -1,14 +1,13 @@
 package com.vi.appointmentservice.api.calcom.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
 import com.vi.appointmentservice.api.model.CalcomBooking;
+import com.vi.appointmentservice.api.service.onlineberatung.VideoAppointmentService;
+import com.vi.appointmentservice.appointmentservice.generated.web.model.Appointment;
 import com.vi.appointmentservice.helper.RescheduleHelper;
 import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +23,8 @@ public class CalComBookingService {
   private final @NonNull BookingRepository bookingRepository;
   private final @NonNull CalcomBookingToAskerRepository calcomBookingToAskerRepository;
   private final @NonNull CalcomLocationsService calcomLocationsService;
+
+  private final @NonNull VideoAppointmentService videoAppointmentService;
 
   public List<CalcomBooking> getConsultantActiveBookings(Long consultantId) {
     return enrichConsultantResultSet(bookingRepository.getConsultantActiveBookings(consultantId));
@@ -48,7 +49,14 @@ public class CalComBookingService {
               booking.getId());
 
       if (!calcomBookingAsker.isPresent()) {
-        log.error("Inconsistent data. Asker not found for booking + " + booking.getId());
+        log.warn("Inconsistent data. Asker not found for booking. Trying to fix consistency for bookingId " + booking.getId());
+        recreateBookingToAskerRelation(booking);
+        calcomBookingAsker = calcomBookingToAskerRepository
+            .findByCalcomBookingId(
+                booking.getId());
+      }
+      if (!calcomBookingAsker.isPresent()) {
+        log.error("Inconsistent data. Asker not found for bookingId + " + booking.getId());
         continue;
       }
       CalcomBookingToAsker entity = calcomBookingAsker.get();
@@ -59,6 +67,18 @@ public class CalComBookingService {
     }
     rescheduleHelper.attachAskerNames(bookings);
     return bookings;
+  }
+
+  private void recreateBookingToAskerRelation(CalcomBooking booking) {
+    Optional<Appointment> appointmentByBookingId = videoAppointmentService.findAppointmentByBookingId(
+        booking.getId().intValue());
+    if (appointmentByBookingId.isPresent()) {
+      String askerId = booking.getAskerId();
+      CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(booking.getId(), askerId,
+          appointmentByBookingId.get().getId().toString());
+      calcomBookingToAskerRepository.save(userAssociation);
+      log.info("Inserted missing booking to asker relation for booking " + booking.getId());
+    }
   }
 
   public List<CalcomBooking> getAskerActiveBookings(List<Long> bookingIds) {
