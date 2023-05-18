@@ -70,8 +70,9 @@ public class CalcomWebhookHandlerService {
 
   void handleCreateEvent(CalcomWebhookInputPayload payload) {
     assertPayloadMetadataIsPresent(payload);
+
     Appointment appointment = videoAppointmentService
-        .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
+        .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime(), payload.getBookingId());
     createBookingAskerRelation(payload, appointment.getId());
     createRocketchatRoomForInitialAppointment(payload);
     log.info("Creating appointment with id {}", appointment.getId());
@@ -134,7 +135,7 @@ public class CalcomWebhookHandlerService {
 
   private void handleRescheduleEvent(CalcomWebhookInputPayload payload) {
     Appointment appointment = videoAppointmentService
-        .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
+        .createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime(), payload.getBookingId());
     calcomBookingToAskerRepository
         .deleteByCalcomBookingId(payload.getMetadata().getBookingId());
     String askerId = payload.getMetadata().getUser();

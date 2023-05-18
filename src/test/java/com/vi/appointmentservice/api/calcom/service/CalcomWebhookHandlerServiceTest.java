@@ -59,13 +59,13 @@ class CalcomWebhookHandlerServiceTest {
     CalcomWebhookInputPayload payload = new CalcomWebhookInputPayload().bookingId(1).organizer(
         new CalcomWebhookInputPayloadOrganizer().email("email")).metadata(new CalcomWebhookInputPayloadMetadata().rcUserId("rcUserId").isInitialAppointment(true).userToken("a token").sessionId("1520"));
     when(userService.getUserAppointmentApi(Mockito.anyString())).thenReturn(userAppointmentControllerApi);
-    when(videoAppointmentService.createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime())).thenReturn(new Appointment().id(
+    when(videoAppointmentService.createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime(), payload.getBookingId())).thenReturn(new Appointment().id(
         UUID.randomUUID()));
     // when
     calcomWebhookHandlerService.handleCreateEvent(payload);
 
     // then
-    verify(videoAppointmentService).createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
+    verify(videoAppointmentService).createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime(), payload.getBookingId());
     CalcomWebhookInputPayloadMetadata metadata = payload.getMetadata();
     verify(userAppointmentControllerApi).createEnquiryAppointment(Mockito.eq(Long.valueOf(metadata.getSessionId())), Mockito.eq(
             metadata.getRcToken()), Mockito.eq(metadata.getRcUserId()),
@@ -77,13 +77,13 @@ class CalcomWebhookHandlerServiceTest {
     // given
     CalcomWebhookInputPayload payload = new CalcomWebhookInputPayload().bookingId(1).organizer(
         new CalcomWebhookInputPayloadOrganizer().email("email")).metadata(new CalcomWebhookInputPayloadMetadata().rcUserId("rcUserId").userToken("a token").isInitialAppointment(false).sessionId("1520"));
-    when(videoAppointmentService.createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime())).thenReturn(new Appointment().id(
+    when(videoAppointmentService.createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime(), payload.getBookingId())).thenReturn(new Appointment().id(
         UUID.randomUUID()));
     // when
     calcomWebhookHandlerService.handleCreateEvent(payload);
 
     // then
-    verify(videoAppointmentService).createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime());
+    verify(videoAppointmentService).createAppointment(payload.getOrganizer().getEmail(), payload.getStartTime(), payload.getBookingId());
     verify(userAppointmentControllerApi, Mockito.never()).createEnquiryAppointment(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
         Mockito.any(EnquiryAppointmentDTO.class));
   }
