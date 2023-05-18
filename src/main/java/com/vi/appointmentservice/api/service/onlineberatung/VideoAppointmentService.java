@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -46,6 +47,9 @@ public class VideoAppointmentService {
     addTechnicalUserHeaders(appointmentControllerApi.getApiClient());
     try {
       return Optional.of(appointmentControllerApi.getAppointmentByBookingId(bookingId));
+    } catch (HttpClientErrorException.NotFound e) {
+      log.debug("Appointment not found for bookingId: {}", bookingId);
+      return Optional.empty();
     } catch (Exception e) {
       log.error("Error while fetching appointment by bookingId: {}", bookingId, e);
       return Optional.empty();
