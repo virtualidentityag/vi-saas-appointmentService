@@ -1,6 +1,7 @@
 package com.vi.appointmentservice.api.controller;
 
 import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
+import com.vi.appointmentservice.api.calcom.service.EventTypeMapper;
 import com.vi.appointmentservice.api.facade.AgencyFacade;
 import com.vi.appointmentservice.api.model.AgencyConsultantSyncRequestDTO;
 import com.vi.appointmentservice.api.model.AgencyMasterDataSyncRequestDTO;
@@ -33,13 +34,13 @@ public class AgencyController implements AgenciesApi {
   public ResponseEntity<Void> agencyMasterDataSync(
       @Valid AgencyMasterDataSyncRequestDTO agencyMasterDataSyncRequestDTO) {
     agencyFacade.agencyMasterDataSync(agencyMasterDataSyncRequestDTO);
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<List<EventTypeDTO>> getAllEventTypesOfAgency(Long agencyId) {
     List<EventTypeDTO> eventTypes = this.agencyFacade.getAgencyEventTypes(agencyId).stream()
-        .map(el -> asEventTypeDTO(el)).collect(
+        .map(this::asEventTypeDTO).collect(
             Collectors.toList());
     return new ResponseEntity<>(eventTypes, HttpStatus.OK);
   }
@@ -92,17 +93,11 @@ public class AgencyController implements AgenciesApi {
   public ResponseEntity<Void> agencyConsultantsSync(
       @Valid AgencyConsultantSyncRequestDTO req) {
     agencyFacade.assignConsultant2AppointmentTeams(req.getConsultantId(), req.getAgencies());
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   private EventTypeDTO asEventTypeDTO(CalcomEventType eventType) {
-    EventTypeDTO calcomEventType = new EventTypeDTO();
-    calcomEventType.setTitle(eventType.getTitle());
-    calcomEventType.setId(eventType.getId());
-    calcomEventType.setLength(eventType.getLength());
-    calcomEventType.setDescription(eventType.getDescription());
-    calcomEventType.setConsultants(eventType.getConsultants());
-    return calcomEventType;
+    return new EventTypeMapper().asEventTypeDTO(eventType);
   }
 
   @Override
