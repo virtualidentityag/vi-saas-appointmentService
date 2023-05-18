@@ -73,7 +73,8 @@ public class CalComBookingService {
     Optional<Appointment> appointmentByBookingId = videoAppointmentService.findAppointmentByBookingId(
         booking.getId().intValue());
     if (appointmentByBookingId.isPresent()) {
-      String askerId = booking.getAskerId();
+      String askerId = booking.getAskerId() != null ? booking.getAskerId() : booking.getMetadataUserId();
+
       CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(booking.getId(), askerId,
           appointmentByBookingId.get().getId().toString());
       calcomBookingToAskerRepository.save(userAssociation);
