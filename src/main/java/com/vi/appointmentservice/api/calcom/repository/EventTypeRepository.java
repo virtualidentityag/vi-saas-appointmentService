@@ -17,8 +17,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class EventTypeRepository {
 
-  public static final String EVENT_TYPE_ID = "eventTypeId";
-  public static final String USER_ID = "userId";
+  private static final String EVENT_TYPE_ID = "eventTypeId";
+  private static final String USER_ID = "userId";
   private final NamedParameterJdbcTemplate db;
   private final DataSource datasource;
 
