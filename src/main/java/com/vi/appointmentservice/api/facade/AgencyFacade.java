@@ -235,7 +235,7 @@ public class AgencyFacade {
       }
     });
     eventTypeDB.setMemberIds(eventMembers);
-    return calcomEventTypeService.updateEventType(eventTypeDB);
+    return calcomEventTypeService.updateEventType(eventTypeDB, eventType.getLocations());
   }
 
   public void deleteAgencyEventType(Long eventTypeId) {

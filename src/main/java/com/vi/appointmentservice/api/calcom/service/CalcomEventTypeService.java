@@ -58,10 +58,6 @@ public class CalcomEventTypeService {
     return eventTypeDB;
   }
 
-  public void markAsDefaultEventType(CalcomEventType eventType) {
-    eventTypeRepository.markAsDefaultEventType(eventType.getId());
-  }
-
   public void createEventType(com.vi.appointmentservice.api.calcom.model.CalcomUser calcomUser,
       AppointmentType appointmentType,
       Long defaultScheduleId) {
@@ -98,6 +94,19 @@ public class CalcomEventTypeService {
     eventTypeRepository.removeTeamEventHostsForEventType(eventType.getId());
     eventType.getMemberIds().forEach(calcomUser -> addUser2Event(calcomUser, eventType.getId()));
     return getEventTypeById(eventType.getId());
+  }
+
+  public CalcomEventType updateEventType(CalcomEventType eventTypeDB, List<String> locations) {
+    List<String> locationJsons = locations.stream()
+        .map(calcomLocationsService::resolveToJsonByLocationType).collect(
+            Collectors.toList());
+    eventTypeDB.setLocations("[" + Joiner.on(",").join(locationJsons) + "]");
+    eventTypeRepository.updateLocations(eventTypeDB.getId(), eventTypeDB.getLocations());
+    return this.updateEventType(eventTypeDB);
+  }
+
+  public void markAsDefaultEventType(CalcomEventType eventType) {
+    eventTypeRepository.markAsDefaultEventType(eventType.getId());
   }
 
   public CalcomEventType getDefaultEventTypeOfTeam(Long teamId) {
