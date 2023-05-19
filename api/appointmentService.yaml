@@ -627,6 +627,10 @@ components:
         description:
           type: string
           format: nullable
+        locations:
+          type: array
+          items:
+            type: string
         consultants:
           type: array
           items:
