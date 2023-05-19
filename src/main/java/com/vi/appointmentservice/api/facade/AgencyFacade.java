@@ -215,6 +215,7 @@ public class AgencyFacade {
     appointmentType.setTitle(eventType.getTitle());
     appointmentType.setLength(eventType.getLength());
     appointmentType.setDescription(eventType.getDescription());
+    appointmentType.setLocations(eventType.getLocations());
     return appointmentType;
   }
 
