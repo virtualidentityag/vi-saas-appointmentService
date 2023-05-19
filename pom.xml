@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.5.RELEASE</version>
+        <version>2.3.12.RELEASE</version>
         <relativePath/>
     </parent>
 
@@ -23,6 +23,31 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
         <keycloak.version>17.0.0</keycloak.version>
+        <springfox.version>2.9.2</springfox.version>
+        <powermock.version>2.0.2</powermock.version>
+        <adapters.web.generated.path>
+            ${project.groupId}.${project.artifactId}.generated.api.adapters.web
+        </adapters.web.generated.path>
+        <adapters.web.dto.path>
+            ${project.groupId}.${project.artifactId}.api.adapters.web.dto
+        </adapters.web.dto.path>
+        <log4j.version>2.17.1
+        </log4j.version> <!-- force safe version due to https://logging.apache.org/log4j/2.x/security.html -->
+        <commons-text.version>1.10.0</commons-text.version>
+        <commons-validator.version>1.7</commons-validator.version>
+        <liquibase-maven-plugin.version>4.8.0</liquibase-maven-plugin.version>
+        <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
+        <spring-boot-starter-web.version>2.6.6</spring-boot-starter-web.version>
+        <spring-security-core.version>5.7.5</spring-security-core.version>
+        <spring-beans.version>5.2.20.RELEASE</spring-beans.version>
+        <spring-webmvc.version>5.2.20.RELEASE</spring-webmvc.version>
+        <spring-core.version>5.2.20.RELEASE</spring-core.version>
+        <json-smart.version>2.4.7</json-smart.version>
+        <springfox-swagger-ui.version>2.10.0</springfox-swagger-ui.version>
+        <spring-context-support.version>5.3.23</spring-context-support.version>
+        <ehcache.version>2.10.9.2</ehcache.version>
+        <testcontainers.version>1.17.6</testcontainers.version>
+        <easy-random-core.version>5.0.0</easy-random-core.version>
     </properties>
 
     <dependencies>
@@ -38,6 +63,17 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot-starter-web.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring-beans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring-webmvc.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -52,10 +88,25 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring-security-core.version}</version>
+        </dependency>
+
+        <!-- Spring actuator  -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <version>2.7.11</version>
+        </dependency>
+
         <!-- Persistance -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
@@ -64,8 +115,17 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <version>42.3.3</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+
         <!-- OpenApi/Swagger dependencies -->
         <dependency>
             <groupId>org.openapitools</groupId>
@@ -109,18 +169,52 @@
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+            <version>4.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+
+        <!-- Apache Commons Text -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>${commons-text.version}</version>
+        </dependency>
 
         <!-- Liquibase -->
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-maven-plugin</artifactId>
-            <version>4.1.1</version>
+            <version>${liquibase-maven-plugin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>4.8.0</version>
         </dependency>
 
         <!-- log dependencies -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-to-slf4j</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -165,6 +259,23 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jeasy</groupId>
+            <artifactId>easy-random-core</artifactId>
+            <version>${easy-random-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.security</groupId>
+                    <artifactId>spring-security-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <build>

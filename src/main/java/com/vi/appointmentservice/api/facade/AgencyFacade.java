@@ -159,10 +159,12 @@ public class AgencyFacade {
     eventType.getMemberIds().forEach(member -> {
       Optional<CalcomUserToConsultant> calomUserToConsultant = user2ConsultantRepo
           .findByCalComUserId(member);
-      TeamEventTypeConsultant teamEventTypeConsultant = new TeamEventTypeConsultant();
-      teamEventTypeConsultant.setConsultantName(calComUserService.getUserById(member).getName());
-      teamEventTypeConsultant.setConsultantId(calomUserToConsultant.get().getConsultantId());
-      consultants.add(teamEventTypeConsultant);
+      if (calomUserToConsultant.isPresent()) {
+        TeamEventTypeConsultant teamEventTypeConsultant = new TeamEventTypeConsultant();
+        teamEventTypeConsultant.setConsultantName(calComUserService.getUserById(member).getName());
+        teamEventTypeConsultant.setConsultantId(calomUserToConsultant.get().getConsultantId());
+        consultants.add(teamEventTypeConsultant);
+      }
     });
     eventType.setConsultants(consultants);
     return eventType;
