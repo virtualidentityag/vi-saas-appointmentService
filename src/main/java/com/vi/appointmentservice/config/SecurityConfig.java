@@ -92,7 +92,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
         .antMatchers(HttpMethod.POST, "/askers/processBooking", "/processBooking")
         .permitAll() // auth handeled via hmac in controller
-        .antMatchers( "/agencies/**/eventTypes", "/agencies/**/consultants")
+        .antMatchers( "/agencies/**/eventTypes", "/agencies/**/consultants", "/agencies/**/eventTypes/**")
         .hasAnyAuthority(AuthorityValue.RESTRICTED_AGENCY_ADMIN, AuthorityValue.SINGLE_TENANT_ADMIN, AuthorityValue.TENANT_ADMIN,
             AuthorityValue.TECHNICAL_DEFAULT)
         .antMatchers(HttpMethod.POST, "/agencies/agencyMasterDataSync")
