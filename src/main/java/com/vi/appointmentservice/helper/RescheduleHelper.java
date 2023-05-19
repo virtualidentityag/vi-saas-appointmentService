@@ -89,26 +89,37 @@ public class RescheduleHelper {
   }
 
   public void attachAskerNames(List<CalcomBooking> calcomBookings) {
-    Map<Long, String> bookingIdAskerId = new HashMap<Long, String>();
+    Map<Long, String> bookingIdAskerId = new HashMap<>();
     calcomBookings.stream().forEach(booking -> {
       Optional<CalcomBookingToAsker> byCalcomBookingId = this.calcomBookingToAskerRepository
           .findByCalcomBookingId(
               booking.getId());
       if (byCalcomBookingId.isPresent()) {
           bookingIdAskerId.put(booking.getId(), byCalcomBookingId.get().getAskerId());
+      } else {
+        if (booking.getMetadataUserId() != null) {
+          bookingIdAskerId.put(booking.getId(), booking.getMetadataUserId());
+        } else {
+          log.info("No asker found for bookingId " + booking.getId());
+        }
       }
     });
 
     Map<String, String> askerUserNamesForIds = this.adminUserService
         .getAskerUserNamesForIds(bookingIdAskerId.values());
     calcomBookings.stream().forEach(booking ->{
-      if (askerUserNamesForIds.get(booking.getAskerId()) != null) {
-        booking.setAskerName(askerUserNamesForIds.get(booking.getAskerId()));
+      String askerId = getAskerId(booking);
+      if (askerUserNamesForIds.get(askerId) != null) {
+        booking.setAskerName(askerUserNamesForIds.get(askerId));
       } else {
         booking.setAskerName("Unknown name");
       }
     });
 
+  }
+
+  private String getAskerId(CalcomBooking booking) {
+    return booking.getAskerId() == null ? booking.getMetadataUserId() : booking.getAskerId();
   }
 
 }
