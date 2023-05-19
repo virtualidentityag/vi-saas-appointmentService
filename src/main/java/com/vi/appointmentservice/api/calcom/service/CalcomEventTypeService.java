@@ -49,11 +49,7 @@ public class CalcomEventTypeService {
     eventType.setTitle(appointmentType.getTitle());
     eventType.setTeamId(teamId);
     CalcomEventType eventTypeDB = eventTypeRepository.createEventType(eventType);
-    List<String> locationJsons = appointmentType.getLocations().stream()
-        .map(calcomLocationsService::resolveToJsonByLocationType).collect(
-            Collectors.toList());
-    eventType.setLocations("[" + Joiner.on(",").join(locationJsons) + "]");
-    eventTypeRepository.updateLocations(eventTypeDB.getId(), eventType.getLocations());
+    updateEventTypeLocations(eventType, appointmentType.getLocations());
     eventTypeRepository.markAsRoundRobin(eventTypeDB.getId());
     return eventTypeDB;
   }
@@ -97,12 +93,18 @@ public class CalcomEventTypeService {
   }
 
   public CalcomEventType updateEventType(CalcomEventType eventTypeDB, List<String> locations) {
+    if (locations != null) {
+      updateEventTypeLocations(eventTypeDB, locations);
+    }
+    return this.updateEventType(eventTypeDB);
+  }
+
+  private void updateEventTypeLocations(CalcomEventType eventTypeDB, List<String> locations) {
     List<String> locationJsons = locations.stream()
         .map(calcomLocationsService::resolveToJsonByLocationType).collect(
             Collectors.toList());
     eventTypeDB.setLocations("[" + Joiner.on(",").join(locationJsons) + "]");
     eventTypeRepository.updateLocations(eventTypeDB.getId(), eventTypeDB.getLocations());
-    return this.updateEventType(eventTypeDB);
   }
 
   public void markAsDefaultEventType(CalcomEventType eventType) {
