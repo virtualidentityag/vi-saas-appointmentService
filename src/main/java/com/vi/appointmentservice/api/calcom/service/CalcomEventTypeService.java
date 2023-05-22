@@ -49,7 +49,9 @@ public class CalcomEventTypeService {
     eventType.setTitle(appointmentType.getTitle());
     eventType.setTeamId(teamId);
     CalcomEventType eventTypeDB = eventTypeRepository.createEventType(eventType);
-    updateEventTypeLocations(eventType, appointmentType.getLocations());
+    if (appointmentType.getLocations() != null) {
+      updateEventTypeLocations(eventType, appointmentType.getLocations());
+    }
     eventTypeRepository.markAsRoundRobin(eventTypeDB.getId());
     return eventTypeDB;
   }
