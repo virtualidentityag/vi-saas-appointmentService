@@ -30,7 +30,7 @@ public class CalcomLocationsService {
   public String resolveLocationType(CalcomBooking booking) {
     if (IN_PERSON_MEETING_MESSAGE.equals(booking.getLocation())) {
       return LocationType.IN_PERSON.name();
-    } else if (PHONE_CALL_MEETING_MESSAGE.equals(booking.getLocation())) {
+    } else if (PHONE_CALL_MEETING_MESSAGE.equalsIgnoreCase(booking.getLocation())) {
       return LocationType.USER_PHONE.name();
     } else if (VIDEO_CALL.equals(booking.getLocation())) {
       return LocationType.LINK.name();
