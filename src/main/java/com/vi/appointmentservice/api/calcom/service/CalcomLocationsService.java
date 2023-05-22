@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class CalcomLocationsService {
 
-  private static final String IN_PERSON_MEETING_MESSAGE = "Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit";
+  private static final String IN_PERSON_MEETING_MESSAGE = "Die Adresse der Beratungsstelle teilt Ihnen Ihr:e Berater:in im Chat mit";
   public static final String IN_PERSON_JSON =
       "{\"type\": \"inPerson\",\"address\": \"" + IN_PERSON_MEETING_MESSAGE + "\"}";
 
-  private static final String PHONE_CALL_MEETING_MESSAGE = "Die Telefonnummer teilt Ihnen ihr:e Berater:in im Chat mit";
+  private static final String PHONE_CALL_MEETING_MESSAGE = "Die Telefonnummer teilt Ihnen Ihr:e Berater:in im Chat mit";
   public static final String USER_PHONE_JSON =
       "{\"type\": \"userPhone\",\"hostPhoneNumber\": \"" + PHONE_CALL_MEETING_MESSAGE + "\"}";
 

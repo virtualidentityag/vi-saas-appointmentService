@@ -27,7 +27,7 @@ class CalcomLocationsServiceTest {
     // When
     String jsonResult = calcomLocationsService.resolveToJsonByLocationType(LocationType.IN_PERSON.getValue());
     // Then
-    assertThat(jsonResult).isEqualTo("{\"type\": \"inPerson\",\"address\": \"Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit\"}");
+    assertThat(jsonResult).isEqualTo("{\"type\": \"inPerson\",\"address\": \"Die Adresse der Beratungsstelle teilt Ihnen Ihr:e Berater:in im Chat mit\"}");
   }
 
   @Test
@@ -35,7 +35,7 @@ class CalcomLocationsServiceTest {
     // When
     String jsonResult = calcomLocationsService.resolveToJsonByLocationType(LocationType.USER_PHONE.getValue());
     // Then
-    assertThat(jsonResult).isEqualTo("{\"type\": \"userPhone\",\"hostPhoneNumber\": \"Die Telefonnummer teilt Ihnen ihr:e Berater:in im Chat mit\"}");
+    assertThat(jsonResult).isEqualTo("{\"type\": \"userPhone\",\"hostPhoneNumber\": \"Die Telefonnummer teilt Ihnen Ihr:e Berater:in im Chat mit\"}");
   }
 
   @Test
