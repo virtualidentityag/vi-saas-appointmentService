@@ -1,5 +1,6 @@
 package com.vi.appointmentservice.api.calcom.service;
 
+import com.google.common.base.Joiner;
 import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
 import com.vi.appointmentservice.api.calcom.repository.EventTypeRepository;
 import com.vi.appointmentservice.api.calcom.repository.MembershipsRepository;
@@ -8,6 +9,7 @@ import com.vi.appointmentservice.api.facade.AppointmentType;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,23 +45,20 @@ public class CalcomEventTypeService {
   }
 
   public CalcomEventType createEventType(Number teamId, AppointmentType appointmentType) {
-    CalcomEventType eventType = this.buildEventType(appointmentType);
+    CalcomEventType eventType = this.buildDefaultEventType(appointmentType);
     eventType.setTitle(appointmentType.getTitle());
     eventType.setTeamId(teamId);
     CalcomEventType eventTypeDB = eventTypeRepository.createEventType(eventType);
+    updateEventTypeLocations(eventType, appointmentType.getLocations());
     eventTypeRepository.markAsRoundRobin(eventTypeDB.getId());
     return eventTypeDB;
-  }
-
-  public void markAsDefaultEventType(CalcomEventType eventType) {
-    eventTypeRepository.markAsDefaultEventType(eventType.getId());
   }
 
   public void createEventType(com.vi.appointmentservice.api.calcom.model.CalcomUser calcomUser,
       AppointmentType appointmentType,
       Long defaultScheduleId) {
     webhookRepository.updateUserWebhook(calcomUser.getId());
-    CalcomEventType eventType = this.buildEventType(appointmentType);
+    CalcomEventType eventType = this.buildDefaultEventType(appointmentType);
     eventType.setTitle(appointmentType.getTitle() + " " + calcomUser.getName());
     eventType.setUserId(Math.toIntExact(calcomUser.getId()));
     CalcomEventType createdEventType = eventTypeRepository.createEventType(eventType);
@@ -67,7 +66,7 @@ public class CalcomEventTypeService {
     eventTypeRepository.updateEventTypeScheduleId(createdEventType.getId(), defaultScheduleId);
   }
 
-  public CalcomEventType buildEventType(AppointmentType appointmentType) {
+  public CalcomEventType buildDefaultEventType(AppointmentType appointmentType) {
     CalcomEventType eventType = new CalcomEventType();
     eventType.setDescription(appointmentType.getDescription());
     eventType.setLength(appointmentType.getLength());
@@ -81,7 +80,7 @@ public class CalcomEventTypeService {
     eventType.setDisableGuests(true);
     eventType.setHideCalendarNotes(true);
     eventType.setPeriodDays(30);
-    eventType.setLocations(calcomLocationsService.buildCalcomLocations());
+    eventType.setLocations(calcomLocationsService.buildDefaultCalcomLocations());
     return eventType;
   }
 
@@ -91,6 +90,25 @@ public class CalcomEventTypeService {
     eventTypeRepository.removeTeamEventHostsForEventType(eventType.getId());
     eventType.getMemberIds().forEach(calcomUser -> addUser2Event(calcomUser, eventType.getId()));
     return getEventTypeById(eventType.getId());
+  }
+
+  public CalcomEventType updateEventType(CalcomEventType eventTypeDB, List<String> locations) {
+    if (locations != null) {
+      updateEventTypeLocations(eventTypeDB, locations);
+    }
+    return this.updateEventType(eventTypeDB);
+  }
+
+  private void updateEventTypeLocations(CalcomEventType eventTypeDB, List<String> locations) {
+    List<String> locationJsons = locations.stream()
+        .map(calcomLocationsService::resolveToJsonByLocationType).collect(
+            Collectors.toList());
+    eventTypeDB.setLocations("[" + Joiner.on(",").join(locationJsons) + "]");
+    eventTypeRepository.updateLocations(eventTypeDB.getId(), eventTypeDB.getLocations());
+  }
+
+  public void markAsDefaultEventType(CalcomEventType eventType) {
+    eventTypeRepository.markAsDefaultEventType(eventType.getId());
   }
 
   public CalcomEventType getDefaultEventTypeOfTeam(Long teamId) {

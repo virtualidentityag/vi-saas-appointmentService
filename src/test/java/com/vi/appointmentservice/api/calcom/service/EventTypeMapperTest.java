@@ -18,7 +18,7 @@ class EventTypeMapperTest {
         + "  },\n"
         + "  {\n"
         + "    \"type\": \"inPerson\",\n"
-        + "    \"address\": \"Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit\"\n"
+        + "    \"address\": \"Die Adresse der Beratungsstelle teilt Ihnen Ihr:e Berater:in im Chat mit\"\n"
         + "  },\n"
         + "  {\n"
         + "    \"link\": \"suchtberatung.digital\",\n"
@@ -26,7 +26,7 @@ class EventTypeMapperTest {
         + "  },\n"
         + "  {\n"
         + "    \"type\": \"userPhone\",\n"
-        + "    \"hostPhoneNumber\": \"Die Telefonnummer teilt Ihnen ihr:e Berater:in im Chat mit\"\n"
+        + "    \"hostPhoneNumber\": \"Die Telefonnummer teilt Ihnen Ihr:e Berater:in im Chat mit\"\n"
         + "  }\n"
         + "]");
     // when
@@ -37,11 +37,11 @@ class EventTypeMapperTest {
     assertThat(eventTypeDTO.getLocations()).hasSize(4);
     assertThat(eventTypeDTO.getLocations().get(0).getType()).isEqualTo("integrations:daily");
     assertThat(eventTypeDTO.getLocations().get(1).getType()).isEqualTo("inPerson");
-    assertThat(eventTypeDTO.getLocations().get(1).getAddress()).isEqualTo("Die Adresse der Beratungsstelle teilt Ihnen ihr:e Berater:in im Chat mit");
+    assertThat(eventTypeDTO.getLocations().get(1).getAddress()).isEqualTo("Die Adresse der Beratungsstelle teilt Ihnen Ihr:e Berater:in im Chat mit");
     assertThat(eventTypeDTO.getLocations().get(2).getType()).isEqualTo("link");
     assertThat(eventTypeDTO.getLocations().get(2).getLink()).isEqualTo("suchtberatung.digital");
     assertThat(eventTypeDTO.getLocations().get(3).getType()).isEqualTo("userPhone");
-    assertThat(eventTypeDTO.getLocations().get(3).getHostPhoneNumber()).isEqualTo("Die Telefonnummer teilt Ihnen ihr:e Berater:in im Chat mit");
+    assertThat(eventTypeDTO.getLocations().get(3).getHostPhoneNumber()).isEqualTo("Die Telefonnummer teilt Ihnen Ihr:e Berater:in im Chat mit");
   }
 
   @Test
