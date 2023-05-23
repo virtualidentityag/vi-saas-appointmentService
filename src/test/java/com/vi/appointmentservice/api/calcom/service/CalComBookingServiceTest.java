@@ -41,11 +41,11 @@ class CalComBookingServiceTest {
     assertFalse(calComBookingService.shouldOverrideDescriptionWithCancellationReason(calcomBooking));
   }
   @Test
-  void should_OverridDescriptionWithCancellationReason_When_CurrentDescriptionIsNotEmpty() {
+  void should_OverridDescriptionWithCancellationReason_When_CurrentDescriptionIsEmpty() {
     // given
-    CalcomBooking calcomBooking = new CalcomBooking().description("description").cancellationReason("cancellationReason");
+    CalcomBooking calcomBooking = new CalcomBooking().description("").cancellationReason("cancellationReason");
 
     // when, then
-    assertFalse(calComBookingService.shouldOverrideDescriptionWithCancellationReason(calcomBooking));
+    assertTrue(calComBookingService.shouldOverrideDescriptionWithCancellationReason(calcomBooking));
   }
 }
