@@ -12,11 +12,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CalcomEventTypeService {
 
   @NonNull
@@ -128,8 +130,12 @@ public class CalcomEventTypeService {
 
 
   public void cleanUserMemberships(Long calcomUserId, List<Long> teamIds) {
-    eventTypeRepository.removeTeamEventTypeMembershipsForUser(
-        calcomUserId, teamIds);
+    if (teamIds != null && !teamIds.isEmpty()) {
+      eventTypeRepository.removeTeamEventTypeMembershipsForUser(
+          calcomUserId, teamIds);
+    } else {
+      log.warn("Could not clean user memberships for user: " + calcomUserId + " because teamIds is empty or null ");
+    }
   }
 
   public void addUser2Team(Long calComUserId, Long teamId) {
