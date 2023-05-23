@@ -8,6 +8,7 @@ import com.vi.appointmentservice.api.calcom.repository.EventTypeRepository;
 import com.vi.appointmentservice.api.calcom.repository.WebhookRepository;
 import com.vi.appointmentservice.api.calcom.service.CalcomEventTypeService;
 import com.vi.appointmentservice.api.calcom.service.CalcomLocationsService;
+import com.vi.appointmentservice.api.facade.AppointmentType;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +50,17 @@ public class CalcomEventTypeServiceTest {
 
     Mockito.verify(eventTypeRepository).updateLocations(1, "[{locationJson}]");
     Mockito.verify(eventTypeRepository).updateEventType(eventType);
+  }
+
+  @Test
+  public void shouldCreateEventTypeAndNotUpdateLocationsIfAppointmentTypeDoesNotContainLocations() {
+    // given
+    when(eventTypeRepository.createEventType(Mockito.any(CalcomEventType.class))).thenReturn(new CalcomEventType());
+    // when
+    calcomEventTypeService.createEventType(1, new AppointmentType());
+    // then
+
+    Mockito.verify(eventTypeRepository, Mockito.never()).updateLocations(Mockito.anyInt(), Mockito.anyString());
   }
 
 }
