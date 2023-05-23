@@ -48,4 +48,13 @@ class CalComBookingServiceTest {
     // when, then
     assertTrue(calComBookingService.shouldOverrideDescriptionWithCancellationReason(calcomBooking));
   }
+
+  @Test
+  void should_OverridDescriptionWithCancellationReason_When_CurrentDescriptionIsNull() {
+    // given
+    CalcomBooking calcomBooking = new CalcomBooking().description(null).cancellationReason("cancellationReason");
+
+    // when, then
+    assertTrue(calComBookingService.shouldOverrideDescriptionWithCancellationReason(calcomBooking));
+  }
 }
