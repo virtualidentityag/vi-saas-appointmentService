@@ -7,9 +7,10 @@ import org.springframework.stereotype.Service;
 public class AppointmentService {
 
   private static final String DEFAULT_EVENT_DESCRIPTION =
-      "Bitte wählen Sie Ihre gewünschte Terminart. Wir bemühen uns, Ihren Wunsch zu erfüllen. "
-          + "Die Berater:innen werden Sie ggf per Chat auf unserer Plattform informieren. "
-          + "Loggen Sie sich also vor einem Termin auf jeden Fall ein!";
+      "Ratsuchende können zwischen vier Terminarten wählen. Das Beratungsteam versucht, diesen Wunsch zu erfüllen. "
+          + "Als Alternative generieren wir immer einen Link zum Video-Call. "
+          + "Die endgültige Abstimmung erfolgt per Chat auf unserer Plattform. "
+          + "Loggen Sie sich also unbedingt vor einem Termin ein!";
 
   public AppointmentType createDefaultAppointmentType() {
     AppointmentType appointmentType = new AppointmentType();
