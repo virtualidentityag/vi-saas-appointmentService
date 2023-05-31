@@ -20,6 +20,7 @@ public class EventTypeMapper {
     calcomEventType.setLength(eventType.getLength());
     calcomEventType.setDescription(eventType.getDescription());
     calcomEventType.setConsultants(eventType.getConsultants());
+    calcomEventType.setMetadata(eventType.getMetadata());
     setLocations(eventType, calcomEventType);
     return calcomEventType;
   }
