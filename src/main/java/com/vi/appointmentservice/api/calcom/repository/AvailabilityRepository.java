@@ -12,16 +12,16 @@ public class AvailabilityRepository {
     private final @NotNull JdbcTemplate jdbcTemplate;
 
     public void deleteAvailabilityByScheduleId(Long scheduleId) {
-      String DELETE_QUERY = "delete from \"Availability\" where \"scheduleId\"=" + scheduleId;
-      jdbcTemplate.update(DELETE_QUERY);
+      String deleteQuery = "delete from \"Availability\" where \"scheduleId\"=" + scheduleId;
+      jdbcTemplate.update(deleteQuery);
     }
 
     public void createDefaultAvailability(Long scheduleId){
       // Create default availability
-      String INSERT_QUERY = "insert into \"Availability\" (\"scheduleId\", \"days\", \"startTime\", \"endTime\") values ($scheduleIdParam, '{1,2,3,4,5}', '09:00:00', '9:15:00')";
-      INSERT_QUERY = INSERT_QUERY
+      String insertQuery = "insert into \"Availability\" (\"scheduleId\", \"days\", \"startTime\", \"endTime\") values ($scheduleIdParam, '{1}', '09:00:00', '9:15:00')";
+      insertQuery = insertQuery
           .replace("$scheduleIdParam", scheduleId.toString());
-      jdbcTemplate.update(INSERT_QUERY);
+      jdbcTemplate.update(insertQuery);
     }
 
 }
