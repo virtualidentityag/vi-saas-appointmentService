@@ -79,7 +79,7 @@ public class CalcomEventTypeService {
     eventType.setAfterEventBuffer(appointmentType.getAfterEventBuffer());
     eventType.setSlotInterval(appointmentType.getSlotInterval());
     eventType.setSlug(UUID.randomUUID().toString());
-    eventType.setEventName(appointmentType.getTitle() + " {ATTENDEE} mit {HOST}");
+    eventType.setEventName(appointmentType.getTitle() + " {HOST} und dem / der Ratsuchenden {ATTENDEE}");
     eventType.setRequiresConfirmation(false);
     eventType.setDisableGuests(true);
     eventType.setHideCalendarNotes(true);

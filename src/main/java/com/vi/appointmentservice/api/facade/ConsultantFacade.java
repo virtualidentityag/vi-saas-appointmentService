@@ -57,7 +57,7 @@ public class ConsultantFacade {
     Optional<CalcomUserToConsultant> userConsultant = userToConsultantRepository
         .findByConsultantId(consultant.getId());
     calComUserService
-        .updateUser(userConsultant.get().getCalComUserId(), name, consultant.getEmail());
+        .updateUser(userConsultant.orElseThrow().getCalComUserId(), name, consultant.getEmail());
   }
 
   private void linkConsultantToAppointmentUser(
@@ -70,7 +70,7 @@ public class ConsultantFacade {
   void setupDefaultScheduleAndEventType(CalcomUser calcomUser) {
     Long defaultScheduleId = scheduleRepository.createDefaultSchedule(calcomUser.getId());
     AppointmentType defaultAppointmentType = appointmentService.createDefaultAppointmentType();
-    defaultAppointmentType.setTitle("Beratung mit");
+    defaultAppointmentType.setTitle("Beratung zwischen dem / der Berater:in");
     calComEventTypeService
         .createEventType(calcomUser, defaultAppointmentType,
             defaultScheduleId);
