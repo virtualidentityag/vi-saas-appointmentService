@@ -68,7 +68,7 @@ public class AgencyFacade {
   private void createTeam(Long agencyId, String agencyName) {
     AppointmentType defaultAppointmentType = appointmentService.createDefaultAppointmentType();
     var calTeam = calComTeamService.createTeam(agencyName);
-    defaultAppointmentType.setTitle("Erstbefragung " + calTeam.getName());
+    defaultAppointmentType.setTitle("Erstberatung " + calTeam.getName());
     CalcomEventType eventType = calcomEventTypeService
         .createEventType(calTeam.getId(), defaultAppointmentType);
     calcomEventTypeService.markAsDefaultEventType(eventType);
