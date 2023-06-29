@@ -18,7 +18,7 @@ public class AvailabilityRepository {
 
     public void createDefaultAvailability(Long scheduleId){
       // Create default availability
-      String insertQuery = "insert into \"Availability\" (\"scheduleId\", \"days\", \"startTime\", \"endTime\") values ($scheduleIdParam, '{1}', '09:00:00', '9:15:00')";
+      String insertQuery = "insert into \"Availability\" (\"scheduleId\", \"days\", \"startTime\", \"endTime\") values ($scheduleIdParam, '{}', '00:00:00', '00:00:00')";
       insertQuery = insertQuery
           .replace("$scheduleIdParam", scheduleId.toString());
       jdbcTemplate.update(insertQuery);
