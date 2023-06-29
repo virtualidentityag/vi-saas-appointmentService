@@ -56,4 +56,17 @@ class EventTypeMapperTest {
     assertThat(eventTypeDTO.getLocations()).isNull();
   }
 
+  @Test
+  void should_ConvertMetadata_If_MetadataSet() {
+    // given
+    CalcomEventType eventType = new CalcomEventType();
+    eventType.setLocations("{}");
+    eventType.setMetadata("{\"defaultEventType\": \"true\"}");
+    // when
+
+    EventTypeDTO eventTypeDTO = new EventTypeMapper().asEventTypeDTO(eventType);
+    // then
+    assertThat(eventTypeDTO.getMetadata()).isEqualTo("{\"defaultEventType\": \"true\"}");
+  }
+
 }

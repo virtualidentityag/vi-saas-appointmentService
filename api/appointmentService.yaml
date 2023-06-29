@@ -610,6 +610,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TeamEventTypeConsultant'
+        metadata:
+          type: string
     ArrayOfCalcomEventTypes:
       type: array
       items:
