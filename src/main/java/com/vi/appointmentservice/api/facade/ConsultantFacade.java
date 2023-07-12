@@ -70,7 +70,7 @@ public class ConsultantFacade {
   void setupDefaultScheduleAndEventType(CalcomUser calcomUser) {
     Long defaultScheduleId = scheduleRepository.createDefaultSchedule(calcomUser.getId());
     AppointmentType defaultAppointmentType = appointmentService.createDefaultAppointmentType();
-    defaultAppointmentType.setTitle("Beratung zwischen dem / der Berater:in");
+    defaultAppointmentType.setTitle("Beratung mit dem / der Berater:in");
     calComEventTypeService
         .createEventType(calcomUser, defaultAppointmentType,
             defaultScheduleId);
