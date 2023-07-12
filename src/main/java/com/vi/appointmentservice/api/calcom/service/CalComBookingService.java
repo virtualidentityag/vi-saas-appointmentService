@@ -12,6 +12,7 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,7 +42,7 @@ public class CalComBookingService {
 
   private List<CalcomBooking> enrichConsultantResultSet(List<CalcomBooking> bookings) {
     for (CalcomBooking booking : bookings) {
-      if (booking.getCancellationReason() != null) {
+      if (shouldOverrideDescriptionWithCancellationReason(booking)) {
         booking.setDescription(booking.getCancellationReason());
       }
       Optional<CalcomBookingToAsker> calcomBookingAsker = calcomBookingToAskerRepository
@@ -69,16 +70,25 @@ public class CalComBookingService {
     return bookings;
   }
 
+  boolean shouldOverrideDescriptionWithCancellationReason(CalcomBooking booking) {
+    return booking.getCancellationReason() != null && StringUtils.isEmpty(booking.getDescription());
+  }
+
   private void recreateBookingToAskerRelation(CalcomBooking booking) {
     Optional<Appointment> appointmentByBookingId = videoAppointmentService.findAppointmentByBookingId(
         booking.getId().intValue());
     if (appointmentByBookingId.isPresent()) {
       String askerId = booking.getAskerId() != null ? booking.getAskerId() : booking.getMetadataUserId();
 
-      CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(booking.getId(), askerId,
-          appointmentByBookingId.get().getId().toString());
-      calcomBookingToAskerRepository.save(userAssociation);
-      log.info("Inserted missing booking to asker relation for booking " + booking.getId());
+      if (askerId != null) {
+        CalcomBookingToAsker userAssociation = new CalcomBookingToAsker(booking.getId(), askerId,
+            appointmentByBookingId.get().getId().toString());
+        calcomBookingToAskerRepository.save(userAssociation);
+        log.info("Inserted missing booking to asker relation for booking " + booking.getId());
+      }
+      else {
+        log.info("Could not insert missing booking to asker relation for booking " + booking.getId() + " because askerId is null");
+      }
     }
   }
 
@@ -88,7 +98,7 @@ public class CalComBookingService {
 
   List<CalcomBooking> enrichAskerResultSet(List<CalcomBooking> bookings) {
     for (CalcomBooking booking : bookings) {
-      if (booking.getCancellationReason() != null) {
+      if (shouldOverrideDescriptionWithCancellationReason(booking)) {
         booking.setDescription(booking.getCancellationReason());
       }
       Optional<CalcomBookingToAsker> calcomBookingAsker = calcomBookingToAskerRepository

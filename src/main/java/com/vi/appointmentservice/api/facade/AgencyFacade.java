@@ -68,7 +68,7 @@ public class AgencyFacade {
   private void createTeam(Long agencyId, String agencyName) {
     AppointmentType defaultAppointmentType = appointmentService.createDefaultAppointmentType();
     var calTeam = calComTeamService.createTeam(agencyName);
-    defaultAppointmentType.setTitle("Erstbefragung " + calTeam.getName());
+    defaultAppointmentType.setTitle("Erstberatung " + calTeam.getName());
     CalcomEventType eventType = calcomEventTypeService
         .createEventType(calTeam.getId(), defaultAppointmentType);
     calcomEventTypeService.markAsDefaultEventType(eventType);
@@ -215,6 +215,7 @@ public class AgencyFacade {
     appointmentType.setTitle(eventType.getTitle());
     appointmentType.setLength(eventType.getLength());
     appointmentType.setDescription(eventType.getDescription());
+    appointmentType.setLocations(eventType.getLocations());
     return appointmentType;
   }
 
@@ -234,7 +235,7 @@ public class AgencyFacade {
       }
     });
     eventTypeDB.setMemberIds(eventMembers);
-    return calcomEventTypeService.updateEventType(eventTypeDB);
+    return calcomEventTypeService.updateEventType(eventTypeDB, eventType.getLocations());
   }
 
   public void deleteAgencyEventType(Long eventTypeId) {

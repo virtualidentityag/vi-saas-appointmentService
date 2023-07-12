@@ -207,10 +207,12 @@ class AgencyFacadeTest {
     when(user2ConsultantRepo.findByConsultantId(CONSULTANT_ID)).thenReturn(Optional.of(giveCalcomUserToConsultant()));
 
     // when
-    agencyFacade.updateAgencyEventType(EVENT_TYPE_ID, new CreateUpdateEventTypeDTO().consultants(Lists.newArrayList(new TeamEventTypeConsultant().consultantId(CONSULTANT_ID))));
+    CreateUpdateEventTypeDTO consultants = new CreateUpdateEventTypeDTO().consultants(
+        Lists.newArrayList(new TeamEventTypeConsultant().consultantId(CONSULTANT_ID))).locations(Lists.newArrayList("location"));
+    agencyFacade.updateAgencyEventType(EVENT_TYPE_ID, consultants);
     // then
     ArgumentCaptor<CalcomEventType> captor = ArgumentCaptor.forClass(CalcomEventType.class);
-    verify(calcomEventTypeService).updateEventType(captor.capture());
+    verify(calcomEventTypeService).updateEventType(captor.capture(), Mockito.eq(Lists.newArrayList("location")));
     assertThat(captor.getValue().getMemberIds()).contains(CALCOM_USER_ID);
   }
 
