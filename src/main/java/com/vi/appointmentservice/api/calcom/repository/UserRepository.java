@@ -25,16 +25,16 @@ public class UserRepository {
   }
 
   public CalcomUser getUserById(Long userId) {
-    String SELECT_USER = "SELECT * FROM users WHERE id = :userId";
+    String selectUser = "SELECT * FROM users WHERE id = :userId";
     SqlParameterSource parameters = new MapSqlParameterSource("userId", userId);
-    Map<String, Object> result = db.queryForMap(SELECT_USER, parameters);
+    Map<String, Object> result = db.queryForMap(selectUser, parameters);
     return CalcomUser.asInstance(result);
   }
 
   public CalcomUser creatUser(
       CalcomUser user) {
     GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
-    String INSERT_USER =
+    String insertUser =
         "INSERT INTO users(username,name,email,password,\"timeZone\",\"weekStart\",locale,\"timeFormat\",\"completedOnboarding\",\"hideBranding\") "
             + "VALUES (:username,:name,:email,:password,:timeZone,:weekStart,:locale,:timeFormat,:completedOnboarding,:hideBranding)";
     SqlParameterSource parameters = new MapSqlParameterSource()
@@ -48,29 +48,30 @@ public class UserRepository {
         .addValue("timeFormat", user.getTimeFormat())
         .addValue("completedOnboarding", true)
         .addValue("hideBranding", true);
-    db.update(INSERT_USER, parameters, generatedKeyHolder);
+    db.update(insertUser, parameters, generatedKeyHolder);
     user.setId(Long.valueOf((Integer) generatedKeyHolder.getKeys().get("id")));
     return user;
   }
 
   public CalcomUser updateUser(Long userId, String name, String email) {
-    String UPDATE_USER_QUERY = "UPDATE \"users\" SET \"name\" = :name, \"email\" = :email WHERE \"id\" = :id";
+    String updateUserQuery = "UPDATE \"users\" SET \"name\" = :name, \"email\" = :email WHERE \"id\" = :id";
     SqlParameterSource parameters = new MapSqlParameterSource()
         .addValue("name", name)
         .addValue("email", email)
         .addValue("id", userId);
-    db.update(UPDATE_USER_QUERY, parameters);
+    db.update(updateUserQuery, parameters);
     return getUserById(userId);
   }
 
   public void setDefaultScheduleId(Long calcomUserId, Long defaultScheduleId) {
-    String UPDATE_USER_QUERY =
+    String updateUserQuery =
         "update \"users\" set \"defaultScheduleId\" = $scheduleIdParam where \"id\" = "
             + calcomUserId;
-    UPDATE_USER_QUERY = UPDATE_USER_QUERY.replace("$scheduleIdParam", defaultScheduleId.toString());
-    jdbcTemplate.update(UPDATE_USER_QUERY);
+    updateUserQuery = updateUserQuery.replace("$scheduleIdParam", defaultScheduleId.toString());
+    jdbcTemplate.update(updateUserQuery);
   }
 
   public void deleteUser(Long userId) {
+    jdbcTemplate.update("DELETE FROM users WHERE id = ?", userId);
   }
 }

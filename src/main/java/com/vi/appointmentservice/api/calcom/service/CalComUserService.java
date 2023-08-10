@@ -6,7 +6,6 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,9 +36,8 @@ public class CalComUserService {
     return userRepository.updateUser(userId, name, email);
   }
 
-  public HttpStatus deleteUser(Long userId) {
+  public void deleteUser(Long userId) {
     userRepository.deleteUser(userId);
-    return null;
   }
 
 

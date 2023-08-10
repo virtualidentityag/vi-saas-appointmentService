@@ -32,19 +32,20 @@ public class ConsultantController implements ConsultantsApi {
   @Override
   public ResponseEntity<Void> createConsultant(ConsultantDTO consultant) {
     this.consultantFacade.createUser(consultant);
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> deleteConsultant(String consultantId) {
-    return new ResponseEntity<>(this.consultantFacade.deleteConsultantHandler(consultantId));
+    this.consultantFacade.deleteConsultantHandler(consultantId);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> updateConsultant(String consultantId,
       ConsultantDTO consultant) {
     this.consultantFacade.updateAppointmentUser(consultant);
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override

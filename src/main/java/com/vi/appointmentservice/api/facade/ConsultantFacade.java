@@ -76,39 +76,40 @@ public class ConsultantFacade {
             defaultScheduleId);
   }
 
-  public HttpStatus deleteConsultantHandler(String consultantId) {
-    // Find associated user
-    Long calcomUserId = this.getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
-    // Delete team memberships
-    calMembershipsRepository.deleteAllMembershipsOfUser(calcomUserId);
-    // Delete personal event-types
-    calComEventTypeService.deleteAllEventTypesOfUser(calcomUserId);
-    // Delete schedules
-    List<Integer> deletedSchedules = scheduleRepository.deleteUserSchedules(calcomUserId);
-    // Delete availabilities for schedules
-    for (Integer scheduleId : deletedSchedules) {
-      availabilityRepository.deleteAvailabilityByScheduleId(Long.valueOf(scheduleId));
-    }
+  public void deleteConsultantHandler(String consultantId) {
+    try {
+      // Find associated user
+      Long calcomUserId = this.getCalcomUserToConsultantIfExists(consultantId).getCalComUserId();
+      // Delete team memberships
+      calMembershipsRepository.deleteAllMembershipsOfUser(calcomUserId);
+      // Delete personal event-types
+      calComEventTypeService.deleteAllEventTypesOfUser(calcomUserId);
+      // Delete schedules
+      List<Integer> deletedSchedules = scheduleRepository.deleteUserSchedules(calcomUserId);
+      // Delete availabilities for schedules
+      for (Integer scheduleId : deletedSchedules) {
+        availabilityRepository.deleteAvailabilityByScheduleId(Long.valueOf(scheduleId));
+      }
 
-    List<CalcomBooking> bookings = new ArrayList<>();
-    bookings.addAll(bookingRepository.getConsultantActiveBookings(calcomUserId));
-    bookings.addAll(bookingRepository.getConsultantCancelledBookings(calcomUserId));
-    bookings.addAll(bookingRepository.getConsultantExpiredBookings(calcomUserId));
+      List<CalcomBooking> bookings = new ArrayList<>();
+      bookings.addAll(bookingRepository.getConsultantActiveBookings(calcomUserId));
+      bookings.addAll(bookingRepository.getConsultantCancelledBookings(calcomUserId));
+      bookings.addAll(bookingRepository.getConsultantExpiredBookings(calcomUserId));
 
-    bookings.forEach(booking -> {
-      calComBookingService.cancelBooking(booking.getUid());
-      bookingRepository.deleteBooking(booking.getId());
-      bookingRepository.deleteAttendeeWithoutBooking();
-    });
+      bookings.forEach(booking -> {
+        calComBookingService.cancelBooking(booking.getUid());
+        bookingRepository.deleteBooking(booking.getId());
+        bookingRepository.deleteAttendeeWithoutBooking();
+      });
 
-    // Delete user
-    HttpStatus deleteResponseCode = calComUserService.deleteUser(calcomUserId);
-    // Remove association
-    if (deleteResponseCode == HttpStatus.OK) {
+      // Delete user
+      calComUserService.deleteUser(calcomUserId);
+      // Remove association
       userToConsultantRepository.deleteByConsultantId(consultantId);
+    } catch (Exception e) {
+      log.error("Error while deleting consultant", e);
+      throw new BadRequestException("Error while deleting consultant with id " + consultantId);
     }
-    return deleteResponseCode;
-
   }
 
   public List<CalcomBooking> getConsultantActiveBookings(String consultantId) {
