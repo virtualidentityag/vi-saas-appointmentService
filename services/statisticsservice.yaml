@@ -198,6 +198,8 @@ components:
           type: string
         bookingId:
           type: integer
+        adviceSeekerId:
+          type: string
 
     BookingRescheduledStatisticsEventMessage:
       type: object
