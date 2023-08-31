@@ -44,19 +44,21 @@ public class BookingCreatedStatisticsEvent implements StatisticsEvent {
   /** {@inheritDoc} */
   @Override
   public Optional<String> getPayload() {
+
     var bookingCreatedStatisticsEventMessage =
         new BookingCreatedStatisticsEventMessage()
             .eventType(EVENT_TYPE)
             .userId(consultantId)
-            .userRole(com.vi.appointmentservice.statisticsservice.generated.web.model.UserRole.CONSULTANT)
+            .userRole(
+                com.vi.appointmentservice.statisticsservice.generated.web.model.UserRole.CONSULTANT)
             .timestamp(CustomOffsetDateTime.nowInUtc())
             .type(payload.getType())
             .title(payload.getTitle())
             .startTime(toIsoTime(payload.getStartTime().toLocalDateTime()))
             .endTime(toIsoTime(payload.getEndTime().toLocalDateTime()))
             .uid(payload.getUid())
-            .bookingId(payload.getBookingId()
-        );
+            .bookingId(payload.getBookingId())
+            .adviceSeekerId(payload.getMetadata().getUser());
 
     try {
       return Optional.of(OBJECT_MAPPER.writeValueAsString(bookingCreatedStatisticsEventMessage));
