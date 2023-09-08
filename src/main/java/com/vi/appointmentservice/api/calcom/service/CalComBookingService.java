@@ -105,6 +105,13 @@ public class CalComBookingService {
           .findByCalcomBookingId(
               booking.getId());
       if (!calcomBookingAsker.isPresent()) {
+        log.warn("Inconsistent data. Asker not found for booking. Trying to fix consistency for bookingId " + booking.getId());
+        recreateBookingToAskerRelation(booking);
+        calcomBookingAsker = calcomBookingToAskerRepository
+            .findByCalcomBookingId(
+                booking.getId());
+      }
+      if (!calcomBookingAsker.isPresent()) {
         log.error("Inconsistent data. Asker not found for booking + " + booking.getId());
         continue;
       }
