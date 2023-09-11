@@ -156,7 +156,13 @@ public class MessagesService {
   private void sendMessage(CalcomBooking booking, AliasMessageDTO message) {
     var messageControllerApi = getMessageControllerApi();
     addTechnicalUserHeaders(messageControllerApi.getApiClient());
-    messageControllerApi.saveAliasMessageWithContent(getRocketChatGroupId(booking), message);
+    String rocketChatGroupId = getRocketChatGroupId(booking);
+    if (rocketChatGroupId == null) {
+      log.warn("No rocketchat group found for bookingId {}", booking.getId());
+      log.warn("Because it's required parameter for message service, message will not be sent");
+    } else {
+      messageControllerApi.saveAliasMessageWithContent(rocketChatGroupId, message);
+    }
   }
 
   private String getRocketChatGroupId(CalcomBooking booking) {
@@ -167,8 +173,13 @@ public class MessagesService {
       Optional<CalcomBookingToAsker> byCalcomBookingId = calcomBookingToAskerRepository
           .findByCalcomBookingId(booking.getId());
       String askerId = byCalcomBookingId.orElseThrow().getAskerId();
-      return userService
+      var rocketChatGroupID = userService
           .getRocketChatGroupId(consultantId, askerId);
+      if (rocketChatGroupID == null) {
+        log.warn("No rocketchat group found for consultant id: {} and asker id: {}", consultantId,
+            askerId);
+      }
+      return rocketChatGroupID;
     }
     throw new NotFoundException("No consultant found for calcom user in booking");
   }
