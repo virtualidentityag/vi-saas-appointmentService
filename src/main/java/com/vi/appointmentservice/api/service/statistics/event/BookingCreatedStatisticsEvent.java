@@ -23,10 +23,12 @@ public class BookingCreatedStatisticsEvent implements StatisticsEvent {
   private static final EventType EVENT_TYPE = EventType.BOOKING_CREATED;
   private final CalcomWebhookInputPayload payload;
   private final String consultantId;
+  private final Long tenantId;
 
-  public BookingCreatedStatisticsEvent(CalcomWebhookInputPayload payload, String consultantId){
+  public BookingCreatedStatisticsEvent(CalcomWebhookInputPayload payload, String consultantId, Long tenantId){
     this.payload = payload;
     this.consultantId = consultantId;
+    this.tenantId = tenantId;
     OBJECT_MAPPER.registerModule(new JavaTimeModule());
     OBJECT_MAPPER.registerModule(buildSimpleModule());
   }
@@ -58,7 +60,8 @@ public class BookingCreatedStatisticsEvent implements StatisticsEvent {
             .endTime(toIsoTime(payload.getEndTime().toLocalDateTime()))
             .uid(payload.getUid())
             .bookingId(payload.getBookingId())
-            .adviceSeekerId(payload.getMetadata().getUser());
+            .adviceSeekerId(payload.getMetadata().getUser())
+            .tenantId(tenantId);
 
     try {
       return Optional.of(OBJECT_MAPPER.writeValueAsString(bookingCreatedStatisticsEventMessage));

@@ -20,6 +20,7 @@ import com.vi.appointmentservice.model.CalcomBookingToAsker;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.CalcomBookingToAskerRepository;
 import com.vi.appointmentservice.repository.UserToConsultantRepository;
+import com.vi.appointmentservice.useradminservice.generated.web.model.ConsultantDTO;
 import com.vi.appointmentservice.userservice.generated.web.model.EnquiryAppointmentDTO;
 import java.util.Optional;
 import java.util.UUID;
@@ -118,15 +119,17 @@ public class CalcomWebhookHandlerService {
   }
 
   private String getConsultantId(Integer bookingId) {
+    return getConsultantByBookingId(bookingId).getId();
+  }
+
+  private ConsultantDTO getConsultantByBookingId(Integer bookingId) {
     CalcomBooking booking = calComBookingService.getBookingById(Long.valueOf(bookingId));
     Optional<CalcomUserToConsultant> calcomUserToConsultant = this.userToConsultantRepository
         .findByCalComUserId(
             Long.valueOf(booking.getUserId()));
     if (calcomUserToConsultant.isPresent()) {
       String consultantId = calcomUserToConsultant.get().getConsultantId();
-      com.vi.appointmentservice.useradminservice.generated.web.model.ConsultantDTO consultant = null;
-      consultant = this.adminUserService.getConsultantById(consultantId);
-      return consultant.getId();
+      return this.adminUserService.getConsultantById(consultantId);
     } else {
       throw new InternalServerErrorException(
           "Could not find calcomUserToConsultant for bookingId " + bookingId);
@@ -165,8 +168,9 @@ public class CalcomWebhookHandlerService {
   private void createStatisticsEvent(String eventType, CalcomWebhookInputPayload payload) {
     switch (eventType) {
       case "BOOKING_CREATED":
+        var consultant = this.getConsultantByBookingId(payload.getBookingId());
         statisticsService.fireEvent(new BookingCreatedStatisticsEvent(payload,
-            this.getConsultantId(payload.getBookingId())));
+            consultant.getId(), Long.valueOf(consultant.getTenantId())));
         break;
       case "BOOKING_RESCHEDULED":
         statisticsService.fireEvent(new BookingRescheduledStatisticsEvent(payload,
