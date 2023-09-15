@@ -169,8 +169,9 @@ public class CalcomWebhookHandlerService {
     switch (eventType) {
       case "BOOKING_CREATED":
         var consultant = this.getConsultantByBookingId(payload.getBookingId());
+        Long tenantId = consultant.getTenantId() != null ? consultant.getTenantId().longValue() : null;
         statisticsService.fireEvent(new BookingCreatedStatisticsEvent(payload,
-            consultant.getId(), Long.valueOf(consultant.getTenantId())));
+            consultant.getId(), tenantId));
         break;
       case "BOOKING_RESCHEDULED":
         statisticsService.fireEvent(new BookingRescheduledStatisticsEvent(payload,
