@@ -716,6 +716,17 @@ components:
           type: array
           items:
             $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
+        isGroupchatConsultant:
+          $ref: '#/components/schemas/IsGroupchatConsultant'
+        tenantId:
+          type: integer
+        tenantName:
+          type: string
+
+    IsGroupchatConsultant:
+      type: boolean
+      example: true
+
 
     AskerResponseDTO:
       type: object
