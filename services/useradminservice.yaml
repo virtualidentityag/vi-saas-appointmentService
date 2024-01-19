@@ -722,6 +722,8 @@ components:
           type: integer
         tenantName:
           type: string
+        displayName:
+          type: string
 
     IsGroupchatConsultant:
       type: boolean
