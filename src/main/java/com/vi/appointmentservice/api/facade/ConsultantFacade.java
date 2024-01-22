@@ -14,6 +14,7 @@ import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
+import com.vi.appointmentservice.api.model.PatchConsultantDTO;
 import com.vi.appointmentservice.api.service.AppointmentService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.UserToConsultantRepository;
@@ -58,12 +59,25 @@ public class ConsultantFacade {
         .getDisplayName();
   }
 
+  private String getDisplayNameOrFallbackToFirstname(PatchConsultantDTO consultant) {
+    return StringUtils.isBlank(consultant.getDisplayName()) ? consultant.getFirstname() : consultant
+        .getDisplayName();
+  }
+
   public void updateAppointmentUser(ConsultantDTO consultant) {
     var name = getDisplayNameOrFallbackToFirstname(consultant);
     Optional<CalcomUserToConsultant> userConsultant = userToConsultantRepository
         .findByConsultantId(consultant.getId());
     calComUserService
         .updateUser(userConsultant.orElseThrow().getCalComUserId(), name, consultant.getEmail());
+  }
+
+  public void patchAppointmentUser(String consultantId, PatchConsultantDTO consultant) {
+    var name = getDisplayNameOrFallbackToFirstname(consultant);
+    Optional<CalcomUserToConsultant> userConsultant = userToConsultantRepository
+        .findByConsultantId(consultantId);
+    calComUserService
+        .updateUsername(userConsultant.orElseThrow().getCalComUserId(), name);
   }
 
   private void linkConsultantToAppointmentUser(
