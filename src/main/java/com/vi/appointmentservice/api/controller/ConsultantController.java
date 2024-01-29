@@ -7,6 +7,7 @@ import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.EventTypeDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
+import com.vi.appointmentservice.api.model.PatchConsultantDTO;
 import com.vi.appointmentservice.generated.api.controller.ConsultantsApi;
 import com.vi.appointmentservice.helper.AuthenticatedUser;
 import io.swagger.annotations.Api;
@@ -45,6 +46,12 @@ public class ConsultantController implements ConsultantsApi {
   public ResponseEntity<Void> updateConsultant(String consultantId,
       ConsultantDTO consultant) {
     this.consultantFacade.updateAppointmentUser(consultant);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> patchConsultant(String consultantId, PatchConsultantDTO consultant) {
+    this.consultantFacade.patchAppointmentUser(consultantId, consultant);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

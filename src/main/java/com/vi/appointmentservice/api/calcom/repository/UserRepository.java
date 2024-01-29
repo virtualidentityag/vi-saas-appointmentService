@@ -63,6 +63,15 @@ public class UserRepository {
     return getUserById(userId);
   }
 
+  public CalcomUser updateUsername(Long userId, String name) {
+    String updateUserQuery = "UPDATE \"users\" SET \"name\" = :name WHERE \"id\" = :id";
+    SqlParameterSource parameters = new MapSqlParameterSource()
+        .addValue("name", name)
+        .addValue("id", userId);
+    db.update(updateUserQuery, parameters);
+    return getUserById(userId);
+  }
+
   public void setDefaultScheduleId(Long calcomUserId, Long defaultScheduleId) {
     String updateUserQuery =
         "update \"users\" set \"defaultScheduleId\" = $scheduleIdParam where \"id\" = "

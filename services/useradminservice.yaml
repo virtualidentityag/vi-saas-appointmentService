@@ -587,6 +587,20 @@ components:
         previous:
           $ref: '#/components/schemas/HalLink'
 
+    PatchConsultantDTO:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: "Max"
+          minLength: 1
+          maxLength: 255
+        displayName:
+          type: string
+          example: "Max Mustermann"
+          minLength: 1
+          maxLength: 255
+
     CreateConsultantDTO:
       type: object
       required:
@@ -721,6 +735,8 @@ components:
         tenantId:
           type: integer
         tenantName:
+          type: string
+        displayName:
           type: string
 
     IsGroupchatConsultant:

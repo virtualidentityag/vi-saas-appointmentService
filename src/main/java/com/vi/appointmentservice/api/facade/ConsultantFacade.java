@@ -14,6 +14,7 @@ import com.vi.appointmentservice.api.model.CalcomBooking;
 import com.vi.appointmentservice.api.model.CalcomToken;
 import com.vi.appointmentservice.api.model.ConsultantDTO;
 import com.vi.appointmentservice.api.model.MeetingSlug;
+import com.vi.appointmentservice.api.model.PatchConsultantDTO;
 import com.vi.appointmentservice.api.service.AppointmentService;
 import com.vi.appointmentservice.model.CalcomUserToConsultant;
 import com.vi.appointmentservice.repository.UserToConsultantRepository;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,18 +48,36 @@ public class ConsultantFacade {
 
   public void createUser(ConsultantDTO consultant) {
     CalcomUser calcomUser = calComUserService
-        .createUser(consultant.getFirstname() + " " + consultant.getLastname(),
+        .createUser(getDisplayNameOrFallbackToFirstname(consultant),
             consultant.getEmail());
     linkConsultantToAppointmentUser(calcomUser, consultant);
     setupDefaultScheduleAndEventType(calcomUser);
   }
 
+  private String getDisplayNameOrFallbackToFirstname(ConsultantDTO consultant) {
+    return StringUtils.isBlank(consultant.getDisplayName()) ? consultant.getFirstname() : consultant
+        .getDisplayName();
+  }
+
+  private String getDisplayNameOrFallbackToFirstname(PatchConsultantDTO consultant) {
+    return StringUtils.isBlank(consultant.getDisplayName()) ? consultant.getFirstname() : consultant
+        .getDisplayName();
+  }
+
   public void updateAppointmentUser(ConsultantDTO consultant) {
-    var name = consultant.getFirstname() + " " + consultant.getLastname();
+    var name = getDisplayNameOrFallbackToFirstname(consultant);
     Optional<CalcomUserToConsultant> userConsultant = userToConsultantRepository
         .findByConsultantId(consultant.getId());
     calComUserService
         .updateUser(userConsultant.orElseThrow().getCalComUserId(), name, consultant.getEmail());
+  }
+
+  public void patchAppointmentUser(String consultantId, PatchConsultantDTO consultant) {
+    var name = getDisplayNameOrFallbackToFirstname(consultant);
+    Optional<CalcomUserToConsultant> userConsultant = userToConsultantRepository
+        .findByConsultantId(consultantId);
+    calComUserService
+        .updateUsername(userConsultant.orElseThrow().getCalComUserId(), name);
   }
 
   private void linkConsultantToAppointmentUser(
