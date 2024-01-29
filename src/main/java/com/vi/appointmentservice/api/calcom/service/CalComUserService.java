@@ -36,6 +36,10 @@ public class CalComUserService {
     return userRepository.updateUser(userId, name, email);
   }
 
+  public CalcomUser updateUsername(Long userId, String name) {
+    return userRepository.updateUsername(userId, name);
+  }
+
   public void deleteUser(Long userId) {
     userRepository.deleteUser(userId);
   }
