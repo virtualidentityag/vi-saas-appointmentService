@@ -1,5 +1,7 @@
 package com.vi.appointmentservice.api.service.onlineberatung;
 
+import static io.micrometer.core.instrument.util.StringUtils.isBlank;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,7 +69,7 @@ public class AdminUserService {
             DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ConsultantDTO consultantDTO = mapper.readValue(consultantResponse, ConsultantDTO.class);
         consultantNames
-            .put(consultantId, consultantDTO.getFirstname() + " " + consultantDTO.getLastname());
+            .put(consultantId, getDisplayNameAndFallbackToFirstname(consultantDTO));
       } catch (Exception e) {
         consultantNames
             .put(consultantId, "Unknown Consultant");
@@ -75,6 +77,11 @@ public class AdminUserService {
     });
 
     return consultantNames;
+  }
+
+  private static String getDisplayNameAndFallbackToFirstname(ConsultantDTO consultantDTO) {
+    return isBlank(consultantDTO.getDisplayName()) ? consultantDTO.getFirstname()
+        : consultantDTO.getDisplayName();
   }
 
   public Map<String, String> getAskerUserNamesForIds(Collection<String> askerIds) {
