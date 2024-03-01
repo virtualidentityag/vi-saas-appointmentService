@@ -28,15 +28,15 @@ class ScheduleRepositoryTest {
 
   @Before
   public void setUp() {
-    jdbcTemplate.execute("DROP TABLE IF EXISTS SCHEDULE");
+   jdbcTemplate.execute("DROP TABLE IF EXISTS \"Schedule\"");
   }
   @Test
   void deleteUserSchedules_Should_DeleteSchedulesPerUserId() {
     // given
     inititalizeDB();
 
-    jdbcTemplate.execute("INSERT INTO SCHEDULE (id, userId, name) VALUES (1, 1, 'DEFAULT_SCHEDULE')");
-    jdbcTemplate.execute("INSERT INTO SCHEDULE (id, userId, name) VALUES (2, 1, 'DEFAULT_SCHEDULE')");
+    jdbcTemplate.execute("INSERT INTO \"Schedule\" (\"id\", \"userId\", \"name\") VALUES (1, 1, 'DEFAULT_SCHEDULE')");
+    jdbcTemplate.execute("INSERT INTO \"Schedule\" (\"id\", \"userId\", \"name\") VALUES (2, 1, 'DEFAULT_SCHEDULE')");
     // when
     Set<Integer> integers = scheduleRepository.deleteUserSchedules(1L);
     // then
@@ -47,12 +47,12 @@ class ScheduleRepositoryTest {
   private void inititalizeDB() {
     // we can't use @Sql annotation here because it's not visible in jdbcTemplate,
     // probably because there are defined multiple jdbc templates in this project for different datasources
-    jdbcTemplate.execute("create table  SCHEDULE\n"
+    jdbcTemplate.execute("create table  \"Schedule\"\n"
         + "(\n"
-        + "    id          integer not null\n"
+        + "    \"id\"          integer not null\n"
         + "        primary key,\n"
-        + "    userId      integer not null,\n"
-        + "    name       varchar(255) not null\n"
+        + "    \"userId\"      integer not null,\n"
+        + "    \"name\"       varchar(255) not null\n"
         + ");");
   }
 

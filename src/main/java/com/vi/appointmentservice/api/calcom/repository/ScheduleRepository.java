@@ -46,7 +46,7 @@ public class ScheduleRepository {
 
   public Set<Integer> deleteUserSchedules(Long calcomUserId) {
     var originalScheduleIds  = getScheduleIdsByUserId(db, calcomUserId);
-    String DELETE_SCHEDULE = "DELETE FROM SCHEDULE where userId = :userId";
+    String DELETE_SCHEDULE = "DELETE FROM \"Schedule\" where \"userId\" = :userId";
     SqlParameterSource parameters = new MapSqlParameterSource("userId", calcomUserId);
     db.update(DELETE_SCHEDULE, parameters);
     var leftScheduleIds  = getScheduleIdsByUserId(db, calcomUserId);
@@ -67,7 +67,7 @@ public class ScheduleRepository {
     Set<Integer> scheduleIds = Sets.newHashSet();
     Map<String, Object> params = new HashMap<>();
     params.put("userId", userId);
-    String sql = "SELECT id FROM SCHEDULE";
+    String sql = "SELECT \"id\" FROM \"Schedule\" WHERE \"userId\" = :userId";
     try {
       List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, params);
       for (Map<String, Object> row : rows) {
