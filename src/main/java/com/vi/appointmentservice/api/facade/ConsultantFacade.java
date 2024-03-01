@@ -21,11 +21,11 @@ import com.vi.appointmentservice.repository.UserToConsultantRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,7 +105,7 @@ public class ConsultantFacade {
       // Delete personal event-types
       calComEventTypeService.deleteAllEventTypesOfUser(calcomUserId);
       // Delete schedules
-      List<Integer> deletedSchedules = scheduleRepository.deleteUserSchedules(calcomUserId);
+      Set<Integer> deletedSchedules = scheduleRepository.deleteUserSchedules(calcomUserId);
       // Delete availabilities for schedules
       for (Integer scheduleId : deletedSchedules) {
         availabilityRepository.deleteAvailabilityByScheduleId(Long.valueOf(scheduleId));
