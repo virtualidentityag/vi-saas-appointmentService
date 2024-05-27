@@ -1,5 +1,6 @@
 package com.vi.appointmentservice.api.service.calcom;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +13,7 @@ import com.vi.appointmentservice.api.facade.AppointmentType;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -61,6 +63,25 @@ public class CalcomEventTypeServiceTest {
     // then
 
     Mockito.verify(eventTypeRepository, Mockito.never()).updateLocations(Mockito.anyInt(), Mockito.anyString());
+  }
+
+  @Test
+  public void shouldUpdateEventTypeTitle() {
+    // given
+    var eventType = new CalcomEventType();
+    eventType.setId(1);
+    eventType.setTitle("Beratung mit dem / der Berater:in ConsultantFirstname");
+
+    Long calcomUserId = 2L;
+    when(eventTypeRepository.getEventTypeByUserId(calcomUserId)).thenReturn(eventType);
+
+    // when
+    calcomEventTypeService.updateEventTypeTitle(calcomUserId, "ConsultantDisplayName");
+    // then
+
+    ArgumentCaptor<CalcomEventType> captor = ArgumentCaptor.forClass(CalcomEventType.class);
+    Mockito.verify(eventTypeRepository).updateEventType(captor.capture());
+    assertThat(captor.getValue().getTitle()).isEqualTo("Beratung mit dem / der Berater:in ConsultantDisplayName");
   }
 
 }
