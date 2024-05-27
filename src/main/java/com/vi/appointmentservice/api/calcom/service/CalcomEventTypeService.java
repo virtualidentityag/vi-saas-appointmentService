@@ -177,7 +177,7 @@ public class CalcomEventTypeService {
 
   public void updateEventTypeTitle(Long calComUserId, String displayName) {
     CalcomEventType eventTypeByUserId = getEventTypeByUserId(calComUserId);
-    if (eventTypeByUserId.getTitle().contains(DefaultTextConstants.BERATUNG_MIT_DEM_DER_BERATER_IN)) {
+    if (eventTypeByUserId.getTitle().contains(DefaultTextConstants.BERATUNG_MIT)) {
       eventTypeByUserId.setTitle(DefaultTextConstants.BERATUNG_MIT_DEM_DER_BERATER_IN + " " + displayName);
       eventTypeRepository.updateEventType(eventTypeByUserId);
     } else {
