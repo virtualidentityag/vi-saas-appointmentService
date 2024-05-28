@@ -1,5 +1,7 @@
 package com.vi.appointmentservice.api.facade;
 
+import com.google.common.collect.Lists;
+import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
 import com.vi.appointmentservice.api.calcom.model.CalcomUser;
 import com.vi.appointmentservice.api.calcom.repository.AvailabilityRepository;
 import com.vi.appointmentservice.api.calcom.repository.BookingRepository;
@@ -76,8 +78,11 @@ public class ConsultantFacade {
     var name = getDisplayNameOrFallbackToFirstname(consultant);
     Optional<CalcomUserToConsultant> userConsultant = userToConsultantRepository
         .findByConsultantId(consultantId);
+    Long calComUserId = userConsultant.orElseThrow().getCalComUserId();
     calComUserService
-        .updateUsername(userConsultant.orElseThrow().getCalComUserId(), name);
+        .updateUsername(calComUserId, name);
+
+    calComEventTypeService.updateEventTypeTitle(calComUserId, name);
   }
 
   private void linkConsultantToAppointmentUser(
@@ -90,7 +95,7 @@ public class ConsultantFacade {
   void setupDefaultScheduleAndEventType(CalcomUser calcomUser) {
     Long defaultScheduleId = scheduleRepository.createDefaultSchedule(calcomUser.getId());
     AppointmentType defaultAppointmentType = appointmentService.createDefaultAppointmentType();
-    defaultAppointmentType.setTitle("Beratung mit dem / der Berater:in");
+    defaultAppointmentType.setTitle(DefaultTextConstants.BERATUNG_MIT_DEM_DER_BERATER_IN);
     calComEventTypeService
         .createEventType(calcomUser, defaultAppointmentType,
             defaultScheduleId);
