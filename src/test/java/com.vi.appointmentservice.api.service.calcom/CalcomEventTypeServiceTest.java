@@ -84,4 +84,12 @@ public class CalcomEventTypeServiceTest {
     assertThat(captor.getValue().getTitle()).isEqualTo("Beratung mit dem / der Berater:in ConsultantDisplayName");
   }
 
+  @Test
+  public void shouldDelegateToRepositoryToFindEventType() {
+    // when
+    calcomEventTypeService.findEventTypeById(1L);
+    // then
+    Mockito.verify(eventTypeRepository).findEventTypeById(1L);
+  }
+
 }

@@ -38,25 +38,38 @@ public class RescheduleHelper {
         .getUserById(Long.valueOf(calcomBooking.getUserId()));
     var teamId = getTeamIdForBooking(calcomBooking);
     String slug = null;
-    if (teamId != null) {
-      CalcomTeam team = calComTeamService.getTeamById(teamId);
+    if (teamId.isPresent()) {
+      CalcomTeam team = calComTeamService.getTeamById(teamId.get());
       slug = "team/" + team.getSlug();
     } else {
       slug = registeredCalcomUser.getUsername();
     }
 
-    String eventTypeSlug = this.calcomEventTypeService.getEventTypeById(
-        Long.valueOf(calcomBooking.getEventTypeId())).getSlug();
-    calcomBooking.setRescheduleLink(
-        "/" + slug + "/" + eventTypeSlug + "?rescheduleUid=" + calcomBooking.getUid());
+    return attachRescheduleLinkIfEventTypeIsFound(calcomBooking, slug);
+  }
 
+  private CalcomBooking attachRescheduleLinkIfEventTypeIsFound(CalcomBooking calcomBooking, String slug) {
+    var optionalEventType = this.calcomEventTypeService.findEventTypeById(
+        Long.valueOf(calcomBooking.getEventTypeId()));
+
+    if (optionalEventType.isEmpty()) {
+      log.warn("EventType not found for bookingId " + calcomBooking.getId());
+      return calcomBooking;
+    } else {
+      calcomBooking.setRescheduleLink(
+          "/" + slug + "/" + optionalEventType.get().getSlug() + "?rescheduleUid=" + calcomBooking.getUid());
+    }
     return calcomBooking;
   }
 
-  private Number getTeamIdForBooking(CalcomBooking calcomBooking) {
-    CalcomEventType eventType = calcomEventTypeService
-        .getEventTypeById(Long.valueOf(calcomBooking.getEventTypeId()));
-    return eventType.getTeamId();
+  private Optional<Number> getTeamIdForBooking(CalcomBooking calcomBooking) {
+    Optional<CalcomEventType> eventType = calcomEventTypeService
+        .findEventTypeById(Long.valueOf(calcomBooking.getEventTypeId()));
+    if (eventType.isEmpty() || eventType.get().getTeamId() == null) {
+      return Optional.empty();
+    } else {
+      return Optional.of(eventType.get().getTeamId());
+    }
   }
 
   public void attachConsultantName(List<CalcomBooking> bookings) {
