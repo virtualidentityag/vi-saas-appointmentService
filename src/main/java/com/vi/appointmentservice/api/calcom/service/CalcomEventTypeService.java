@@ -43,6 +43,10 @@ public class CalcomEventTypeService {
     return eventType;
   }
 
+  public Optional<CalcomEventType> findEventTypeById(Number eventTypeId) {
+    return eventTypeRepository.findEventTypeById(eventTypeId);
+  }
+
   public CalcomEventType getEventTypeByUserId(Number userId) {
     return eventTypeRepository.getEventTypeByUserId(userId);
   }

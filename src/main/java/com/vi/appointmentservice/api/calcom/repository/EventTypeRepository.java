@@ -3,6 +3,7 @@ package com.vi.appointmentservice.api.calcom.repository;
 import com.vi.appointmentservice.api.calcom.model.CalcomEventType;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import javax.validation.constraints.NotNull;
@@ -37,6 +38,17 @@ public class EventTypeRepository {
     SqlParameterSource parameters = new MapSqlParameterSource(EVENT_TYPE_ID, eventTypeId);
     Map<String, Object> result = db.queryForMap(selectEvent, parameters);
     return getCalcomEventType(result);
+  }
+
+  public Optional<CalcomEventType> findEventTypeById(Number eventTypeId) {
+    String selectEvent = "SELECT * FROM \"EventType\" WHERE id = :eventTypeId";
+    SqlParameterSource parameters = new MapSqlParameterSource(EVENT_TYPE_ID, eventTypeId);
+    List<Map<String, Object>> result = db.queryForList(selectEvent, parameters);
+    if (result.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return Optional.of(getCalcomEventType(result.get(0)));
+    }
   }
 
   public CalcomEventType getEventTypeByUserId(Number userId) {
