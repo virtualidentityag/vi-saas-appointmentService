@@ -1,9 +1,23 @@
 package com.vi.appointmentservice.api.calcom.repository;
 
+import static org.openapitools.codegen.meta.features.DataTypeFeature.Maps;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -11,6 +25,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@Slf4j
 public class ScheduleRepository {
 
   private final @NotNull JdbcTemplate jdbcTemplate;
@@ -29,12 +44,40 @@ public class ScheduleRepository {
     this.jdbcTemplate = jdbcTemplate;
   }
 
-  public List<Integer> deleteUserSchedules(Long calcomUserId) {
+  public Set<Integer> deleteUserSchedules(Long calcomUserId) {
+    var originalScheduleIds  = getScheduleIdsByUserId(db, calcomUserId);
     String DELETE_SCHEDULE = "DELETE FROM \"Schedule\" where \"userId\" = :userId";
     SqlParameterSource parameters = new MapSqlParameterSource("userId", calcomUserId);
     db.update(DELETE_SCHEDULE, parameters);
-    //TODO: return ids of removed schedules
-    return null;
+    var leftScheduleIds  = getScheduleIdsByUserId(db, calcomUserId);
+    return Sets.difference(originalScheduleIds, leftScheduleIds);
+  }
+
+  public List<String> getTableNames(JdbcTemplate jdbcTemplate) throws SQLException {
+    List<String> tableNames = new ArrayList<>();
+    Connection connection = jdbcTemplate.getDataSource().getConnection();
+    DatabaseMetaData metaData = connection.getMetaData();
+    ResultSet rs = metaData.getTables(null, null, "%", null);
+    while (rs.next()) {
+      tableNames.add(rs.getString("TABLE_NAME"));
+    }
+    return tableNames;
+  }
+  public Set<Integer> getScheduleIdsByUserId(NamedParameterJdbcTemplate jdbcTemplate, Long userId) {
+    Set<Integer> scheduleIds = Sets.newHashSet();
+    Map<String, Object> params = new HashMap<>();
+    params.put("userId", userId);
+    String sql = "SELECT \"id\" FROM \"Schedule\" WHERE \"userId\" = :userId";
+    try {
+      List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, params);
+      for (Map<String, Object> row : rows) {
+        scheduleIds.add((Integer) row.get("id"));
+      }
+    } catch (DataAccessException e) {
+      log.error("Error while fetching schedule ids for user: {}", userId, e);
+    }
+
+    return scheduleIds;
   }
 
   public Long createDefaultSchedule(Long calcomUserId) {

@@ -6,6 +6,7 @@ import com.vi.appointmentservice.api.calcom.repository.EventTypeRepository;
 import com.vi.appointmentservice.api.calcom.repository.MembershipsRepository;
 import com.vi.appointmentservice.api.calcom.repository.WebhookRepository;
 import com.vi.appointmentservice.api.facade.AppointmentType;
+import com.vi.appointmentservice.api.facade.DefaultTextConstants;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +41,10 @@ public class CalcomEventTypeService {
         .getUserIdsOfEventTypeMembers(eventType.getId());
     eventType.setMemberIds(userIdsOfEventTypeMembers);
     return eventType;
+  }
+
+  public Optional<CalcomEventType> findEventTypeById(Number eventTypeId) {
+    return eventTypeRepository.findEventTypeById(eventTypeId);
   }
 
   public CalcomEventType getEventTypeByUserId(Number userId) {
@@ -172,5 +177,15 @@ public class CalcomEventTypeService {
     eventTypeRepository.deleteEventType(eventTypeId);
     eventTypeRepository.removeTeamEventTypeMembershipsForEventType(eventTypeId);
     eventTypeRepository.removeTeamEventHostsForEventType(eventTypeId);
+  }
+
+  public void updateEventTypeTitle(Long calComUserId, String displayName) {
+    CalcomEventType eventTypeByUserId = getEventTypeByUserId(calComUserId);
+    if (eventTypeByUserId.getTitle().contains(DefaultTextConstants.BERATUNG_MIT)) {
+      eventTypeByUserId.setTitle(DefaultTextConstants.BERATUNG_MIT_DEM_DER_BERATER_IN + " " + displayName);
+      eventTypeRepository.updateEventType(eventTypeByUserId);
+    } else {
+      log.warn("Skipping update of EventType because event type for the user {} does not contain text {}", calComUserId, DefaultTextConstants.BERATUNG_MIT_DEM_DER_BERATER_IN);
+    }
   }
 }
