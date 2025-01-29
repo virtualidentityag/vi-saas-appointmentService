@@ -1,7 +1,6 @@
 package com.vi.appointmentservice.api.calcom.service;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import com.vi.appointmentservice.api.calcom.model.LocationType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
