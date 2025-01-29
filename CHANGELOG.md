@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.1](https://github.com/Onlineberatung/onlineBeratung-appointmentService/compare/v1.9.0...v1.9.1) (2025-01-29)
+
+
+### Bug Fixes
+
+* bump actions versions ([edf2f0b](https://github.com/Onlineberatung/onlineBeratung-appointmentService/commit/edf2f0b260fc6455ad0962cdbd5cb0f5db44e1a2))
+* change conditions for expired and active bookings ([0ac9925](https://github.com/Onlineberatung/onlineBeratung-appointmentService/commit/0ac99253278f4de99ff56ce5e37c73ddf7bec362))
+* change conditions for expired and active bookings ([33bd992](https://github.com/Onlineberatung/onlineBeratung-appointmentService/commit/33bd992c97be2a25269c57cdecf389139bed3901))
+
 ## 1.9.0 (2024-06-20)
 
 
